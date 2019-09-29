@@ -1,6 +1,6 @@
 ---
 layout: page
-title: ""
+title: "关于 huacnlee"
 date: 2012-02-21 09:30
 comments: false
 sharing: true
