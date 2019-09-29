@@ -1,0 +1,41 @@
+{% capture root_url %}{{ site.root | strip_slash }}{% endcapture %}
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    {% include head.html %}
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	{% include header.html %}
+	<!-- /include -->
+        <!-- include social_service_links -->
+	{% include social_service_links.html %}
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	{{ content | expand_urls: root_url }}
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	{% include footer.html %}
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      {% include after_footer.html %}
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

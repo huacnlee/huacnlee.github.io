@@ -1,0 +1,131 @@
+---
+layout: post
+title: "Jquery.js 1.1.4发布"
+date: 2008-04-24 08:17
+comments: true
+categories: 
+- jQuery
+- Javascript
+---
+<p>很久没有去关注JQuery网站了，今天突然发现网站改版了，把插件栏目都调整了一下，我在想，该不会有新版本发布了吧！于是回到首页一看果然 Jquery.js 1.1.4发布了.<br /> 不知道这次有了些什么改进，希望能把与AjaxPro在.NET1.1中Json冲突的问题解决了，这个问题一直郁闷着我，用AjaxPro开发快，不过只能取取数据，而JQuery可以帮助快速地实现很多功能。两个没法一起用，前段时间都找了到久。<br /> 还好后边AjaxPro发布了个新版本，才解决了这个问题（不过只是在.NET2.0中才解决了1.1中依然存在）<br /> 刚刚在官方中博客中看到，更新有提高获取对象的速度，有一个比较：</p>
+<p><span style="font-size: 10pt;">
+<p>$(&rdquo;#id&rdquo;) Improvements</p>
+<table border="0">
+<thead> 
+<tr>
+<th>浏览器</th> <th>jQuery 1.1.3</th> <th>jQuery 1.1.4</th> <th>提高比例</th>
+</tr>
+</thead> 
+<tbody>
+<tr>
+<th>IE 6</th>
+<td>651ms</td>
+<td>70ms</td>
+<th>830%</th>
+</tr>
+<tr>
+<th>Firefox 2</th>
+<td>1355ms</td>
+<td>27ms</td>
+<th>4919%</th>
+</tr>
+<tr>
+<th>Safari 3</th>
+<td>101ms</td>
+<td>14ms</td>
+<th>620%</th>
+</tr>
+<tr>
+<th>Opera 9</th>
+<td>270ms</td>
+<td>62ms</td>
+<th>335%</th>
+</tr>
+<tr>
+<td style="text-align: right;" colspan="3">Average improvement:</td>
+<th>1676%</th>
+</tr>
+</tbody>
+</table>
+<p>$(&rdquo;elem&rdquo;) Improvements</p>
+<table border="0">
+<thead> 
+<tr>
+<th>浏览器</th> <th>jQuery 1.1.3</th> <th>jQuery 1.1.4</th> <th>提高比例</th>
+</tr>
+</thead> 
+<tbody>
+<tr>
+<th>IE 6</th>
+<td>661ms</td>
+<td>451ms</td>
+<th>47%</th>
+</tr>
+<tr>
+<th>Firefox 2</th>
+<td>1717ms</td>
+<td>143ms</td>
+<th>1100%</th>
+</tr>
+<tr>
+<th>Safari 3</th>
+<td>99ms</td>
+<td>83ms</td>
+<th>19%</th>
+</tr>
+<tr>
+<th>Opera 9</th>
+<td>226ms</td>
+<td>198ms</td>
+<th>14%</th>
+</tr>
+<tr>
+<td style="text-align: right;" colspan="3">Average improvement:</td>
+<th>295%</th>
+</tr>
+</tbody>
+</table>
+<p>.each() Improvements</p>
+<table border="0">
+<thead> 
+<tr>
+<th>浏览器</th> <th>jQuery 1.1.3</th> <th>jQuery 1.1.4</th> <th>提高比例</th>
+</tr>
+</thead> 
+<tbody>
+<tr>
+<th>IE 6</th>
+<td>200ms</td>
+<td>30ms</td>
+<th>567%</th>
+</tr>
+<tr>
+<th>Firefox 2</th>
+<td>468ms</td>
+<td>29ms</td>
+<th>1514%</th>
+</tr>
+<tr>
+<th>Safari 3</th>
+<td>17ms</td>
+<td>11ms</td>
+<th>54%</th>
+</tr>
+<tr>
+<th>Opera 9</th>
+<td>45ms</td>
+<td>25ms</td>
+<th>80%</th>
+</tr>
+<tr>
+<td style="text-align: right;" colspan="3">Average improvement:</td>
+<th>554%</th>
+</tr>
+</tbody>
+</table>
+</span></p>
+<p><br /> <br /> 新增了<code><strong><span style="color: #104cff;">slice</span></strong>的方法,作用是取得对象中的第几个,如：<br /> $("div") 这个方法可能取到很多个对象，哪你可以用 </code><code>$("div").slice(n)来取出第n个对象，补足了以前要用each来找中间的对象的麻烦。<br /> 例如：<br /> </code></p>
+<div style="border: 1px solid #cccccc; padding: 4px 5px 4px 4px; background-color: #eeeeee; font-size: 13px; width: 98%;"><!--<br /> <br /> Code highlighting produced by Actipro CodeHighlighter (freeware)<br /> http://www.CodeHighlighter.com/<br /> <br /> --><span style="color: #0000ff;">&lt;</span><span style="color: #800000;">script&nbsp;</span><span style="color: #ff0000;">type</span><span style="color: #0000ff;">="text/javascript"</span><span style="color: #0000ff;">&gt;</span><span style="background-color: #f5f5f5; color: #000000;"><br /> &nbsp;&nbsp;&nbsp;&nbsp;$().ready(</span><span style="background-color: #f5f5f5; color: #0000ff;">function</span><span style="background-color: #f5f5f5; color: #000000;">(){<br /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alert($(</span><span style="background-color: #f5f5f5; color: #000000;">"</span><span style="background-color: #f5f5f5; color: #000000;">div</span><span style="background-color: #f5f5f5; color: #000000;">"</span><span style="background-color: #f5f5f5; color: #000000;">).slice(</span><span style="background-color: #f5f5f5; color: #000000;">0</span><span style="background-color: #f5f5f5; color: #000000;">).html());<br /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alert($(</span><span style="background-color: #f5f5f5; color: #000000;">"</span><span style="background-color: #f5f5f5; color: #000000;">div</span><span style="background-color: #f5f5f5; color: #000000;">"</span><span style="background-color: #f5f5f5; color: #000000;">).slice(</span><span style="background-color: #f5f5f5; color: #000000;">1</span><span style="background-color: #f5f5f5; color: #000000;">).html());<br /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alert($(</span><span style="background-color: #f5f5f5; color: #000000;">"</span><span style="background-color: #f5f5f5; color: #000000;">div</span><span style="background-color: #f5f5f5; color: #000000;">"</span><span style="background-color: #f5f5f5; color: #000000;">).slice(</span><span style="background-color: #f5f5f5; color: #000000;">2</span><span style="background-color: #f5f5f5; color: #000000;">).html());<br /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alert($(</span><span style="background-color: #f5f5f5; color: #000000;">"</span><span style="background-color: #f5f5f5; color: #000000;">div</span><span style="background-color: #f5f5f5; color: #000000;">"</span><span style="background-color: #f5f5f5; color: #000000;">).slice(</span><span style="background-color: #f5f5f5; color: #000000;">-</span><span style="background-color: #f5f5f5; color: #000000;">1</span><span style="background-color: #f5f5f5; color: #000000;">).html()); //取最后个<br /> &nbsp;&nbsp;&nbsp;&nbsp;});<br /> </span><span style="color: #0000ff;"><!--</span--><span style="color: #800000;">script</span><span style="color: #0000ff;">&gt;</span><span style="color: #000000;"><br /> </span><span style="color: #0000ff;">&lt;</span><span style="color: #800000;">body</span><span style="color: #0000ff;">&gt;</span><span style="color: #000000;"><br /> &nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000ff;">&lt;</span><span style="color: #800000;">div</span><span style="color: #0000ff;">&gt;</span><span style="color: #000000;">1第一个&lt;</span><span style="color: #0000ff;">/</span><span style="color: #800000;">div</span><span style="color: #0000ff;">&gt;</span><span style="color: #000000;"><br /> &nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000ff;">&lt;</span><span style="color: #800000;">div</span><span style="color: #0000ff;">&gt;</span><span style="color: #000000;">2第二个</span><span style="color: #0000ff;"><!--</span--><span style="color: #800000;">div</span><span style="color: #0000ff;">&gt;</span><span style="color: #000000;"><br /> &nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000ff;">&lt;</span><span style="color: #800000;">div</span><span style="color: #0000ff;">&gt;</span><span style="color: #000000;">3中间的</span><span style="color: #0000ff;"><!--</span--><span style="color: #800000;">div</span><span style="color: #0000ff;">&gt;</span><span style="color: #000000;"><br /> &nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000ff;">&lt;</span><span style="color: #800000;">div</span><span style="color: #0000ff;">&gt;</span><span style="color: #000000;">4中间的</span><span style="color: #0000ff;"><!--</span--><span style="color: #800000;">div</span><span style="color: #0000ff;">&gt;</span><span style="color: #000000;"><br /> &nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000ff;">&lt;</span><span style="color: #800000;">div</span><span style="color: #0000ff;">&gt;</span><span style="color: #000000;">5这个最后个div</span><span style="color: #0000ff;"> </span><span style="color: #000000;">$("div").slice(-1);</span><span style="color: #0000ff;"><!--</span--><span style="color: #800000;">code</span><span style="color: #0000ff;">&gt;<!--</span--><span style="color: #800000;">div</span><span style="color: #0000ff;">&gt;</span><span style="color: #000000;"><br /> </span><span style="color: #0000ff;"><!--</span--><span style="color: #800000;">div</span><span style="color: #0000ff;">&gt;</span></span></span></span></span></span></span></span></div>
+<p><br /> <span style="color: #0846ff;"> :has</span>方法<br /> <span style="color: #008000;">//取所有div里面带有p的对象</span><span style="color: #008000;"><br /> </span><span style="color: #000000;">$(</span><span style="color: #000000;">"</span><span style="color: #000000;">div:has(p)</span><span style="color: #000000;">"</span><span style="color: #000000;">)<br /> </span><br /> <code><br /> 另外修正了N多BUG，具体只有慢慢体验了,快去<a href="http://jquery.com/" target="_blank">JQuery官方网站</a>下载吧。<br /> <br /> </code></p>
+<hr />
+<p><span style="font-size: x-small;"><br /></span></p>

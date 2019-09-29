@@ -1,0 +1,15 @@
+---
+layout: post
+title: "硬盘分区表坏了,资料全没了"
+date: 2008-09-02 07:21
+comments: true
+categories: 
+---
+<p>我郁闷,用Linux下面的 <a href="http://gparted.sourceforge.net/" target="_blank">GParted</a> 本来想激活一个分区的,没想到不小心把分区表弄掉了,都不知道它是怎么弄的,我还在 <a href="http://www.ubuntu.com" target="_blank">Ubuntu</a> 下面运行着,就弄没了.一看分区没了,我连忙强关机,希望它还没有进行物理的修改,不过事情没我想的哪样,它的确是坏了,啊啊啊,我硬盘几十G的资料,我的照片/软件安装程序/以前的项目代码/系统设置/备份/还有几G的刚下的电影 通通通通通全没了...........</p>
+<p>哎,昨天才花了一天的时间把 Leopard 安装好,之间一直没搞定的 1280*800 的宽屏分辨率也弄好了,只是无线无法用,本想准备今晚再试试的,没想到,就这样全都没了.</p>
+<p>静下来想想 <a href="http://www.ubuntu.com" target="_blank">Ubuntu</a> 的盘可以直接从光盘启动到Gnome桌面,并且可以上网,于是我放入光盘,启动到<a href="http://www.ubuntu.com" target="_blank">Ubuntu</a>启面,进入<a href="http://www.google.com" target="_blank">Google</a>,可这玩意儿不能打中文,再次郁闷,只能找些论坛一个字一个字的拼凑再搜索,还试过用<a href="http://www.google.com/language_tools" target="_blank">Google 语言工具</a> 翻译英文成中文再搜索.我想没人比我这方法更强了.</p>
+<p>找了几处发现有个工具叫 <a href="http://www.cgsecurity.org/wiki/TestDisk" target="_blank">TestDisk</a> 于是下载安装,再照片网上的教程试着恢复......</p>
+<p>恢复过程花了我半个多小时,找到了几个分区,不过只找回了昨晚安装好的 Leopard 分区...不知道是我操作不对,还是只能找成这样.......哎,已经都重写了,这回没机会了......</p>
+<p>再仔细想想,这样也没什么,再重装嘛,反正自已也一直不喜欢 Sony 自已给分配的 50G 用不完的C盘,Vista也很少用.而且现在网络时代让我习惯了很多资料都装网上去了,电脑上基本上都是些软件安装程序/电影什么的,最近做的项目的源代码都放网上的,这些最重要的资料还在,不怕,干脆妈的直接装 <a href="http://www.ubuntu.com" target="_blank">Ubuntu</a> ,把 Linux 的分区弄大些,再留些空间给以后装多系统用,说干就干,今天才从 <a href="http://www.cnblogs.com/cnlamar/" target="_blank">同事</a> 哪儿把Ubuntu的光盘拿回来了,直接安装.</p>
+<p>哎,Ubuntu软件安装都还得一个一个的从网上下载,又得下很久,漫长呀......</p>
+<p><span style="color: #ff0000;">最后,提醒大家,在做硬盘分区操作的时候千万小心小心再小心,这东西他娘的脆弱,前车之贱呀!还有,文档之类的东西要慢慢习惯放网上去,如:照片,项目代码,软件设置备份,记事,账本等等,这样就算是硬盘坏了,咱也不怕.</span></p>

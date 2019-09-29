@@ -1,0 +1,181 @@
+/* -*- mode:css coding:utf-8 -*- */
+
+#comments { display: none; }
+body{
+  font-size: 1.0em;
+  line-height: 160%;
+  color: #222;
+  margin: 0px;
+  padding: 0px;
+}
+
+h2, h3, h4, h5, h6{
+}
+
+#flickrList {
+  li {
+    list-style:none; padding:0;
+    display:inline; margin-right:8px; margin-bottom:8px;
+    text-align: center;
+  }
+}
+.site_metas {
+  background-color:#fff;
+  color:#333;
+  a{ color: #333; }
+}
+header[role="banner"]{
+  @extend .site_metas;
+  a{
+    text-decoration: none;
+    &:hover{
+      text-decoration: underline;
+    }
+  }
+  hgroup{
+    h1 {
+      text-align:center;
+      margin: 0px;
+      padding: 0px;
+      font-weight:bold;
+      font-size: 2.5em;
+      font-weight: 100;
+    }
+    h2{ display: none; }
+    margin: 0px;
+    padding: 0px;
+  }
+  &:after {
+    content: "";
+    clear: both;
+    display: block;
+    visibility: hidden;
+  }
+  margin: 30px 50px 50px;
+  padding: 0px;
+  .nav {
+    margin-top:20px;
+    text-align:center;
+    a { margin:0 8px;}
+  }
+}
+
+#social-links {
+  float: right;
+  > ul {
+    padding: 0px;
+    margin: 0px;
+    list-style-type: none;
+    > li {
+      display: block;
+      float: left;
+      margin: 0px 10px;
+    }
+  }
+}
+@mixin social-links-base($img){
+  @include mask-image('socialis/glyph/'+$img+'.png');
+  background-color: #999;
+  display: block;
+  text-indent: -999999em;
+  position: relative;
+  top: 0px;
+  left: 0px;
+  padding: 5px;
+}
+
+#tweets {
+  p { margin:0px; }
+  a { margin:0 2px; }
+}
+#gh_repos {
+  p { margin:0px; }
+}
+.maskImage{
+  @each $name in github, twitter, tumblr, feed {
+    #social-links-#{$name} {
+      > a {
+       @include social-links-base(#{$name});
+       &:hover {
+         @if $name == twitter { background-color: #39c; }
+         @else if $name == tumblr { background-color: #357; }
+         @else if $name == feed { background-color:#e93; }
+         @else { background-color: #ccc; }
+       }
+     }
+     margin: 0px 5px;
+   }
+ }
+ #social-links-feed > a:hover{	 }
+}
+
+#content { width:800px; }
+@media (min-width: 767px) and (max-width: 1000px) {
+  #content { width:747px; }
+}
+@media (min-width: 480px) and (max-width: 767px) {
+  #content { width:460px; }
+}
+@media (min-width: 320px) and (max-width: 480px) {
+  #content { width:300px; }
+}
+#content{
+  margin: 8px auto;
+  width: 1010px;
+  a{
+    color: #3F72D8;
+    &:visited { color:#374598;}
+  }
+  a:hover{ background-color: yellow; }
+  dl{
+   margin: 1em;
+ }
+ dt{
+   margin-top: .6em;
+   font-style: italic;
+ }
+}
+.entry > header{
+  margin: 50px 0px;
+}
+
+
+p.meta{
+  text-align: right;
+}
+
+footer[role="contentinfo"]{
+  @extend .site_metas;
+  text-align: center;
+  margin: 0px;
+  padding: 8px;
+  font-size: 80%;
+  p {
+   margin: 0px;
+ }
+}
+
+/* archive page */
+#blog-archives	ul  li{
+  list-style-type: none;
+}
+
+/* disqus */
+#dsq-reply > h3, #dsq-account-dropdown, #dsq-subscribe { display: none; }
+#disqus_thread #dsq-content #dsq-global-toolbar { margin: 0.3em 0px; }
+#dsq-reply{ margin: 0.3em}
+
+.entry {
+  h1 { font-size:2em; line-height:150%; text-align:center;}
+}
+
+.entry_content {
+  h3 { font-size:1em; border-left:2px solid #ddd; padding-left:8px; }
+  h2 { padding-top: 20px; }
+  blockquote {
+    margin:0;
+    background: image_url('quote.png') left top no-repeat;
+    padding-left: 60px;
+    color:#888;
+  }
+}

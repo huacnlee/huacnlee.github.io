@@ -1,0 +1,16 @@
+---
+layout: post
+title: "PersonLab 0.4.5 发布"
+date: 2010-09-04 02:42
+comments: true
+categories: 
+- Ruby
+- Rails
+- Personlab
+- 开源
+---
+<p>Rails 3.0 正式版一出我就将&nbsp;<a href="http://github.com/huacnlee/personlab" target="_blank">PersonLab</a>&nbsp;升级到 Rails 3.0。</p>
+<p>整个升级过程还是很容易的，只是遇到几处 Ruby 1.9 导致编码的错误。</p>
+<p>另外，修正了一些以前一直遗留的问题，如 某些地方的缓存清除不够干净... 也顺便改进了一下页面风格。</p>
+<p>如果你喜欢我这个博客程序，可以在&nbsp;<a href="http://github.com/huacnlee/personlab" target="_blank">Github</a>&nbsp;上面下载到。</p>
+<p>&nbsp;</p>

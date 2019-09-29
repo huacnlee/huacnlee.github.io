@@ -1,0 +1,21 @@
+{% comment %} -*- coding:utf-8 -*- {% endcomment %}
+{% if site.twitter_user %}
+<section>
+  <h2>
+    Twitter
+    <script type="text/javascript">
+      $.domReady(function(){
+        getTwitterFeed("{{site.twitter_user}}", {{site.twitter_tweet_count}}, {{site.twitter_show_replies}});
+      });
+    </script>
+    <script src="{{ root_url }}/javascripts/twitter.js" type="text/javascript"> </script>
+    {% if site.twitter_follow_button %}
+      <a href="http://twitter.com/{{ site.twitter_user }}" class="twitter-follow-button" data-width="308px" data-show-count="{{ site.twitter_show_follower_count }}">Follow @{{ site.twitter_user }}</a>
+    {% endif %}
+  </h2>
+  <ul id="tweets">
+    <li class="loading">Loading ...</li>
+  </ul>
+  <div class="more"><a href="https://twitter.com/{{site.twitter_user}}" target="_blank">More Tweets...</a></div>
+</section>
+{% endif %}

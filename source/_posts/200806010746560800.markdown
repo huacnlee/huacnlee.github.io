@@ -1,0 +1,32 @@
+---
+layout: post
+title: "开源的3D动画片《Big Buck Bunny》今天开放下载了"
+date: 2008-06-01 07:46
+comments: true
+categories: 
+- 开源
+---
+<p>开源不只是软件可以做，现在电影也开始在走这条路了，未来的互联网趋势呀！</p>
+<p>前几天在Google Reader订阅的文章中看到<a href="http://www.bigbuckbunny.org/" target="_blank">《Big Buck Bunny》</a> 这个项目的消息，我一直都对开源东西很感兴趣，也对电影情有独钟。</p>
+<p><img src="http://pic.yupoo.com/huacn/806395a4e9e2/medium.jpg" border="0" /></p>
+<p>从 <a href="http://www.bigbuckbunny.org/" target="_blank">《Big Buck Bunny》</a> 的官方网站了解到，这部电影是由 The Peach Studio 用一个开源的3D软件：<a href="http://www.blender.org/" target="_blank">Blender</a> 制做的一部兔子主角的卡通3D动画片。</p>
+<p>开源协议用的是<a href="http://creativecommons.org/licenses/by/3.0/" target="_blank">《Creative Commons Attribution 3.0》</a> 做3D的朋友可以去他们官方网站下载源文件看到，一定可以收获不小！</p>
+<p>我看到他们的下载页面提供的下载版本太强了，居然最高有1920*1080分辨的下载，不知道这种看起来有多爽！</p>
+<p>给大家看一个Youtube上面的预告片：&nbsp;</p>
+<div>
+<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" width="425" height="355" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0">
+<param name="width" value="425" />
+<param name="height" value="355" />
+<param name="wmode" value="transparent" />
+<param name="src" value="http://www.youtube.com/v/YE7VzlLtp-4&amp;hl=en" /><embed type="application/x-shockwave-flash" width="425" height="355" src="http://www.youtube.com/v/YE7VzlLtp-4&amp;hl=en" wmode="transparent"></embed>
+</object>
+</div>
+<p>&nbsp;</p>
+<p>相关地址：</p>
+<ul>
+<li>项目官方：<a href="http://www.bigbuckbunny.org" target="_blank">http://www.bigbuckbunny.org</a> </li>
+<li>电影下载：<a href="http://www.bigbuckbunny.org/index.php/download/" target="_blank">http://www.bigbuckbunny.org/index.php/download/</a></li>
+</ul>
+<p>&nbsp;</p>
+<p>PS:这兔子真肥，以后跟长得胖的朋友开玩笑的时候就可以讲：看你！肥得跟只兔子似的！嘿嘿</p>
+<p>&nbsp;</p>
