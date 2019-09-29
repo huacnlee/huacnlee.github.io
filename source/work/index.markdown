@@ -7,12 +7,12 @@ sharing: true
 footer: true
 ---
 
-## 主要参与的项目
+## 开源项目
 
 * [Ruby China](http://ruby-china.org) 国内知名技术社区，也是唯一的 Ruby 中文社区网站，我是创始人、管理员、主要开发者。
 * [BlueDoc](http://github.com/thebluedoc/bluedoc) 开源企业文档管理工具。
 * [GoBackup](https://gobackup.github.io) 一站式备份工具，为中小型服务器／个人服务器而设计，配合 Crontab 以实现定时备份的目的。
-* [RubyGems 国内镜像](https://gems.ruby-china) RubyGems 国内镜像。
+* [RubyGems 国内镜像](https://gems.ruby-china.com) RubyGems 国内镜像。
 * [Quora](http://huacnlee.com/quora) 模仿 Quora 实现的开源问答网站。
 * [imax.im](http://github.com/huacnlee/imax.im) 电影分享网站，Rails 编写，开源。
 * [ytrip.com](http://www.ytrip.com) 旅游网站（已关闭），我第一个 Ruby on Rails 编写的正式项目。
