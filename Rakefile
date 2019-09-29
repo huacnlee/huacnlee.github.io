@@ -248,6 +248,7 @@ multitask :push do
   puts "\n## copying #{public_dir} to #{deploy_dir}"
   cp_r "#{public_dir}/.", deploy_dir
   cd "#{deploy_dir}" do
+    system "git init && git remote add origin git@github.com:huacnlee/huacnlee.github.io.git && git checkout -b #{deploy_branch}"
     system "git add ."
     system "git add -u"
     puts "\n## Commiting: Site updated at #{Time.now.utc}"

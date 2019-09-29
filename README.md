@@ -1,1 +1,4 @@
-Source of [huacnlee.com](http://huacnlee.com), powered by [Octopress](http://octopress.org).
+## Usage
+
+- make serve - To development;
+- make release - To build and deploy to gh-pages branch.
