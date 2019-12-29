@@ -1,0 +1,286 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>千万别把属性当变量使用 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="千万别把属性当变量使用 C#里面属性大家都应该用过，因为它可以在get里面写判断，所以有时候用起来很爽！ 你是否有把属性当成变量来使用过呢？ 最近我发现一个问题，如果你把属性当变量用习惯了将会存在比较大的隐患！来看一段有问题的代码，应该你都有这样写过。我这里以一个缓存的数据为操作为例（当然， &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/do-not-use-property-with-variable">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">千万别把属性当变量使用</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>C#里面属性大家都应该用过，因为它可以在get里面写判断，所以有时候用起来很爽！</p>
+
+
+<p>你是否有把属性当成变量来使用过呢？</p>
+
+
+<p>最近我发现一个问题，如果你把属性当变量用习惯了将会存在比较大的隐患！来看一段有问题的代码，应该你都有这样写过。我这里以一个缓存的数据为操作为例（当然，我所讲的问题不仅仅只是C#才有，其它语言同样会有类似的问题存在）。</p>
+
+
+<h3>有问题的写法</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">namespace</span> <span class="nn">Application.Helper</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">public</span> <span class="k">class</span> <span class="nc">PageCaches</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">private</span> <span class="k">static</span> <span class="kt">string</span> <span class="k">readonly</span> <span class="n">cacheKey</span> <span class="p">=</span> <span class="s">&quot;Application.Models.Posts.RelateList&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="c1">// 页面与类的关系二维表，存在缓存中</span>
+</span><span class='line'>        <span class="k">public</span> <span class="k">static</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">Relate</span><span class="p">&gt;</span> <span class="n">RelateList</span><span class="p">{</span>
+</span><span class='line'>            <span class="k">get</span><span class="p">{</span>
+</span><span class='line'>                <span class="n">Object</span> <span class="n">obj</span> <span class="p">=</span> <span class="n">Caches</span><span class="p">.</span><span class="n">Get</span><span class="p">(</span><span class="n">cacheKey</span><span class="p">);</span>
+</span><span class='line'>                <span class="k">if</span><span class="p">(</span><span class="n">obj</span> <span class="p">!=</span> <span class="k">null</span><span class="p">){</span>
+</span><span class='line'>                    <span class="k">return</span> <span class="p">(</span><span class="n">List</span><span class="p">&lt;</span><span class="n">Relate</span><span class="p">&gt;)</span><span class="n">obj</span><span class="p">;</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>                <span class="k">else</span><span class="p">{</span>
+</span><span class='line'>                    <span class="k">return</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">Relate</span><span class="p">&gt;();</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>            <span class="k">set</span><span class="p">{</span>
+</span><span class='line'>                <span class="n">Caches</span><span class="p">.</span><span class="n">Set</span><span class="p">(</span><span class="n">cacheKey</span><span class="p">,</span><span class="k">value</span><span class="p">);</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">public</span> <span class="k">class</span> <span class="nc">Relate</span><span class="p">{</span>
+</span><span class='line'>            <span class="k">public</span> <span class="kt">string</span> <span class="n">Key</span> <span class="p">{</span><span class="k">get</span><span class="p">;</span><span class="k">set</span><span class="p">;}</span>
+</span><span class='line'>            <span class="k">public</span> <span class="kt">string</span> <span class="n">ClassName</span> <span class="p">{</span><span class="k">get</span><span class="p">;</span><span class="k">set</span><span class="p">;}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">// 更新PageView</span>
+</span><span class='line'>        <span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">Add</span><span class="p">(</span><span class="kt">string</span> <span class="n">pageName</span><span class="p">,</span><span class="kt">string</span><span class="p">[]</span> <span class="n">classNames</span><span class="p">){</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">foreach</span><span class="p">(</span><span class="kt">string</span> <span class="n">className</span> <span class="k">in</span> <span class="n">classNames</span><span class="p">){</span>
+</span><span class='line'>                <span class="c1">// 检查是否有存在的，不存才在加入</span>
+</span><span class='line'>                <span class="k">if</span><span class="p">(!</span> <span class="n">RelateList</span><span class="p">.</span><span class="n">Exist</span><span class="p">(</span><span class="n">a</span> <span class="p">=&gt;</span> <span class="n">a</span><span class="p">.</span><span class="n">ClassName</span> <span class="p">==</span> <span class="n">className</span> <span class="p">&amp;&amp;</span> <span class="n">a</span><span class="p">.</span><span class="n">Key</span> <span class="p">==</span> <span class="n">pageName</span><span class="p">)){</span>
+</span><span class='line'>                    <span class="n">RelateList</span> <span class="p">=</span> <span class="n">RelateList</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="k">new</span> <span class="n">Relate</span><span class="p">(){</span> <span class="n">Key</span> <span class="p">=</span> <span class="n">pageName</span><span class="p">,</span><span class="n">ClassName</span> <span class="p">=</span> <span class="n">className</span><span class="p">});</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p><span style="color: #ff0000;">注意看 Add() 方法里面的循环！里面有多次操作 RelateList 这个属性，每一次读与取的操作都将会调用到Caches里面的Get 与 Set，这将会使效率低很多！</span></p>
+
+
+<p><span style="color: #008000;">正确写法应改成，先把 RelateList 放到一个临时变量里面，再对临时变量进行操作，完成后再赋给 RelateList ，这样就只有一次读取，一次写入。</span></p>
+
+
+<p>当然这种要到了压力测试下面才会发现速度上会有很大的差别！</p>
+
+
+<p><span style="color: #808080;">这段代码我用 <a href="http://www.intype.info" target="_blank">Intype</a> 写的，所以是不能拿来运行的，可能还有语法错误，还请见谅。</span></p>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2009-02-13 04:12:00 +0800" pubdate>2009-02-13</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/-net/'>.NET</a>, <a class='category' href='/blog/category/性能/'>性能</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/do-not-use-property-with-variable';
+	var disqus_url = 'http://huacnlee.github.com/blog/do-not-use-property-with-variable';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

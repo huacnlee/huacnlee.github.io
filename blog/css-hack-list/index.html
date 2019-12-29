@@ -1,0 +1,197 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>IE Firefox Css Hack 汇总 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="IE Firefox Css Hack 汇总 屏蔽IE浏览器（也就是IE下不显示） :lang(zh) select {font:12px&nbsp; !important;} /FF,OP可见/select:empty {font:12px&nbsp; !important;} / &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/css-hack-list">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">IE Firefox Css Hack 汇总</h1>
+    
+  </header>
+
+  <div class="entry_content"><p><dt>屏蔽IE浏览器（也就是IE下不显示） </dt><dd><em>:lang(zh) <em><span style="color: #cc0000;">select</span></em> {<em><span style="color: #cc0000;">font:12px</span></em>&nbsp; !important;} /</em>FF,OP可见<em>/<br /><em><span style="color: #cc0000;">select</span></em>:empty {<em><span style="color: #cc0000;">font:12px</span></em>&nbsp; !important;} /</em>safari可见<em>/<br /><span><span style="color: #336600;">这里select是选择符，根据情况更换。第二句是MAC上safari浏览器独有的。</span></span> </dd><dt>仅IE7与IE5.0可以识别 </dt><dd></em>+html&nbsp; <em><span style="color: #cc0000;">select</span></em> {<em><span style="color: #cc0000;">&hellip;</span></em>}<br /><span><span style="color: #336600;">当面临需要只针对IE7与IE5.0做样式的时候就可以采用这个HACK。</span></span> </dd><dt>仅IE7可以识别 </dt><dd><em>+html&nbsp; <em><span style="color: #cc0000;">select</span></em> {<em><span style="color: #cc0000;">&hellip;!important;</span></em>}<br /><span><span style="color: #336600;">当面临需要只针对IE7做样式的时候就可以采用这个HACK。</span></span> </dd><dt>IE6及IE6以下识别 </dt><dd></em> html&nbsp; <em><span style="color: #cc0000;">select</span></em> {<em><span style="color: #cc0000;">&hellip;</span></em>}<br /><span style="color: #336600;"><span>这个地方要特别注意很多博客都写成了是IE6的HACK其实IE5.x同样可以识别这个HACK。其它浏览器不识别。</span><br /></span>html/<strong>/ &gt;body&nbsp; <em><span style="color: #cc0000;">select</span></em> {<em><span style="color: #cc0000;">&hellip;</span></em>}<br /><span><span style="color: #336600;">这句与上一句的作用相同。</span></span> </dd><dt>仅IE6不识别，屏蔽IE6 </dt><dd><em><span style="color: #cc0000;">select</span></em> { <em><span style="color: #cc0000;">display</span></em> /<em>屏蔽IE6</em>/:<em><span style="color: #cc0000;">none</span></em>;}<br /><span><span style="color: #336600;">这里主要是通过CSS注释分开一个属性与值，注释在冒号前。</span></span> </dd><dt>仅IE6与IE5不识别，屏蔽IE6与IE5 </dt><dd><em><span style="color: #cc0000;">select</span></em>/</strong>/ { <em><span style="color: #cc0000;">display</span></em> /<em>IE6,IE5不识别</em>/<em><span style="color: #cc0000;">:none</span></em>;}<br /><span><span style="color: #336600;">这里与上面一句不同的是在选择符与花括号之间多了一个CSS注释。<strong>不屏蔽IE5.5</strong></span></span> </dd><dt>仅IE5不识别，屏蔽IE5 </dt><dd><em><span style="color: #cc0000;">select</span></em>/<em>IE5不识别</em>/ {<em><span style="color: #cc0000;">&hellip;</span></em>}<br /><span><span style="color: #336600;">这一句是在上一句中去掉了属性区的注释。只有IE5不识别，IE5.5可以识别。</span></span> </dd><dt>盒模型解决方法 </dt><dd><em><span style="color: #cc0000;">selct</span></em> {<em><span style="color: #cc0000;">width:IE5.x宽度;</span></em> voice-family :&#8221;&#34;}&#34;&#8221;; voice-family:inherit; <em><span style="color: #cc0000;">width:正确宽度;</span></em>}<br /><span><span style="color: #336600;">盒模型的清除方法不是通过!important来处理的。这点要明确。</span></span> </dd><dt>清除浮动 </dt><dd><em><span style="color: #cc0000;">select</span></em>:after {content:&#8221;.&#8221;; display:block; height:0; clear:both; visibility:hidden;}<br /><span><span style="color: #336600;">在Firefox中，当子级都为浮动时，那么父级的高度就无法完全的包住整个子级，那么这时用这个清除浮动的HACK来对父级做一次定义，那么就可以解决这个问题。</span></span> </dd><dt>截字省略号 </dt><dd><em><span style="color: #cc0000;">select</span></em> { -o-text-overflow:ellipsis; text-overflow:ellipsis; white-space:nowrap; overflow:hidden; }<br /><span><span style="color: #336600;">这个是在越出长度后会自行的截掉多出部分的文字，并以省略号结尾，很好的一个技术。只是目前Firefox并不支持。</span></span> </dd><dt>只有Opera识别 </dt><dd>@media all and (min-width: 0px){ <em><span style="color: #cc0000;">select {&hellip;&hellip;}</span></em> }<br /><span><span style="color: #336600;">针对Opera浏览器做单独的设定。</span></span> <dl></dl></p>
+
+<p>以上都是写CSS中的一些HACK，这些都是用来解决局部的兼容性问题，如果希望把兼容性的内容也分离出来，不妨试一下下面的几种过滤器。这些过滤器有的是写在CSS中通过过滤器导入特别的样式，也有的是写在HTML中的通过条件来链接或是导入需要的补丁样式。</p>
+
+
+<dl id="interlocution"> <dt>IE5.x的过滤器，只有IE5.x可见 </dt><dd>@media tty {<br />i{content:&#8221;&#34;;/*&#8221; &#8220;*/}} @import &rsquo;<em><span style="color: #cc0000;">ie5win.css</span></em>&rsquo;; /*&#8221;;}<br />}/* */ </dd><dt>IE5/MAC的过滤器，一般用不着 </dt><dd>/*\*//*/<br />&nbsp;&nbsp;&nbsp; @import &#8221;<em><span style="color: #cc0000;">ie5mac.css</span></em>&#8221;;<br />/**/ </dd><dt>IE的if条件Hack </dt><dd><!--[if IE]> <i><font color=#cc0000>Only IE</font></i> <![endif]--><br /><span style="color: #336600;"><span>所有的IE可识别</span><br /></span><!--[if IE 5.0]> <i><font color=#cc0000>Only IE 5.0</font></i> <![endif]--><br /><span style="color: #336600;"><span>只有IE5.0可以识别</span><br /></span><!--[if gt IE 5.0]> <i><font color=#cc0000>Only IE 5.0+</font></i> <![endif]--><br /><span style="color: #336600;"><span>IE5.0包换IE5.5都可以识别</span><br /></span><!--[if lt IE 6]> <i><font color=#cc0000>Only IE 6-</font></i> <![endif]--><br /><span style="color: #336600;"><span>仅IE6可识别</span><br /></span><!--[if gte IE 6]> <i><font color=#cc0000>Only IE 6/+</font></i> <![endif]--><br /><span style="color: #336600;"><span>IE6以及IE6以下的IE5.x都可识别</span><br /></span><!--[if lte IE 7]> <i><font color=#cc0000>Only IE 7/-</font></i> <![endif]--><br /><span><span style="color: #336600;">仅IE7可识别</span></span></dd></dl>
+
+
+<p>以上内容可能并不全面，欢迎大家能和我一起把这些技巧都汇总起来，为以后工作的查询提供一个方便，同时在这里感谢那些研究出这些HACK的作者们。<br /><br />以上摘自：<a href="http://www.wediy.cn/" target="_blank">http://www.wediy.cn/</a></p>
+
+
+<p></dd></p>
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2008-04-24 08:17:00 +0800" pubdate>2008-04-24</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/css/'>CSS</a>, <a class='category' href='/blog/category/web标准/'>Web标准</a>, <a class='category' href='/blog/category/前端/'>前端</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/css-hack-list';
+	var disqus_url = 'http://huacnlee.github.com/blog/css-hack-list';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

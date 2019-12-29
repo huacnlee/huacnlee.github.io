@@ -1,0 +1,480 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Rails项目，从文件系统转移到 Mongodb GridFS - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Rails项目，从文件系统转移到 Mongodb GridFS 最近 NoSQL 很火嘛！咱也跟上时代的脚步，了解了一下。 之前的 Rails 项目都是 MySQL 数据库的，文件存储用 Linux 普通，上传图片用&nbsp;Paperclip&nbsp;这个插件， &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/move-rails-project-from-linux-file-system-to-mongodb-gridfs">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Rails项目，从文件系统转移到 Mongodb GridFS</h1>
+    
+  </header>
+
+  <div class="entry_content"><p><span style="font-family: arial; font-size: small;"> </span></p>
+
+
+<div>最近 NoSQL 很火嘛！咱也跟上时代的脚步，了解了一下。</div>
+
+
+<p>之前的 Rails 项目都是 MySQL 数据库的，文件存储用 Linux 普通，上传图片用&nbsp;<a href="https://github.com/thoughtbot/paperclip" target="_blank">Paperclip</a>&nbsp;这个插件，有两个项目的上传目录里面文件非常多，管理，同步很是成问题，而且之前定义的目录结构有性能隐患。这个文件存储一直是我的一块心病，项目的上传文件越来越多。</p>
+
+
+<div>于是最近试着想办法把文件系统转移到 GridFS 里面存放，以来管理简单了，而来不用担心目录结构的问题，而且 Mongodb 的机制还可以应对未来的扩充。</div>
+
+
+<div><br /></div>
+
+
+<div>程序上面转移过去倒是不难，难点在于以前的上传文件需要平滑转移到 GridFS 里面。</div>
+
+
+<div>我先在我的那个小论坛项目&nbsp;<a href="https://github.com/huacnlee/homeland/tree/mysql" target="_blank">Homeland</a>(mysql 分支) 里面试着搞了一下，结果很顺利，目前&nbsp;<a href="http://lanxs.com/" target="_blank">http://lanxs.com</a>&nbsp;这里已经成功转入 GridFS 了。</div>
+
+
+<div><br /></div>
+
+
+<div>一下仅供参考，每个项目使用的组件和架构方式不同，不一定完全适合！</div>
+
+
+<div><br /></div>
+
+
+<h2><strong>Homeland 的项目情况</strong></h2>
+
+
+<div>
+<ul>
+<li><span style="font-family: mceinline;">Ruby 1.9.2 + Rails 3 &nbsp;+ Nginx + Passenger + MySQL + Linux 文件系统存放上传文件</span></li>
+<li><span style="font-family: mceinline;">上传图片用 Paperclip，并用&nbsp;<a href="https://github.com/huacnlee/homeland/blob/ca0bdd8ab26da7b780e2dae7eba12b79f41e6d65/config/initializers/paperclip_hashpath.rb" target="_blank">hashed_path</a>&nbsp;的方式分散上传目录</span></li>
+<li><span style="font-family: mceinline;">文件调用方式&nbsp;<a href="http://127.0.0.1/uploads" target="_blank">http://127.0.0.1/uploads</a>&nbsp;或者&nbsp;<a href="http://img.localhost/" target="_blank">http://img.localhost/</a></span></li>
+</ul>
+</div>
+
+
+<!-- more -->
+
+
+<h2><strong>程序方面改动</strong></h2>
+
+
+<div>有些太写的我就没法一一讲了，</div>
+
+
+<div>先是把 Paperclip 换成&nbsp;<a href="https://github.com/jnicklas/carrierwave" target="_blank">Carrierwave</a>&nbsp;(这里时因为截止到目前 Paperclip 还没有支持 GridFS)</div>
+
+
+<h3><strong>我以一个Model为例子来介绍转换过程</strong></h3>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Photo</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="c1"># 上传图片</span>
+</span><span class='line'>  <span class="n">has_attached_file</span> <span class="ss">:image</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:default_style</span> <span class="o">=&gt;</span> <span class="ss">:normal</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:styles</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span><span class='line'>      <span class="ss">:small</span> <span class="o">=&gt;</span> <span class="err">“</span><span class="mi">100</span><span class="o">&gt;</span><span class="err">”</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">:normal</span> <span class="o">=&gt;</span> <span class="err">“</span><span class="mi">680</span><span class="o">&gt;</span><span class="err">”</span><span class="p">,</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="ss">:url</span> <span class="o">=&gt;</span> <span class="err">“</span><span class="c1">#{APP_CONFIG[‘upload_url’]}/:class/:attachment/:hashed_path/:id_:style.jpg”,</span>
+</span><span class='line'>    <span class="ss">:path</span> <span class="o">=&gt;</span> <span class="err">“</span><span class="c1">#{APP_CONFIG[‘upload_root’]}/:class/:attachment/:hashed_path/:id_:style.jpg”,</span>
+</span><span class='line'>    <span class="ss">:default_url</span> <span class="o">=&gt;</span> <span class="err">“</span><span class="n">photo</span><span class="o">/</span><span class="ss">:style</span><span class="o">.</span><span class="n">jpg</span><span class="err">”</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><strong>具体步骤</strong></h3>
+
+
+<div>
+<ul>
+<li>Gemfile 里面增加, Paperclip 插件依然保留：</li>
+</ul>
+</div>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="err">‘</span><span class="n">carrierwave</span><span class="err">’</span>
+</span><span class='line'><span class="n">gem</span> <span class="err">‘</span><span class="n">mini_magick</span><span class="err">’</span>
+</span><span class='line'><span class="n">gem</span> <span class="err">“</span><span class="n">mongoid</span><span class="err">”</span><span class="p">,</span> <span class="err">“</span><span class="mi">2</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="n">rc</span><span class="o">.</span><span class="mi">7</span><span class="err">”</span>
+</span><span class='line'><span class="n">gem</span> <span class="err">“</span><span class="n">bson_ext</span><span class="err">”</span><span class="p">,</span> <span class="err">“</span><span class="o">~&gt;</span> <span class="mi">1</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">2</span><span class="err">”</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<div>
+<ul>
+<li>$ bundle install</li>
+<li>生成 mongoid 的配置文件 $ rails g mongoid:config&nbsp;</li>
+<li>新增 config/initializers/carrierwave.rb 文件，可以参考&nbsp;<a href="https://github.com/huacnlee/homeland/blob/8c9abd3e21afaa4160c36393436768a0249f234d/config/initializers/carrierwave.rb" target="_blank">carrierwave.rb</a></li>
+<li>新增 app/uploaders/base_uploader.rb, 内容参考&nbsp;<a href="https://github.com/huacnlee/homeland/blob/7100ce4c506cc2c4387f25e50c533e5bbcac6cc2/app/uploaders/base_uploader.rb" target="_blank">base_uploader.rb</a></li>
+<li>新增 app/uploaders/photo_uploader.rb, 并继承 BaseUploader, 内容参考&nbsp;<a href="https://github.com/huacnlee/homeland/blob/7100ce4c506cc2c4387f25e50c533e5bbcac6cc2/app/uploaders/photo_uploader.rb" target="_blank">photo_uploader.rb</a></li>
+<li>去掉 Photo model 里面的&nbsp;has_attached_file 定义，改用&nbsp;mount_uploader :image, PhotoUploader</li>
+<li>生成个 migration,把数据库里面&nbsp;<em>image_file_name</em>&nbsp;字段重命名为&nbsp;<em>image</em></li>
+<li>Views 里面把所有以前 Paperclip 的图片调用方式改为 Carrierwave 的调用方式 (哎，为嘛不做成一样的呢)</li>
+<li>上传图片流程不用修改</li>
+<li>routes</li>
+<li>然后就可以测试上传了，如果没有出错，程序方面的改动就完成了。</li>
+</ul>
+</div>
+
+
+<h2><strong>文件转移</strong></h2>
+
+
+<div>这里就比较麻烦了，我写了一个 Rake 脚本，里面有说明（根据自己的情况做一定的修改）：</div>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># coding: UTF-8</span>
+</span><span class='line'><span class="c1"># </span>
+</span><span class='line'><span class="c1"># 以下为 Rake 任务，功能是将普通文件系统里面的东西转移到 MongoDB GridFS 里面</span>
+</span><span class='line'><span class="c1"># 此代码片段来自于 Homeland 项目： https://github.com/huacnlee/homeland/tree/mysql</span>
+</span><span class='line'><span class="c1"># 场景：</span>
+</span><span class='line'><span class="c1"># 老架构 Linux File Store, Paperclip, hash 目录:&quot;https://github.com/huacnlee/homeland/blob/ca0bdd8ab26da7b780e2dae7eba12b79f41e6d65/config/initializers/paperclip_hashpath.rb&quot;</span>
+</span><span class='line'><span class="c1"># 新架构 Mongodb GridFS, Garrierwave, 继续沿用 Paperclip 目录兼容: https://github.com/huacnlee/homeland/tree/7100ce4c506cc2c4387f25e50c533e5bbcac6cc2/app/uploaders</span>
+</span><span class='line'><span class="c1"># 整个过程不会修改任何原始数据库和上传文件</span>
+</span><span class='line'><span class="c1">#</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;mongo&#39;</span>
+</span><span class='line'><span class="kp">include</span> <span class="no">Mongo</span>
+</span><span class='line'><span class="n">namespace</span> <span class="ss">:gridfs</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">task</span> <span class="ss">:import</span> <span class="o">=&gt;</span> <span class="ss">:environment</span> <span class="k">do</span>
+</span><span class='line'>    <span class="c1"># 这里将图片读取并转入 GridFS 的过程抽象为 GridFsImporter，见下面</span>
+</span><span class='line'>    <span class="vi">@grid</span> <span class="o">=</span> <span class="no">GridFsImporter</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1"># 处理 Photo 表的</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="mi">120</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;Import Photos&quot;</span>
+</span><span class='line'>    <span class="c1"># 定义原来的几种图片个规格,分别载入</span>
+</span><span class='line'>    <span class="n">photos_styles</span> <span class="o">=</span> <span class="sx">%w(small normal original)</span>
+</span><span class='line'>    <span class="no">Photo</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="ss">:conditions</span> <span class="o">=&gt;</span> <span class="s1">&#39;image is not null&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">photo</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">photos_styles</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">style</span><span class="o">|</span>
+</span><span class='line'>        <span class="vi">@grid</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">photo</span><span class="p">,</span> <span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="n">style</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1"># 处理 User 表</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="mi">120</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;Import Users&quot;</span>
+</span><span class='line'>    <span class="n">avatars_styles</span> <span class="o">=</span> <span class="sx">%w(small normal large original)</span>
+</span><span class='line'>    <span class="no">User</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="ss">:conditions</span> <span class="o">=&gt;</span> <span class="s1">&#39;avatar is not null&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">user</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">avatars_styles</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">style</span><span class="o">|</span>
+</span><span class='line'>        <span class="vi">@grid</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="s1">&#39;avatar&#39;</span><span class="p">,</span> <span class="n">style</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 图片读取并转入 GridFS</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">GridFsImporter</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span>
+</span><span class='line'>    <span class="vi">@grid</span> <span class="o">=</span> <span class="no">Grid</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Mongoid</span><span class="o">.</span><span class="n">database</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">put</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">style</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">print</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">to_s</span><span class="si">}</span><span class="s2">: </span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> ...&quot;</span>
+</span><span class='line'>    <span class="c1"># Hash path, 我这个是在 BaseUploader 里面定义个一个按照之前 paperclip 那中目录生成方法写的  </span>
+</span><span class='line'>    <span class="n">hashed_path</span> <span class="o">=</span> <span class="no">BaseUploader</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">hashed_path</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1"># file_name 的定义格式要按照原来 Paperclip 的标准定义，这样在网站正文中插入的图片就不会受到影响，图片地址通通不变</span>
+</span><span class='line'>    <span class="n">file_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">tableize</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">attr_name</span><span class="o">.</span><span class="n">tableize</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">hashed_path</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">_</span><span class="si">#{</span><span class="n">style</span><span class="si">}</span><span class="s2">.jpg&quot;</span>
+</span><span class='line'>    <span class="c1"># 实际的文件地址，我在 APP_CONFIG[&#39;upload_root&#39;] 里面配置了上传的根目录</span>
+</span><span class='line'>    <span class="n">real_file_name</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">[</span><span class="no">APP_CONFIG</span><span class="o">[</span><span class="s1">&#39;upload_root&#39;</span><span class="o">]</span><span class="p">,</span><span class="n">file_name</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">begin</span>
+</span><span class='line'>      <span class="n">f</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">real_file_name</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">rescue</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>      <span class="nb">puts</span> <span class="s2">&quot;** [Error] open file error: </span><span class="si">#{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1"># 检查有没有同样的，如果有，就不用插入了（一来可以防止重复图片，而来如果转移过程中断，之前加过的就不会再次加入）</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">old</span> <span class="o">=</span> <span class="vi">@grid</span><span class="o">.</span><span class="n">exist?</span><span class="p">({</span><span class="s1">&#39;filename&#39;</span> <span class="o">=&gt;</span> <span class="n">file_name</span><span class="p">})</span>
+</span><span class='line'>      <span class="nb">puts</span> <span class="s2">&quot;-- skip, old </span><span class="si">#{</span><span class="n">old</span><span class="o">[</span><span class="s1">&#39;filename&#39;</span><span class="o">]</span><span class="si">}</span><span class="s2"> existed.&quot;</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="k">begin</span>
+</span><span class='line'>        <span class="c1"># 向 GridFS 提交文件</span>
+</span><span class='line'>        <span class="nb">id</span> <span class="o">=</span> <span class="vi">@grid</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">real_file_name</span><span class="p">),</span> <span class="ss">:filename</span> <span class="o">=&gt;</span> <span class="n">file_name</span><span class="p">)</span>
+</span><span class='line'>        <span class="nb">puts</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">file_name</span><span class="si">}</span><span class="s2"> saved.&quot;</span>
+</span><span class='line'>      <span class="k">rescue</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>        <span class="nb">puts</span> <span class="s2">&quot;** [GridFS] save file error: </span><span class="si">#{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<div><strong><br /></strong></div>
+
+
+<p>我说的不是很细，只是给出一个参考，可以多看一下 <a href="https://github.com/huacnlee/homeland" target="_blank">Homeland</a> 项目里面的情况做对比，根据实际情况做修改。</p>
+
+
+<p>祝你顺利转移！</p>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2011-02-25 20:05:00 +0800" pubdate>2011-02-25</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/gridfs/'>GridFS</a>, <a class='category' href='/blog/category/mongodb/'>MongoDB</a>, <a class='category' href='/blog/category/nosql/'>NoSQL</a>, <a class='category' href='/blog/category/rails/'>Rails</a>, <a class='category' href='/blog/category/ruby/'>Ruby</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/move-rails-project-from-linux-file-system-to-mongodb-gridfs';
+	var disqus_url = 'http://huacnlee.github.com/blog/move-rails-project-from-linux-file-system-to-mongodb-gridfs';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

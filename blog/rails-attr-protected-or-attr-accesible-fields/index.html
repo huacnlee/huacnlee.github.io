@@ -1,0 +1,378 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Rails 使用参数提交表单时，要注意保护敏感字段 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Rails 使用参数提交表单时，要注意保护敏感字段 刚接触 Rails 的人都会对 Rails form 实际特别喜爱，因为它让我们省时省力，就算遇到有100多个字段的表单，也能够几下就做出来了，因为在服务端不用再去对每个字段分别写文本框与字段的赋值。 但是如果没有注意保护，使用 Model. &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/rails-attr-protected-or-attr-accesible-fields">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Rails 使用参数提交表单时，要注意保护敏感字段</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>刚接触 Rails 的人都会对 Rails form 实际特别喜爱，因为它让我们省时省力，就算遇到有100多个字段的表单，也能够几下就做出来了，因为在服务端不用再去对每个字段分别写文本框与字段的赋值。</p>
+
+
+<p>但是如果没有注意保护，使用 Model.create(params[:model]) 的方式提交会有很大的安全漏洞。</p>
+
+
+<h2>下面来看一个例子：</h2>
+
+<h3>有用户表 [users]</h3>
+
+<ul>
+<li>id</li>
+<li>login [用户名]</li>
+<li>passwd [密码]</li>
+<li>nick_name [昵称]</li>
+<li>email [Email]</li>
+<li>state [状态]</li>
+<li>group_id [组 [1 管理员, 2 编辑, 3 普通用户]]</li>
+<li>exp [经验值]</li>
+<li>money [金币]</li>
+<li>level_id [等级]</li>
+<li>created_at</li>
+<li>updated_at</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h3>注册表单 users/regist.html.erb</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="x">&lt;div id=&quot;register&quot;&gt;</span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%</span> <span class="n">form_for</span> <span class="vi">@user</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">-%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">    &lt;p class=&quot;row&quot;&gt;</span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">label</span> <span class="ss">:login</span><span class="p">,</span> <span class="s2">&quot;Login&quot;</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">text_field</span> <span class="ss">:login</span> <span class="cp">%&gt;</span><span class="x">  </span>
+</span><span class='line'><span class="x">    &lt;/p&gt;      </span>
+</span><span class='line'><span class="x">    &lt;p class=&quot;row&quot;&gt;</span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">label</span> <span class="ss">:passwd</span><span class="p">,</span> <span class="s2">&quot;Password&quot;</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">password_field</span> <span class="ss">:passwd</span> <span class="cp">%&gt;</span><span class="x">  </span>
+</span><span class='line'><span class="x">    &lt;/p&gt;</span>
+</span><span class='line'><span class="x">    &lt;p class=&quot;row&quot;&gt;</span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">label</span> <span class="ss">:nick_name</span><span class="p">,</span> <span class="s2">&quot;Nick Name&quot;</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">password_field</span> <span class="ss">:nick_name</span> <span class="cp">%&gt;</span><span class="x">  </span>
+</span><span class='line'><span class="x">    &lt;/p&gt;</span>
+</span><span class='line'><span class="x">    &lt;p class=&quot;buttons&quot;&gt;</span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">submit</span> <span class="s2">&quot;Regist&quot;</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">    &lt;/p&gt;</span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">-%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></li>
+<li>控制器 UsersController.rb</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">UsersController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">new</span>
+</span><span class='line'>    <span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="vi">@user</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>      <span class="n">flash</span><span class="o">[</span><span class="ss">:notice</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;注册成功。&quot;</span>
+</span><span class='line'>      <span class="n">redirect_to</span> <span class="s2">&quot;/&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></li>
+</ol>
+这是 Rails 里面很常见的写法,但是如果没有做相应的保护措施，那么使用 <code>@user = User.new(params[:user])</code> 然后 <code>@user.save</code> 这样的方式就会有很严重的问题，因为HTML表单是可以通过 <a href="http://www.getfirebug.com">Firebug</a> 这类前端调试工具修改的。
+比如，现在的注册表单上面有 <code>login,passwd,nick_name</code> 三个字段，我可以使用 Firebug 强制修改HTML，加上：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;input</span> <span class="na">name=</span><span class="s">&quot;user[:group_id]&quot;</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">value=</span><span class="s">&quot;1&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'><span class="nt">&lt;input</span> <span class="na">name=</span><span class="s">&quot;user[:money]&quot;</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">value=</span><span class="s">&quot;9999999&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'><span class="nt">&lt;input</span> <span class="na">name=</span><span class="s">&quot;user[:exp]&quot;</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">value=</span><span class="s">&quot;9999999&quot;</span> <span class="nt">/&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后提交保存&#8230; 接下来出现的结果大家应该都能猜到，这个用户的金币和经验值都被强制加上了，而且还注册成为了超级管理员！很恐怖把！ 看我在 <a href="http://pasite.is-programmer.com/posts/15200.html">is-programmer.com</a> 上面测试的这个例子
+我把访问量修改到上亿次！当然 is-programmer.com 做过这方面的保护，这个地方的问题不大不小，我本想强制注册个超级管理员的&#8230;但后面发现有做保护的&#8230; 呵呵</p>
+
+<h2>如何保护？</h2>
+
+<p>在 Model 里面使用 <em>attr_accessible</em> 或 <em>attr_protected</em> 详见：<a href="http://api.rubyonrails.org/classes/ActiveRecord/Base.html#M002280">ActiveRecord::Base 文档</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># models/user.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="n">base</span>
+</span><span class='line'>  <span class="c1"># 使用 attr_protected 保护</span>
+</span><span class='line'>  <span class="n">attr_protected</span> <span class="ss">:group_id</span><span class="p">,</span> <span class="ss">:money</span><span class="p">,</span> <span class="ss">:exp</span><span class="p">,</span> <span class="ss">:level_id</span><span class="p">,</span> <span class="ss">:state</span>
+</span><span class='line'>  <span class="c1"># 或使用 attr_accessible</span>
+</span><span class='line'>  <span class="c1"># attr_accessible :login, :passwd, :email</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># controllers/users_controller.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">UsersController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">new</span>
+</span><span class='line'>    <span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1"># 如果需要特别修改 attr_protected 保护的字段，请手动赋值，如</span>
+</span><span class='line'>    <span class="vi">@user</span><span class="o">.</span><span class="n">exp</span> <span class="o">=</span> <span class="mi">1000</span> <span class="c1"># 初始经验值 1000</span>
+</span><span class='line'>    <span class="vi">@user</span><span class="o">.</span><span class="n">level_id</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span class='line'>    <span class="k">if</span> <span class="vi">@user</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>      <span class="n">flash</span><span class="o">[</span><span class="ss">:notice</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;注册成功。&quot;</span>
+</span><span class='line'>      <span class="n">redirect_to</span> <span class="s2">&quot;/&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>特别需要更改保护字段的时候，需要使用 @model.money = 55 这样的方式赋值，而直接 @model.update_attributes(params[:model]) 这总方式会把保护字段过滤掉。</p>
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2010-01-29 12:09:00 +0800" pubdate>2010-01-29</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/activerecord/'>ActiveRecord</a>, <a class='category' href='/blog/category/rails/'>Rails</a>, <a class='category' href='/blog/category/安全/'>安全</a>, <a class='category' href='/blog/category/漏洞/'>漏洞</a>, <a class='category' href='/blog/category/破解/'>破解</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/rails-attr-protected-or-attr-accesible-fields';
+	var disqus_url = 'http://huacnlee.github.com/blog/rails-attr-protected-or-attr-accesible-fields';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

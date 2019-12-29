@@ -1,0 +1,497 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>ASP.NET JPG 格式的图片存放质量问题 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="ASP.NET JPG 格式的图片存放质量问题 不知道大家有没有发现，Asp.net 的图片存储的存在质量的问题；这几天在项目中做到相册功能，其中有缩小成不同大小的图片的功能，最后存成 JPG 格式。可是当我在保存图片的时候发现，这些缩小后的图片出现了一些质量的问题，出现了一些杂点， &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/asp-net-jpeg-format-with-image-quality">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">ASP.NET JPG 格式的图片存放质量问题</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>不知道大家有没有发现，<strong>Asp.net</strong> 的图片存储的存在质量的问题；<br />这几天在项目中做到相册功能，其中有缩小成不同大小的图片的功能，最后存成 <span style="color: #008000;"><strong>JPG </strong></span>格式。可是当我在保存图片的时候发现，这些缩小后的图片出现了一些质量的问题，出现了一些杂点，让整个图片看起来很脏。</p>
+
+
+<p>而对比<a href="http://www.flickr.com" target="_blank">Flickr</a>或者<a href="http://www.yupoo.com" target="_blank">Yupoo</a>这种网站的缩略图，效果上面有很多差距。<br />问题出在哪里呢？起初我以为问题出在缩小图的时候，不停的调试，试效果。但当我把它存成 <strong><span style="color: #008000;">PNG</span></strong> 格式的时候效果又是对的，这说明一点：缩小图的方法没有问题。难道问题出在最后存储上面？</p>
+
+
+<p><strong>Asp.net</strong> 的 <span style="color: #ff0000;">Image</span> 对象有个 <span style="color: #333399;"><strong>Save</strong></span> 的方法，它有个参数是 <span style="color: #ff0000;"><strong>ImageFormat</strong></span> ，我选择的是 <span style="color: #008000;"><strong>JPG</strong></span>（估计很多人都是这样做的），这样存储是存在效果的问题的（好像只有 <span style="color: #ff6600;">80%</span> 的质量）！。但我在国外的网站上面查到，另外一种存放方式，这样的效果会好很多。</p>
+
+
+<h2>优化的存储方式：</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="n">EncoderParameters</span> <span class="n">encoderParam</span> <span class="p">=</span> <span class="k">new</span> <span class="n">EncoderParameters</span><span class="p">();</span>
+</span><span class='line'><span class="n">encoderParam</span><span class="p">.</span><span class="n">Param</span><span class="p">[</span><span class="m">0</span><span class="p">]</span> <span class="p">=</span> <span class="k">new</span> <span class="n">EncoderParameter</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="n">Drawing</span><span class="p">.</span><span class="n">Imaging</span><span class="p">.</span><span class="n">Encoder</span><span class="p">.</span><span class="n">Quality</span><span class="p">,</span> <span class="n">quality</span><span class="p">);</span>
+</span><span class='line'><span class="n">System</span><span class="p">.</span><span class="n">Drawing</span><span class="p">.</span><span class="n">Imaging</span><span class="p">.</span><span class="n">ImageCodecInfo</span> <span class="n">imageCodercInfo</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">Drawing</span><span class="p">.</span><span class="n">Imaging</span><span class="p">.</span><span class="n">ImageCodecInfo</span><span class="p">.</span><span class="n">GetImageEncoders</span><span class="p">()[</span><span class="m">1</span><span class="p">];</span>
+</span><span class='line'><span class="n">bitmap</span><span class="p">.</span><span class="n">Save</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">imageCodercInfo</span><span class="p">,</span> <span class="n">encoderParam</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>看效果对比：</h2>
+
+<p><img src="http://farm4.static.flickr.com/3272/2982518879_fab1e36781_o.png" /></p>
+
+<h2>另附模仿 Flickr 或 Yupoo 的切图方式：</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
+<span class='line-number'>127</span>
+<span class='line-number'>128</span>
+<span class='line-number'>129</span>
+<span class='line-number'>130</span>
+<span class='line-number'>131</span>
+<span class='line-number'>132</span>
+<span class='line-number'>133</span>
+<span class='line-number'>134</span>
+<span class='line-number'>135</span>
+<span class='line-number'>136</span>
+<span class='line-number'>137</span>
+<span class='line-number'>138</span>
+<span class='line-number'>139</span>
+<span class='line-number'>140</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">Imager</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// 缩略模式。</span>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="k">public</span> <span class="k">enum</span> <span class="n">ThumnalMode</span> <span class="p">:</span> <span class="kt">byte</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="c1">///</span>
+</span><span class='line'>        <span class="c1">/// 缩图模式</span>
+</span><span class='line'>        <span class="c1">///</span>
+</span><span class='line'>        <span class="n">Full</span><span class="p">,</span>
+</span><span class='line'>        <span class="c1">///</span>
+</span><span class='line'>        <span class="c1">/// 切图模式</span>
+</span><span class='line'>        <span class="c1">///</span>
+</span><span class='line'>        <span class="n">CUT</span><span class="p">,</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// 优化过后的图片保存功能，JPG效果更好</span>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// 要保存的图片对象</span>
+</span><span class='line'>    <span class="c1">/// 保存到文件</span>
+</span><span class='line'>    <span class="c1">/// 质量 1-100</span>
+</span><span class='line'>    <span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">Save</span><span class="p">(</span><span class="n">Bitmap</span> <span class="n">bitmap</span><span class="p">,</span> <span class="kt">string</span> <span class="n">fileName</span><span class="p">,</span> <span class="kt">int</span> <span class="n">quality</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="n">EncoderParameters</span> <span class="n">encoderParam</span> <span class="p">=</span> <span class="k">new</span> <span class="n">EncoderParameters</span><span class="p">();</span>
+</span><span class='line'>        <span class="n">encoderParam</span><span class="p">.</span><span class="n">Param</span><span class="p">[</span><span class="m">0</span><span class="p">]</span> <span class="p">=</span> <span class="k">new</span> <span class="n">EncoderParameter</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="n">Drawing</span><span class="p">.</span><span class="n">Imaging</span><span class="p">.</span><span class="n">Encoder</span><span class="p">.</span><span class="n">Quality</span><span class="p">,</span> <span class="n">quality</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">System</span><span class="p">.</span><span class="n">Drawing</span><span class="p">.</span><span class="n">Imaging</span><span class="p">.</span><span class="n">ImageCodecInfo</span> <span class="n">imageCodercInfo</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">Drawing</span><span class="p">.</span><span class="n">Imaging</span><span class="p">.</span><span class="n">ImageCodecInfo</span><span class="p">.</span><span class="n">GetImageEncoders</span><span class="p">()[</span><span class="m">1</span><span class="p">];</span>
+</span><span class='line'>        <span class="n">bitmap</span><span class="p">.</span><span class="n">Save</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">imageCodercInfo</span><span class="p">,</span> <span class="n">encoderParam</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// 取得小图</span>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// 原图</span>
+</span><span class='line'>    <span class="c1">/// 新的大小</span>
+</span><span class='line'>    <span class="c1">/// 缩图的方式</span>
+</span><span class='line'>    <span class="c1">/// mode=Full无效 如果mode=Max 的话，此参数表示切图的方式</span>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="k">public</span> <span class="k">static</span> <span class="n">Bitmap</span> <span class="nf">GetThumnail</span><span class="p">(</span><span class="n">Bitmap</span> <span class="n">image</span><span class="p">,</span> <span class="n">Size</span> <span class="n">size</span><span class="p">,</span> <span class="n">ThumnalMode</span> <span class="n">mode</span><span class="p">,</span> <span class="n">ContentAlignment</span> <span class="n">contentAlignment</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(!</span><span class="n">size</span><span class="p">.</span><span class="n">IsEmpty</span> <span class="p">&amp;&amp;</span> <span class="p">!</span><span class="n">image</span><span class="p">.</span><span class="n">Size</span><span class="p">.</span><span class="n">IsEmpty</span> <span class="p">&amp;&amp;</span> <span class="n">image</span><span class="p">.</span><span class="n">Width</span> <span class="p">&gt;</span> <span class="n">size</span><span class="p">.</span><span class="n">Width</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="c1">//先取一个宽比例。</span>
+</span><span class='line'>            <span class="kt">double</span> <span class="n">scale</span> <span class="p">=</span> <span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="n">image</span><span class="p">.</span><span class="n">Width</span> <span class="p">/</span> <span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="n">size</span><span class="p">.</span><span class="n">Width</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">Size</span> <span class="n">newSize</span> <span class="p">=</span> <span class="n">size</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="c1">//缩略模式</span>
+</span><span class='line'>            <span class="k">switch</span> <span class="p">(</span><span class="n">mode</span><span class="p">)</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="k">case</span> <span class="n">ThumnalMode</span><span class="p">.</span><span class="n">Full</span><span class="p">:</span>
+</span><span class='line'>                    <span class="p">{</span>
+</span><span class='line'>                        <span class="n">scale</span> <span class="p">=</span> <span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="n">image</span><span class="p">.</span><span class="n">Width</span> <span class="p">/</span> <span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="n">size</span><span class="p">.</span><span class="n">Width</span><span class="p">;</span>
+</span><span class='line'>                        <span class="n">newSize</span><span class="p">.</span><span class="n">Height</span> <span class="p">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">image</span><span class="p">.</span><span class="n">Height</span> <span class="p">/</span> <span class="n">scale</span><span class="p">);</span>
+</span><span class='line'>                        <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>                    <span class="p">}</span>
+</span><span class='line'>                <span class="k">case</span> <span class="n">ThumnalMode</span><span class="p">.</span><span class="n">CUT</span><span class="p">:</span>
+</span><span class='line'>                    <span class="p">{</span>
+</span><span class='line'>                        <span class="k">if</span> <span class="p">(</span><span class="n">image</span><span class="p">.</span><span class="n">Height</span> <span class="p">/</span> <span class="n">scale</span> <span class="p">&lt;</span> <span class="n">size</span><span class="p">.</span><span class="n">Height</span><span class="p">)</span>
+</span><span class='line'>                            <span class="n">scale</span> <span class="p">=</span> <span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="n">image</span><span class="p">.</span><span class="n">Height</span> <span class="p">/</span> <span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="n">size</span><span class="p">.</span><span class="n">Height</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>                        <span class="n">newSize</span><span class="p">.</span><span class="n">Width</span> <span class="p">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">image</span><span class="p">.</span><span class="n">Width</span> <span class="p">/</span> <span class="n">scale</span><span class="p">);</span>
+</span><span class='line'>                        <span class="n">newSize</span><span class="p">.</span><span class="n">Height</span> <span class="p">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">image</span><span class="p">.</span><span class="n">Height</span> <span class="p">/</span> <span class="n">scale</span><span class="p">);</span>
+</span><span class='line'>                        <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>                    <span class="p">}</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">Bitmap</span> <span class="n">result</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">mode</span> <span class="p">==</span> <span class="n">ThumnalMode</span><span class="p">.</span><span class="n">CUT</span><span class="p">)</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="n">result</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Bitmap</span><span class="p">(</span><span class="n">size</span><span class="p">.</span><span class="n">Width</span><span class="p">,</span> <span class="n">size</span><span class="p">.</span><span class="n">Height</span><span class="p">);</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>            <span class="k">else</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="n">result</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Bitmap</span><span class="p">(</span><span class="n">newSize</span><span class="p">.</span><span class="n">Width</span><span class="p">,</span> <span class="n">newSize</span><span class="p">.</span><span class="n">Height</span><span class="p">);</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">using</span> <span class="p">(</span><span class="n">Graphics</span> <span class="n">g</span> <span class="p">=</span> <span class="n">Graphics</span><span class="p">.</span><span class="n">FromImage</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="c1">//背景颜色</span>
+</span><span class='line'>                <span class="n">g</span><span class="p">.</span><span class="n">FillRectangle</span><span class="p">(</span><span class="n">Brushes</span><span class="p">.</span><span class="n">White</span><span class="p">,</span> <span class="k">new</span> <span class="n">Rectangle</span><span class="p">(</span><span class="k">new</span> <span class="n">Point</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">),</span> <span class="n">size</span><span class="p">));</span>
+</span><span class='line'>                <span class="n">g</span><span class="p">.</span><span class="n">InterpolationMode</span> <span class="p">=</span> <span class="n">InterpolationMode</span><span class="p">.</span><span class="n">HighQualityBilinear</span><span class="p">;</span>
+</span><span class='line'>                <span class="n">g</span><span class="p">.</span><span class="n">SmoothingMode</span> <span class="p">=</span> <span class="n">SmoothingMode</span><span class="p">.</span><span class="n">HighQuality</span><span class="p">;</span>
+</span><span class='line'>                <span class="n">g</span><span class="p">.</span><span class="n">PixelOffsetMode</span> <span class="p">=</span> <span class="n">PixelOffsetMode</span><span class="p">.</span><span class="n">HighQuality</span><span class="p">;</span>
+</span><span class='line'>                <span class="n">g</span><span class="p">.</span><span class="n">CompositingMode</span> <span class="p">=</span> <span class="n">CompositingMode</span><span class="p">.</span><span class="n">SourceOver</span><span class="p">;</span>
+</span><span class='line'>                <span class="n">g</span><span class="p">.</span><span class="n">CompositingQuality</span> <span class="p">=</span> <span class="n">CompositingQuality</span><span class="p">.</span><span class="n">HighQuality</span><span class="p">;</span>
+</span><span class='line'>                <span class="n">g</span><span class="p">.</span><span class="n">TextRenderingHint</span> <span class="p">=</span> <span class="n">TextRenderingHint</span><span class="p">.</span><span class="n">AntiAliasGridFit</span><span class="p">;</span>
+</span><span class='line'>                <span class="c1">//对齐方式</span>
+</span><span class='line'>                <span class="n">Rectangle</span> <span class="n">destRect</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Rectangle</span><span class="p">(</span><span class="k">new</span> <span class="n">Point</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">),</span> <span class="n">newSize</span><span class="p">);</span>
+</span><span class='line'>                <span class="k">if</span> <span class="p">(</span><span class="n">mode</span> <span class="p">==</span> <span class="n">ThumnalMode</span><span class="p">.</span><span class="n">CUT</span><span class="p">)</span>
+</span><span class='line'>                <span class="p">{</span>
+</span><span class='line'>                    <span class="k">switch</span> <span class="p">(</span><span class="n">contentAlignment</span><span class="p">)</span>
+</span><span class='line'>                    <span class="p">{</span>
+</span><span class='line'>                        <span class="k">case</span> <span class="n">ContentAlignment</span><span class="p">.</span><span class="n">TopCenter</span><span class="p">:</span>
+</span><span class='line'>                            <span class="n">destRect</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Rectangle</span><span class="p">(</span><span class="k">new</span> <span class="n">Point</span><span class="p">(-((</span><span class="n">newSize</span><span class="p">.</span><span class="n">Width</span> <span class="p">-</span> <span class="n">size</span><span class="p">.</span><span class="n">Width</span><span class="p">)</span> <span class="p">/</span> <span class="m">2</span><span class="p">),</span> <span class="m">0</span><span class="p">),</span> <span class="n">newSize</span><span class="p">);</span>
+</span><span class='line'>                            <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>                        <span class="k">case</span> <span class="n">ContentAlignment</span><span class="p">.</span><span class="n">TopRight</span><span class="p">:</span>
+</span><span class='line'>                            <span class="n">destRect</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Rectangle</span><span class="p">(</span><span class="k">new</span> <span class="n">Point</span><span class="p">(-(</span><span class="n">newSize</span><span class="p">.</span><span class="n">Width</span> <span class="p">-</span> <span class="n">size</span><span class="p">.</span><span class="n">Width</span><span class="p">),</span> <span class="m">0</span><span class="p">),</span> <span class="n">newSize</span><span class="p">);</span>
+</span><span class='line'>                            <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>                        <span class="k">case</span> <span class="n">ContentAlignment</span><span class="p">.</span><span class="n">MiddleLeft</span><span class="p">:</span>
+</span><span class='line'>                            <span class="n">destRect</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Rectangle</span><span class="p">(</span><span class="k">new</span> <span class="n">Point</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="p">-((</span><span class="n">newSize</span><span class="p">.</span><span class="n">Height</span> <span class="p">-</span> <span class="n">size</span><span class="p">.</span><span class="n">Height</span><span class="p">)</span> <span class="p">/</span> <span class="m">2</span><span class="p">)),</span> <span class="n">newSize</span><span class="p">);</span>
+</span><span class='line'>                            <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>                        <span class="k">case</span> <span class="n">ContentAlignment</span><span class="p">.</span><span class="n">MiddleCenter</span><span class="p">:</span>
+</span><span class='line'>                            <span class="n">destRect</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Rectangle</span><span class="p">(</span><span class="k">new</span> <span class="n">Point</span><span class="p">(-((</span><span class="n">newSize</span><span class="p">.</span><span class="n">Width</span> <span class="p">-</span> <span class="n">size</span><span class="p">.</span><span class="n">Width</span><span class="p">)</span> <span class="p">/</span> <span class="m">2</span><span class="p">),</span> <span class="p">-((</span><span class="n">newSize</span><span class="p">.</span><span class="n">Height</span> <span class="p">-</span> <span class="n">size</span><span class="p">.</span><span class="n">Height</span><span class="p">)</span> <span class="p">/</span> <span class="m">2</span><span class="p">)),</span> <span class="n">newSize</span><span class="p">);</span>
+</span><span class='line'>                            <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>                        <span class="k">case</span> <span class="n">ContentAlignment</span><span class="p">.</span><span class="n">MiddleRight</span><span class="p">:</span>
+</span><span class='line'>                            <span class="n">destRect</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Rectangle</span><span class="p">(</span><span class="k">new</span> <span class="n">Point</span><span class="p">(-(</span><span class="n">newSize</span><span class="p">.</span><span class="n">Width</span> <span class="p">-</span> <span class="n">size</span><span class="p">.</span><span class="n">Width</span><span class="p">),</span> <span class="p">-((</span><span class="n">newSize</span><span class="p">.</span><span class="n">Height</span> <span class="p">-</span> <span class="n">size</span><span class="p">.</span><span class="n">Height</span><span class="p">)</span> <span class="p">/</span> <span class="m">2</span><span class="p">)),</span> <span class="n">newSize</span><span class="p">);</span>
+</span><span class='line'>                            <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>                        <span class="k">case</span> <span class="n">ContentAlignment</span><span class="p">.</span><span class="n">BottomLeft</span><span class="p">:</span>
+</span><span class='line'>                            <span class="n">destRect</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Rectangle</span><span class="p">(</span><span class="k">new</span> <span class="n">Point</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="p">-(</span><span class="n">newSize</span><span class="p">.</span><span class="n">Height</span> <span class="p">-</span> <span class="n">size</span><span class="p">.</span><span class="n">Height</span><span class="p">)),</span> <span class="n">newSize</span><span class="p">);</span>
+</span><span class='line'>                            <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>                        <span class="k">case</span> <span class="n">ContentAlignment</span><span class="p">.</span><span class="n">BottomCenter</span><span class="p">:</span>
+</span><span class='line'>                            <span class="n">destRect</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Rectangle</span><span class="p">(</span><span class="k">new</span> <span class="n">Point</span><span class="p">(-((</span><span class="n">newSize</span><span class="p">.</span><span class="n">Width</span> <span class="p">-</span> <span class="n">size</span><span class="p">.</span><span class="n">Width</span><span class="p">)</span> <span class="p">/</span> <span class="m">2</span><span class="p">),</span> <span class="p">-(</span><span class="n">newSize</span><span class="p">.</span><span class="n">Height</span> <span class="p">-</span> <span class="n">size</span><span class="p">.</span><span class="n">Height</span><span class="p">)),</span> <span class="n">newSize</span><span class="p">);</span>
+</span><span class='line'>                            <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>                        <span class="k">case</span> <span class="n">ContentAlignment</span><span class="p">.</span><span class="n">BottomRight</span><span class="p">:</span>
+</span><span class='line'>                            <span class="n">destRect</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Rectangle</span><span class="p">(</span><span class="k">new</span> <span class="n">Point</span><span class="p">(-(</span><span class="n">newSize</span><span class="p">.</span><span class="n">Width</span> <span class="p">-</span> <span class="n">size</span><span class="p">.</span><span class="n">Width</span><span class="p">),</span> <span class="p">-(</span><span class="n">newSize</span><span class="p">.</span><span class="n">Height</span> <span class="p">-</span> <span class="n">size</span><span class="p">.</span><span class="n">Height</span><span class="p">)),</span> <span class="n">newSize</span><span class="p">);</span>
+</span><span class='line'>                            <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>                        <span class="k">default</span><span class="p">:</span>
+</span><span class='line'>                            <span class="n">destRect</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Rectangle</span><span class="p">(</span><span class="k">new</span> <span class="n">Point</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">),</span> <span class="n">newSize</span><span class="p">);</span>
+</span><span class='line'>                            <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>                    <span class="p">}</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="n">g</span><span class="p">.</span><span class="n">DrawImage</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">destRect</span><span class="p">,</span> <span class="k">new</span> <span class="n">Rectangle</span><span class="p">(</span><span class="k">new</span> <span class="n">Point</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">),</span> <span class="n">image</span><span class="p">.</span><span class="n">Size</span><span class="p">),</span> <span class="n">GraphicsUnit</span><span class="p">.</span><span class="n">Pixel</span><span class="p">);</span>
+</span><span class='line'>                <span class="n">image</span><span class="p">.</span><span class="n">Dispose</span><span class="p">();</span>
+</span><span class='line'>                <span class="n">g</span><span class="p">.</span><span class="n">Dispose</span><span class="p">();</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">else</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">image</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>演示代码：<a href="http://files.cnblogs.com/huacn/AspnetImage.zip" target="_blank">http://files.cnblogs.com/huacn/AspnetImage.zip</a></p>
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2008-10-29 08:00:00 +0800" pubdate>2008-10-29</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/-net/'>.NET</a>, <a class='category' href='/blog/category/图像处理/'>图像处理</a>, <a class='category' href='/blog/category/技巧/'>技巧</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/asp-net-jpeg-format-with-image-quality';
+	var disqus_url = 'http://huacnlee.github.com/blog/asp-net-jpeg-format-with-image-quality';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

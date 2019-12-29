@@ -1,0 +1,698 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>通过 WebClient 的 Postdata 将上传文件功能放到另一个网站上去操作 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="通过 WebClient 的 Postdata 将上传文件功能放到另一个网站上去操作 看了本文的标题，可能很多人不太明白，其实这里讲的只是一个简单的处理办法。 以前做的上传文件也是分离的，上传后的文件存在一个文件服务器上面，这个应该很多人都会。 今天我这里提的是分离上传功能， &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/howto-upload-file-to-another-website">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">通过 WebClient 的 Postdata 将上传文件功能放到另一个网站上去操作</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>看了本文的标题，可能很多人不太明白，其实这里讲的只是一个简单的处理办法。</p>
+
+<p>以前做的上传文件也是分离的，上传后的文件存在一个文件服务器上面，这个应该很多人都会。 今天我这里提的是分离上传功能，因为上传过程也是一个占用服务器资源的大问题，如果能够把它和网站分开，哪效果应该会有很大的提升。</p>
+
+<p>先看这个图:</p>
+
+<p><img src="http://www.cnblogs.com/images/cnblogs_com/huacn/fileserver_mode1.png" border="0" /></p>
+
+<p>A 层是我们的用户表单，如一个简单的修改用户信息页面
+B 层也是一个网站，它是一个上传功能。
+C 层是存放文件的服务器</p>
+
+<p>B网站可以是一台独立的网站服务器，它做的事情就只是上传，并处理文件，如：切割图片、锐化图片等功能。当A网站需要上传功能时，就可以通过一个iframe去调用B网站的上传页面，两者之间通过JS的Parent来传递数据(具体做法请看我以前写的《<a href="../archive/2007/07/16/819196.html" target="_blank">Javascript与asp.net多文件无刷新上传</a>》)。</p>
+
+<p>但今天有个功能却不能用这种方式做，不能使用iframe，所以一直想了好几个办法，最终做了一个通过WebClient来将文件数据POST到B服务器，B服务器再处理，并保存。这种做法虽然效果没有达到完全的分离(上传时A网站还是要将文件信息从用户的本地读到A网站的服务器)，不过处理文件的资源已经分开了，速度上面应该会有些好的(看具体情况了，我这里会将文件缩小并切割成好几种不同大小的格式，再将切割完成的图进行锐化处理)。</p>
+
+<p>我一直在想，怎么才能将Ajax一样，直接把信息POST到B网站的一个页面上，终于找到WebClient，我先把文件读成Byte数组，再用WebClient提交到B服务器的页面上，B服务接收此信息并转成一个Image，然后处理文件并保存，最后返回结果。</p>
+
+<p>再看一下具体的代码：</p>
+
+<p>A层页面代码的Default.aspx：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="err">&lt;</span>%@ Page Language=&quot;C#&quot; AutoEventWireup=&quot;true&quot; CodeFile=&quot;Default.aspx.cs&quot; Inherits=&quot;_Default&quot; %&gt;
+</span><span class='line'><span class="nt">&lt;DOCTYPE</span> <span class="na">html</span> <span class="na">PUBLIC</span> <span class="err">&quot;</span><span class="na">-</span><span class="err">//</span><span class="na">W3C</span><span class="err">//</span><span class="na">DTD</span> <span class="na">XHTML</span> <span class="na">1</span><span class="err">.</span><span class="na">0</span> <span class="na">Transitional</span><span class="err">//</span><span class="na">EN</span><span class="err">&quot;</span> <span class="err">&quot;</span><span class="na">http:</span><span class="err">//</span><span class="na">www</span><span class="err">.</span><span class="na">w3</span><span class="err">.</span><span class="na">org</span><span class="err">/</span><span class="na">TR</span><span class="err">/</span><span class="na">xhtml1</span><span class="err">/</span><span class="na">DTD</span><span class="err">/</span><span class="na">xhtml1-transitional</span><span class="err">.</span><span class="na">dtd</span><span class="err">&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'><span class="nt">&lt;html</span> <span class="na">xmlns=</span><span class="s">&quot;http://www.w3.org/1999/xhtml&quot;</span> <span class="nt">&gt;</span>
+</span><span class='line'><span class="nt">&lt;head</span> <span class="na">runat=</span><span class="s">&quot;server&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;title&gt;</span>上传文件端<span class="nt">&lt;/title&gt;</span>
+</span><span class='line'><span class="nt">&lt;/head&gt;</span>
+</span><span class='line'><span class="nt">&lt;body&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;form</span> <span class="na">id=</span><span class="s">&quot;form1&quot;</span> <span class="na">runat=</span><span class="s">&quot;server&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;asp:FileUpload</span> <span class="na">ID=</span><span class="s">&quot;file1&quot;</span> <span class="na">runat=</span><span class="s">&quot;server&quot;</span> <span class="nt">/&gt;</span> <span class="nt">&lt;asp:Button</span> <span class="na">ID=</span><span class="s">&quot;btnPost&quot;</span> <span class="na">runat=</span><span class="s">&quot;server&quot;</span> <span class="na">Text=</span><span class="s">&quot;上传&quot;</span> <span class="na">OnClick=</span><span class="s">&quot;btnPost_Click&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/form&gt;</span>
+</span><span class='line'><span class="nt">&lt;/body&gt;</span>
+</span><span class='line'><span class="nt">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>A层服务端代码 Default.aspx.cs</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Data</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Configuration</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Web</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Web.Security</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Web.UI</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Web.UI.WebControls</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Web.UI.WebControls.WebParts</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Web.UI.HtmlControls</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">public</span> <span class="k">partial</span> <span class="k">class</span> <span class="nc">_Default</span> <span class="p">:</span> <span class="n">System</span><span class="p">.</span><span class="n">Web</span><span class="p">.</span><span class="n">UI</span><span class="p">.</span><span class="n">Page</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">protected</span> <span class="k">void</span> <span class="nf">Page_Load</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">protected</span> <span class="k">void</span> <span class="nf">btnPost_Click</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span><span class="p">(!</span> <span class="n">file1</span><span class="p">.</span><span class="n">HasFile</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="n">Alert</span><span class="p">(</span><span class="s">&quot;还未选择要上传的文件.&quot;</span><span class="p">);</span>
+</span><span class='line'>            <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">HttpPostedFile</span> <span class="n">myFile</span> <span class="p">=</span> <span class="n">file1</span><span class="p">.</span><span class="n">PostedFile</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kt">string</span> <span class="n">result</span> <span class="p">=</span> <span class="s">&quot;&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">try</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="c1">//将文件转换成字节形式</span>
+</span><span class='line'>            <span class="kt">byte</span><span class="p">[]</span> <span class="n">fileByte</span> <span class="p">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="p">[</span><span class="n">myFile</span><span class="p">.</span><span class="n">InputStream</span><span class="p">.</span><span class="n">Length</span><span class="p">];</span>
+</span><span class='line'>            <span class="n">myFile</span><span class="p">.</span><span class="n">InputStream</span><span class="p">.</span><span class="n">Read</span><span class="p">(</span><span class="n">fileByte</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="n">fileByte</span><span class="p">.</span><span class="n">Length</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="c1">//通过WebClient类来提交文件数据</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="c1">//定义提交URL地址,它会接收文件的字节数据，并保存，再返回相应的结果[此处具体用的时候要修改]</span>
+</span><span class='line'>            <span class="kt">string</span> <span class="n">postUrl</span> <span class="p">=</span> <span class="s">&quot;http://localhost:2956/Upload/uploadpic.aspx?oldfilename=&quot;</span> <span class="p">+</span> <span class="n">myFile</span><span class="p">.</span><span class="n">FileName</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">System</span><span class="p">.</span><span class="n">Net</span><span class="p">.</span><span class="n">WebClient</span> <span class="n">webClient</span> <span class="p">=</span> <span class="k">new</span> <span class="n">System</span><span class="p">.</span><span class="n">Net</span><span class="p">.</span><span class="n">WebClient</span><span class="p">();</span>
+</span><span class='line'>            <span class="kt">byte</span><span class="p">[]</span> <span class="n">responseArray</span> <span class="p">=</span> <span class="n">webClient</span><span class="p">.</span><span class="n">UploadData</span><span class="p">(</span><span class="n">postUrl</span><span class="p">,</span> <span class="s">&quot;POST&quot;</span><span class="p">,</span> <span class="n">fileByte</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="c1">//将返回的字节数据转成字符串（也就是uploadpic.aspx里面的页面输出内容）</span>
+</span><span class='line'>            <span class="n">result</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">Text</span><span class="p">.</span><span class="n">Encoding</span><span class="p">.</span><span class="n">Default</span><span class="p">.</span><span class="n">GetString</span><span class="p">(</span><span class="n">responseArray</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="n">responseArray</span><span class="p">.</span><span class="n">Length</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="c1">//返回结果的处理</span>
+</span><span class='line'>            <span class="k">switch</span> <span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="k">case</span> <span class="s">&quot;-1&quot;</span><span class="p">:</span>
+</span><span class='line'>                    <span class="n">Alert</span><span class="p">(</span><span class="s">&quot;上传头像时发生异常，未提交成功。&quot;</span><span class="p">);</span>
+</span><span class='line'>                    <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>                <span class="k">case</span> <span class="s">&quot;0&quot;</span><span class="p">:</span>
+</span><span class='line'>                    <span class="n">Alert</span><span class="p">(</span><span class="s">&quot;您还未选择头像。&quot;</span><span class="p">);</span>
+</span><span class='line'>                    <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">ex</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="n">Response</span><span class="p">.</span><span class="n">Write</span><span class="p">(</span><span class="n">ex</span><span class="p">.</span><span class="n">Message</span><span class="p">);</span>
+</span><span class='line'>            <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">Alert</span><span class="p">(</span><span class="s">&quot;上传成功!\r\n结果是：&quot;</span> <span class="p">+</span> <span class="n">result</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cp">#region 在客户端发出Alert提示窗口</span>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// sumary:弹出一个提示窗口</span>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// 提示信息</span>
+</span><span class='line'>    <span class="c1">/// 要专向的地址,不转请传空字符串</span>
+</span><span class='line'>    <span class="k">public</span> <span class="k">void</span> <span class="nf">Alert</span><span class="p">(</span><span class="kt">string</span> <span class="n">msg</span><span class="p">,</span> <span class="kt">string</span> <span class="n">url</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kt">string</span> <span class="n">goUrlScript</span> <span class="p">=</span> <span class="s">&quot;&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">url</span> <span class="p">!=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="n">goUrlScript</span> <span class="p">=</span> <span class="s">&quot;document.location.href=’&quot;</span> <span class="p">+</span> <span class="n">url</span> <span class="p">+</span> <span class="s">&quot;’;&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="n">Page</span><span class="p">.</span><span class="n">RegisterStartupScript</span><span class="p">(</span><span class="s">&quot;alert&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// 弹出错误提示</span>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// 提示信息，支持HTML</span>
+</span><span class='line'>    <span class="k">public</span> <span class="k">void</span> <span class="nf">Alert</span><span class="p">(</span><span class="kt">string</span> <span class="n">msg</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="n">Alert</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cp">#endregion</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>B层的服务端代码　UploadPic.aspx.cs：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
+<span class='line-number'>127</span>
+<span class='line-number'>128</span>
+<span class='line-number'>129</span>
+<span class='line-number'>130</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Data</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Configuration</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Web</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Web.Security</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Web.UI</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Web.UI.WebControls</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Web.UI.WebControls.WebParts</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Web.UI.HtmlControls</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.IO</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">public</span> <span class="k">partial</span> <span class="k">class</span> <span class="nc">uploadpic</span> <span class="p">:</span> <span class="n">System</span><span class="p">.</span><span class="n">Web</span><span class="p">.</span><span class="n">UI</span><span class="p">.</span><span class="n">Page</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">private</span> <span class="kt">string</span> <span class="n">SavePath</span> <span class="p">=</span> <span class="s">@&quot;c:\uploadfiles&quot;</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">private</span> <span class="kt">string</span> <span class="n">UrlFilePath</span> <span class="p">=</span> <span class="s">&quot;/UserHead/&quot;</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">protected</span> <span class="k">void</span> <span class="nf">Page_Load</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="n">initPage</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">private</span> <span class="k">void</span> <span class="nf">initPage</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">Request</span><span class="p">.</span><span class="n">InputStream</span><span class="p">.</span><span class="n">Length</span> <span class="p">==</span> <span class="m">0</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="c1">//没有内容</span>
+</span><span class='line'>            <span class="n">Response</span><span class="p">.</span><span class="n">Write</span><span class="p">(</span><span class="s">&quot;0&quot;</span><span class="p">);</span>
+</span><span class='line'>            <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">//HttpPostedFile myFile = Request.Files[0];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kt">string</span> <span class="n">OldFileName</span> <span class="p">=</span> <span class="k">this</span><span class="p">.</span><span class="n">GetQueryString</span><span class="p">(</span><span class="s">&quot;oldfilename&quot;</span><span class="p">);</span>
+</span><span class='line'>        <span class="kt">string</span> <span class="n">DirPath</span> <span class="p">=</span> <span class="n">GetDataPath</span><span class="p">();</span>
+</span><span class='line'>        <span class="kt">string</span> <span class="n">RealSavePath</span> <span class="p">=</span> <span class="n">SavePath</span> <span class="p">+</span> <span class="s">&quot;\\&quot;</span> <span class="p">+</span> <span class="n">DirPath</span> <span class="p">+</span> <span class="s">&quot;\\&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="kt">string</span> <span class="n">fileExt</span> <span class="p">=</span> <span class="s">&quot;jpg&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">OldFileName</span> <span class="p">!=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="n">fileExt</span> <span class="p">=</span> <span class="n">OldFileName</span><span class="p">.</span><span class="n">Substring</span><span class="p">(</span><span class="n">OldFileName</span><span class="p">.</span><span class="n">LastIndexOf</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span> <span class="p">+</span> <span class="m">1</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="kt">string</span> <span class="n">NewFileName</span> <span class="p">=</span> <span class="n">GetFileName</span><span class="p">(</span><span class="n">fileExt</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">System</span><span class="p">.</span><span class="n">Drawing</span><span class="p">.</span><span class="n">Image</span> <span class="n">postImage</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">Drawing</span><span class="p">.</span><span class="n">Image</span><span class="p">.</span><span class="n">FromStream</span><span class="p">(</span><span class="n">Request</span><span class="p">.</span><span class="n">InputStream</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">try</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(!</span><span class="n">Directory</span><span class="p">.</span><span class="n">Exists</span><span class="p">(</span><span class="n">RealSavePath</span><span class="p">))</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="n">System</span><span class="p">.</span><span class="n">IO</span><span class="p">.</span><span class="n">Directory</span><span class="p">.</span><span class="n">CreateDirectory</span><span class="p">(</span><span class="n">RealSavePath</span><span class="p">);</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">MakeSmallImage</span><span class="p">(</span><span class="n">postImage</span><span class="p">,</span> <span class="n">RealSavePath</span><span class="p">,</span> <span class="n">NewFileName</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">Response</span><span class="p">.</span><span class="n">Write</span><span class="p">(</span><span class="n">UrlFilePath</span> <span class="p">+</span> <span class="n">DirPath</span> <span class="p">+</span> <span class="s">&quot;/&quot;</span> <span class="p">+</span> <span class="n">NewFileName</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">ex</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="n">Response</span><span class="p">.</span><span class="n">Write</span><span class="p">(</span><span class="s">&quot;-1&quot;</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// 生成缩微图</span>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// 保存的文件名，包括目录地址</span>
+</span><span class='line'>    <span class="k">private</span> <span class="k">void</span> <span class="nf">MakeSmallImage</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="n">Drawing</span><span class="p">.</span><span class="n">Image</span> <span class="n">imageBase</span><span class="p">,</span> <span class="kt">string</span> <span class="n">p_SavePath</span><span class="p">,</span> <span class="kt">string</span> <span class="n">p_FileName</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">try</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="n">System</span><span class="p">.</span><span class="n">Drawing</span><span class="p">.</span><span class="n">Bitmap</span> <span class="n">bitmap_b</span> <span class="p">=</span> <span class="k">new</span> <span class="n">System</span><span class="p">.</span><span class="n">Drawing</span><span class="p">.</span><span class="n">Bitmap</span><span class="p">(</span><span class="n">imageBase</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="c1">//保存</span>
+</span><span class='line'>            <span class="n">bitmap_b</span><span class="p">.</span><span class="n">Save</span><span class="p">(</span><span class="n">p_SavePath</span> <span class="p">+</span> <span class="s">&quot;/&quot;</span> <span class="p">+</span> <span class="n">p_FileName</span><span class="p">,</span> <span class="n">System</span><span class="p">.</span><span class="n">Drawing</span><span class="p">.</span><span class="n">Imaging</span><span class="p">.</span><span class="n">ImageFormat</span><span class="p">.</span><span class="n">Jpeg</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">ex</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">(</span><span class="n">ex</span><span class="p">.</span><span class="n">ToString</span><span class="p">());</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">public</span> <span class="kt">string</span> <span class="nf">GetFileName</span><span class="p">(</span><span class="kt">string</span> <span class="n">FileType</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="n">System</span><span class="p">.</span><span class="n">Random</span> <span class="n">Rd</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Random</span><span class="p">();</span>
+</span><span class='line'>        <span class="kt">double</span> <span class="n">Rds</span> <span class="p">=</span> <span class="n">Rd</span><span class="p">.</span><span class="n">NextDouble</span><span class="p">();</span>
+</span><span class='line'>        <span class="kt">string</span> <span class="n">nowTime</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">DateTime</span><span class="p">.</span><span class="n">Now</span><span class="p">.</span><span class="n">ToString</span><span class="p">();</span>
+</span><span class='line'>        <span class="n">nowTime</span> <span class="p">=</span> <span class="n">nowTime</span><span class="p">.</span><span class="n">Replace</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">nowTime</span> <span class="p">=</span> <span class="n">nowTime</span><span class="p">.</span><span class="n">Replace</span><span class="p">(</span><span class="s">&quot;-&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">nowTime</span> <span class="p">=</span> <span class="n">nowTime</span><span class="p">.</span><span class="n">Replace</span><span class="p">(</span><span class="s">&quot;:&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">nowTime</span> <span class="p">=</span> <span class="n">nowTime</span><span class="p">.</span><span class="n">Trim</span><span class="p">()</span> <span class="p">+</span> <span class="s">&quot;_&quot;</span> <span class="p">+</span> <span class="n">Rds</span><span class="p">.</span><span class="n">ToString</span><span class="p">().</span><span class="n">Replace</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">).</span><span class="n">Substring</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">4</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">nowTime</span> <span class="p">=</span> <span class="n">nowTime</span> <span class="p">+</span> <span class="s">&quot;.&quot;</span> <span class="p">+</span> <span class="n">FileType</span><span class="p">.</span><span class="n">ToLower</span><span class="p">();</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">nowTime</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">public</span> <span class="kt">string</span> <span class="nf">GetDataPath</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="kt">string</span> <span class="n">nowTime</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">DateTime</span><span class="p">.</span><span class="n">Now</span><span class="p">.</span><span class="n">ToShortDateString</span><span class="p">().</span><span class="n">Trim</span><span class="p">();</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">nowTime</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cp">#region 获取QueryString的值</span>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// sumary:获取QueryString的值</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// QueryString中字段的名称</span>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// 如果存在则返回QueryString中字段对应的值 如果不存在或异常，则返回空字符串</span>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="k">public</span> <span class="kt">string</span> <span class="nf">GetQueryString</span><span class="p">(</span><span class="kt">string</span> <span class="n">key</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">try</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="kt">string</span> <span class="k">value</span> <span class="p">=</span> <span class="kt">string</span><span class="p">.</span><span class="n">Empty</span><span class="p">;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">HttpContext</span><span class="p">.</span><span class="n">Current</span><span class="p">.</span><span class="n">Request</span><span class="p">.</span><span class="n">QueryString</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="k">value</span> <span class="p">=</span> <span class="n">HttpContext</span><span class="p">.</span><span class="n">Current</span><span class="p">.</span><span class="n">Request</span><span class="p">.</span><span class="n">QueryString</span><span class="p">[</span><span class="n">key</span><span class="p">].</span><span class="n">ToString</span><span class="p">();</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>            <span class="k">return</span> <span class="k">value</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">catch</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="kt">string</span><span class="p">.</span><span class="n">Empty</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="cp">#endregion</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>完整源代码下载：<a href="http://www.cnblogs.com/Files/huacn/HttpPostFile.7z" target="_blank">http://www.cnblogs.com/Files/huacn/HttpPostFile.7z</a></p>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2008-04-24 08:17:00 +0800" pubdate>2008-04-24</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/-net/'>.NET</a>, <a class='category' href='/blog/category/upload/'>Upload</a>, <a class='category' href='/blog/category/技巧/'>技巧</a>, <a class='category' href='/blog/category/教程/'>教程</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/howto-upload-file-to-another-website';
+	var disqus_url = 'http://huacnlee.github.com/blog/howto-upload-file-to-another-website';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

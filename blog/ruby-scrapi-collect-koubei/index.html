@@ -1,0 +1,360 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>用 Ruby scrAPI 做数据采集，口碑例子 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="用 Ruby scrAPI 做数据采集，口碑例子 以前一直没有研究过采集相关的技术，只是用过几个采集系统，但哪些效果都不怎么样，而且整个操作过程很是麻烦，又不够精确。
+前天在 Railscasts 上面看到一篇介绍 Ruby scrAPI 这个类库的视频教程《Screen Scraping &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/ruby-scrapi-collect-koubei">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">用 Ruby scrAPI 做数据采集，口碑例子</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>以前一直没有研究过采集相关的技术，只是用过几个采集系统，但哪些效果都不怎么样，而且整个操作过程很是麻烦，又不够精确。
+前天在 Railscasts 上面看到一篇介绍 <a href="http://rubyforge.org/projects/scrapi/" target="_blank">Ruby scrAPI</a> 这个类库的视频教程《<a href="http://railscasts.com/episodes/173-screen-scraping-with-scrapi" target="_blank">Screen Scraping with ScrAPI</a>》，里面介绍了如何通过 scrAPI 以 HTML dom 的方式抓取其它网站的内容的例子，整个方式非常简单有效！
+scrAPI 的 HTML 解析机制和 jQuery 的 <a href="http://docs.jquery.com/Selectors" target="_blank" title="Selectors">Selectors</a> 非常像，它可以以 <span style="color: #ff6600;"><strong>html&gt;body&gt;div#container&gt;div#articles&gt;div.item&gt;div.title</strong></span> 的方式来解析像下面这样的HTML结构</p>
+
+<!-- more -->
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="cp">&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;</span>
+</span><span class='line'><span class="cp">  &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;&gt;</span>
+</span><span class='line'><span class="nt">&lt;html</span> <span class="na">xmlns=</span><span class="s">&quot;http://www.w3.org/1999/xhtml&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'><span class="nt">&lt;head&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">&quot;Content-type&quot;</span> <span class="na">content=</span><span class="s">&quot;text/html; charset=utf-8&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;title&gt;</span>This is the scrAPI collect demo page<span class="nt">&lt;/title&gt;</span>
+</span><span class='line'><span class="nt">&lt;/head&gt;</span>
+</span><span class='line'><span class="nt">&lt;body&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;header&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;h1</span> <span class="na">id=</span><span class="s">&quot;demo&quot;</span><span class="nt">&gt;</span>Demo<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;ul</span> <span class="na">id=</span><span class="s">&quot;nav&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;/&quot;</span><span class="nt">&gt;</span>Home<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">&quot;current&quot;</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;/articles&quot;</span><span class="nt">&gt;</span>Articles<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;/about&quot;</span><span class="nt">&gt;</span>About<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/ul&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;container&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;articles&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;item&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;title&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/articles/show/1&quot;</span><span class="nt">&gt;</span>Sample article title 1<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;summary&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>          There is the summary text 1.
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;item&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;title&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/articles/show/1&quot;</span><span class="nt">&gt;</span>Sample article title 2<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;summary&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>          There is the summary text 2.
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;item&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;title&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/articles/show/1&quot;</span><span class="nt">&gt;</span>Sample article title 3<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;summary&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>          There is the summary text 3.
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'><span class="nt">&lt;/body&gt;</span>
+</span><span class='line'><span class="nt">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>将上面的代码保存为 demo.rb 文件，并使用 <span style="color: #3366ff;"><strong>gem install scrapi</strong></span> 安装好 scrapi 这个类库，直接运行 <span style="color: #3366ff;">ruby demo.rb</span> 就<span class="c1"></span>能看到执行结果了。</p>
+
+<h3>采集后的部分结果</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>标题：<span class="ni">&amp;#184;&amp;#163;&amp;#187;&amp;#170;&amp;#208;&amp;#194;&amp;#198;&amp;#240;&amp;#181;&amp;#227;</span>1<span class="ni">&amp;#202;&amp;#210;</span>0<span class="ni">&amp;#204;&amp;#252;</span>1<span class="ni">&amp;#206;&amp;#192;</span>1<span class="ni">&amp;#209;&amp;#244;&amp;#204;&amp;#168;</span>
+</span><span class='line'>价格：1000 元/月
+</span><span class='line'>类别：<span class="ni">&amp;#213;&amp;#251;&amp;#215;&amp;#226;</span>
+</span><span class='line'>装修：<span class="ni">&amp;#184;&amp;#223;&amp;#181;&amp;#181;&amp;#215;&amp;#176;&amp;#208;&amp;#222;</span>
+</span><span class='line'>连接：http://chengdu.koubei.com/fang/detail-rent-r6cb50dac9ad346b395b203ae1c8961db.html
+</span><span class='line'>
+</span><span class='line'>标题：TT<span class="ni">&amp;#201;&amp;#208;&amp;#198;&amp;#183;</span>2<span class="ni">&amp;#202;&amp;#210;</span>2<span class="ni">&amp;#204;&amp;#252;</span>1<span class="ni">&amp;#206;&amp;#192;</span>1<span class="ni">&amp;#209;&amp;#244;&amp;#204;&amp;#168;</span>
+</span><span class='line'>价格：1700 元/月
+</span><span class='line'>类别：<span class="ni">&amp;#213;&amp;#251;&amp;#215;&amp;#226;</span>
+</span><span class='line'>装修：<span class="ni">&amp;#214;&amp;#208;&amp;#181;&amp;#181;&amp;#215;&amp;#176;&amp;#208;&amp;#222;</span>
+</span><span class='line'>连接：http://chengdu.koubei.com/fang/detail-rent-r9850826ea74a46a7b67956905d82a965.html
+</span><span class='line'>
+</span><span class='line'>标题：<span class="ni">&amp;#201;&amp;#207;&amp;#189;&amp;#245;&amp;#209;&amp;#197;&amp;#214;&amp;#254;</span>2<span class="ni">&amp;#202;&amp;#210;</span>2<span class="ni">&amp;#204;&amp;#252;</span>1<span class="ni">&amp;#206;&amp;#192;</span>1<span class="ni">&amp;#209;&amp;#244;&amp;#204;&amp;#168;</span>
+</span><span class='line'>价格：2000 元/月
+</span><span class='line'>类别：<span class="ni">&amp;#213;&amp;#251;&amp;#215;&amp;#226;</span>
+</span><span class='line'>装修：<span class="ni">&amp;#184;&amp;#223;&amp;#181;&amp;#181;&amp;#215;&amp;#176;&amp;#208;&amp;#222;</span>
+</span><span class='line'>连接：http://chengdu.koubei.com/fang/detail-rent-r9fed98c9135445d9b677d79dce6208e5.html
+</span><span class='line'>
+</span><span class='line'>标题：<span class="ni">&amp;#190;&amp;#167;&amp;#192;&amp;#182;&amp;#176;&amp;#235;&amp;#181;&amp;#186;&amp;#182;&amp;#254;&amp;#198;&amp;#218;</span>3<span class="ni">&amp;#202;&amp;#210;</span>2<span class="ni">&amp;#204;&amp;#252;</span>1<span class="ni">&amp;#206;&amp;#192;</span>2<span class="ni">&amp;#209;&amp;#244;&amp;#204;&amp;#168;</span>
+</span><span class='line'>价格：3600 元/月
+</span><span class='line'>类别：<span class="ni">&amp;#213;&amp;#251;&amp;#215;&amp;#226;</span>
+</span><span class='line'>装修：<span class="ni">&amp;#214;&amp;#208;&amp;#181;&amp;#181;&amp;#215;&amp;#176;&amp;#208;&amp;#222;</span>
+</span><span class='line'>连接：http://chengdu.koubei.com/fang/detail-rent-r40d585129d81446f868f8aa1e03b18d5.html
+</span><span class='line'>
+</span><span class='line'>标题：<span class="ni">&amp;#196;&amp;#166;&amp;#191;&amp;#168;&amp;#214;&amp;#254;</span>1<span class="ni">&amp;#202;&amp;#210;</span>0<span class="ni">&amp;#204;&amp;#252;</span>1<span class="ni">&amp;#206;&amp;#192;</span>1<span class="ni">&amp;#209;&amp;#244;&amp;#204;&amp;#168;</span>
+</span><span class='line'>价格：1700 元/月
+</span><span class='line'>类别：<span class="ni">&amp;#213;&amp;#251;&amp;#215;&amp;#226;</span>
+</span><span class='line'>装修：<span class="ni">&amp;#184;&amp;#223;&amp;#181;&amp;#181;&amp;#215;&amp;#176;&amp;#208;&amp;#222;</span>
+</span><span class='line'>连接：http://chengdu.koubei.com/fang/detail-rent-rc0354101ab934930a3c7416e6ed6ec51.html
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>相关连接</h3>
+
+<ul>
+<li><a href="http://rubyforge.org/projects/scrapi/" target="_blank">Ruby scrAPI 下载地址</a></li>
+<li><a href="http://railscasts.com/episodes/173-screen-scraping-with-scrapi" target="_blank">Railscases 上面关于 scrAPI 的视频教程</a></li>
+</ul>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2009-08-14 13:12:00 +0800" pubdate>2009-08-14</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/rails/'>Rails</a>, <a class='category' href='/blog/category/ruby/'>Ruby</a>, <a class='category' href='/blog/category/scrapi/'>scrAPI</a>, <a class='category' href='/blog/category/教程/'>教程</a>, <a class='category' href='/blog/category/采集/'>采集</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/ruby-scrapi-collect-koubei';
+	var disqus_url = 'http://huacnlee.github.com/blog/ruby-scrapi-collect-koubei';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

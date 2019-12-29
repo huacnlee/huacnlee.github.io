@@ -1,0 +1,361 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Rails 使用 Swfupload 无刷新多文件上传的 Session 问题解决 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Rails 使用 Swfupload 无刷新多文件上传的 Session 问题解决 Swfupload 是一个 Javascript + Flash 实现的无刷新上传组件，它支持一次选择多个文件上传、上传状态、进度等实用功能。
+在 Ruby on Rails 里面使用 Swfupload &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/rails-multi-files-upload-with-swfupload">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Rails 使用 Swfupload 无刷新多文件上传的 Session 问题解决</h1>
+    
+  </header>
+
+  <div class="entry_content"><p><a href="http://swfupload.org/">Swfupload</a> 是一个 Javascript + Flash 实现的无刷新上传组件，它支持一次选择多个文件上传、上传状态、进度等实用功能。
+在 Ruby on Rails 里面使用 Swfupload 来实现多文件上传基本上很简单，按照 <a href="http://demo.swfupload.org/v220/applicationdemo/index.php">Demo</a> 这个页面的例子代码，并修改制定的参数就好了。
+但是，如果你的上传需要验证用户登录，那就会有问题出现了。
+因为 Swfupload 上传是在 Flash 里面实现的，也就是说 Swfupload 和页面的 Cookie 将会是两个，Session 当然也是同样的。
+要避免这个问题，就需要强制的改写 Cookie。</p>
+
+<h2>步骤</h2>
+
+<ul>
+<li>在 Rails 项目里面创建 <code>app/middlewares</code> 目录</li>
+<li>创建 <code>app/middlewares/flash_session_cookie_middleware.rb</code> 文件，并存入这段代码:</li>
+</ul>
+
+
+<!-- more -->
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;rack/utils&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">FlashSessionCookieMiddleware</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">session_key</span> <span class="o">=</span> <span class="s1">&#39;_session_id&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@app</span> <span class="o">=</span> <span class="n">app</span>
+</span><span class='line'>    <span class="vi">@session_key</span> <span class="o">=</span> <span class="n">session_key</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">env</span><span class="o">[</span><span class="s1">&#39;HTTP_USER_AGENT&#39;</span><span class="o">]</span> <span class="o">=~</span> <span class="sr">/^(Adobe|Shockwave) Flash/</span>
+</span><span class='line'>      <span class="n">params</span> <span class="o">=</span> <span class="o">::</span><span class="no">Rack</span><span class="o">::</span><span class="no">Utils</span><span class="o">.</span><span class="n">parse_query</span><span class="p">(</span><span class="n">env</span><span class="o">[</span><span class="s1">&#39;QUERY_STRING&#39;</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">env</span><span class="o">[</span><span class="s1">&#39;HTTP_COOKIE&#39;</span><span class="o">]</span> <span class="o">=</span> <span class="o">[</span> <span class="vi">@session_key</span><span class="p">,</span> <span class="n">params</span><span class="o">[</span><span class="vi">@session_key</span><span class="o">]</span> <span class="o">].</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">freeze</span> <span class="k">unless</span> <span class="n">params</span><span class="o">[</span><span class="vi">@session_key</span><span class="o">].</span><span class="n">nil?</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="vi">@app</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>修改 <code>config/initializers/session_store.rb</code> 并加入：</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># config/initializers/session_store.rb </span>
+</span><span class='line'><span class="no">ActionController</span><span class="o">::</span><span class="no">Dispatcher</span><span class="o">.</span><span class="n">middleware</span><span class="o">.</span><span class="n">insert_before</span><span class="p">(</span><span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span><span class="o">.</span><span class="n">session_store</span><span class="p">,</span>
+</span><span class='line'>    <span class="no">FlashSessionCookieMiddleware</span><span class="p">,</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span><span class="o">.</span><span class="n">session_options</span><span class="o">[</span><span class="ss">:key</span><span class="o">]</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>修改 <code>config/environment.rb</code> 将 <code>app/middlewares</code> 目录加入到 <code>config.load_paths</code> 里面：</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># config/environment.rb</span>
+</span><span class='line'><span class="no">Rails</span><span class="o">::</span><span class="no">Initializer</span><span class="o">.</span><span class="n">run</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+</span><span class='line'>  <span class="c1"># ..... 省略其他的一些代码</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">load_paths</span> <span class="o">+=</span> <span class="sx">%W( </span><span class="si">#{</span><span class="no">RAILS_ROOT</span><span class="si">}</span><span class="sx">/app/middlewares )</span>
+</span><span class='line'>  <span class="c1"># ..... 省略其他的一些代码</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>对 脚本的 upload_url 进行修改，加入 session 参数:</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="x">&lt;!-- 如原始的代码是这样 --&gt;</span>
+</span><span class='line'><span class="x">&lt;script type=&quot;text/javascript&quot;&gt;</span>
+</span><span class='line'><span class="x">  var swfu;</span>
+</span><span class='line'><span class="x">  window.onload = function () {</span>
+</span><span class='line'><span class="x">    swfu = new SWFUpload({</span>
+</span><span class='line'><span class="x">      upload_url: &#39;</span><span class="cp">&lt;%=</span> <span class="n">link_to</span> <span class="ss">:controller</span> <span class="o">=&gt;</span> <span class="s2">&quot;photos&quot;</span><span class="p">,</span> <span class="ss">:action</span> <span class="o">=&gt;</span> <span class="s2">&quot;create&quot;</span> <span class="cp">%&gt;</span><span class="x">&#39;,</span>
+</span><span class='line'><span class="x">      //....... 省略后面的...</span>
+</span><span class='line'><span class="x">  }</span>
+</span><span class='line'><span class="x">&lt;/script&gt;</span>
+</span><span class='line'><span class="x">&lt;!-- 修改为 --&gt;</span>
+</span><span class='line'><span class="x">&lt;script type=&quot;text/javascript&quot;&gt;</span>
+</span><span class='line'><span class="x">  var swfu;</span>
+</span><span class='line'><span class="x">  window.onload = function () {</span>
+</span><span class='line'><span class="x">    swfu = new SWFUpload({</span>
+</span><span class='line'><span class="x">      upload_url: &#39;</span><span class="cp">&lt;%=</span> <span class="n">link_to</span> <span class="ss">:controller</span> <span class="o">=&gt;</span> <span class="s2">&quot;photos&quot;</span><span class="p">,</span> <span class="ss">:action</span> <span class="o">=&gt;</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span><span class="o">.</span><span class="n">session_options</span><span class="o">[</span><span class="ss">:key</span><span class="o">]</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="n">cookies</span><span class="o">[</span><span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span><span class="o">.</span><span class="n">session_options</span><span class="o">[</span><span class="ss">:key</span><span class="o">]]</span> <span class="cp">%&gt;</span><span class="x">&#39;,</span>
+</span><span class='line'><span class="x">      //....... 省略后面的...</span>
+</span><span class='line'><span class="x">  }</span>
+</span><span class='line'><span class="x">&lt;/script&gt;</span>
+</span><span class='line'><span class="x">&lt;!--</span>
+</span><span class='line'><span class="x">   这样一来，upload_url 就会从之前的 </span>
+</span><span class='line'><span class="x">  /photos/create </span>
+</span><span class='line'><span class="x">  变为 </span>
+</span><span class='line'><span class="x">  /photos/create?_projectname_session_key=asdgkljasdklgjasdklgjlakjlwje </span>
+</span><span class='line'><span class="x">  类似的地址</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">  _projectname_session_key 是在 config/initializers/session_store.rb 里面配置的 </span>
+</span><span class='line'><span class="x">  ActionController::Base.session 的 :key 的值</span>
+</span><span class='line'><span class="x">--&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>在修改一下你的 controller 加入</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">session</span> <span class="ss">:cookie_only</span> <span class="o">=&gt;</span> <span class="kp">false</span><span class="p">,</span> <span class="ss">:only</span> <span class="o">=&gt;</span> <span class="ss">:create</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>最后重启Web服务器。</li>
+</ul>
+
+
+<h2>参考资料：</h2>
+
+<ul>
+<li><a href="http://demo.swfupload.org/v220/applicationdemo/index.php" target="_blank">Swfupload demo</a></li>
+<li><a href="http://jimneath.org/2008/05/15/swfupload-paperclip-and-ruby-on-rails/" target="_blank" title="Permanent Link: SWFUpload, Paperclip and Ruby on Rails">SWFUpload, Paperclip and Ruby on Rails</a></li>
+<li><a href="http://railsforum.com/viewtopic.php?id=32662" target="_blank">swfupload and restful authentication session problem</a></li>
+</ul>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2009-10-15 14:03:00 +0800" pubdate>2009-10-15</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/rails/'>Rails</a>, <a class='category' href='/blog/category/session/'>Session</a>, <a class='category' href='/blog/category/swfupload/'>Swfupload</a>, <a class='category' href='/blog/category/前端开发/'>前端开发</a>, <a class='category' href='/blog/category/无刷新上传/'>无刷新上传</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/rails-multi-files-upload-with-swfupload';
+	var disqus_url = 'http://huacnlee.github.com/blog/rails-multi-files-upload-with-swfupload';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

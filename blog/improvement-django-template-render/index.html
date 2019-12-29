@@ -1,0 +1,375 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Django Views 里面 Templates 输出的更好的方法 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Django Views 里面 Templates 输出的更好的方法 Django里面我们通常会通过这样来将结果递交给Template页面处理并输出最终结果 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26 &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/improvement-django-template-render">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Django Views 里面 Templates 输出的更好的方法</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>Django里面我们通常会通过这样来将结果递交给Template页面处理并输出最终结果</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">Http404</span><span class="p">,</span> <span class="n">HttpResponse</span><span class="p">,</span> <span class="n">HttpResponseRedirect</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">TemplateDoesNotExist</span><span class="p">,</span> <span class="n">RequestContext</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render_to_response</span><span class="p">,</span> <span class="n">get_object_or_404</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">archive_view</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">page_num</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">date__year</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">year</span><span class="p">),</span>
+</span><span class='line'>            <span class="n">date__month</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">month</span><span class="p">),</span>
+</span><span class='line'>            <span class="nb">type</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s">&#39;-date&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="n">page_num</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">current_page</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">page_num</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">else</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">current_page</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">link</span> <span class="o">=</span> <span class="s">&#39;/archives/</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">page</span> <span class="o">=</span> <span class="bp">None</span>
+</span><span class='line'>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">posts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">page</span> <span class="o">=</span> <span class="n">Paginator</span><span class="p">(</span><span class="n">posts</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">page</span><span class="p">(</span><span class="n">current_page</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">posts</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">object_list</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="s">&#39;post/archive.html&#39;</span><span class="p">,</span>
+</span><span class='line'>                <span class="p">{</span> <span class="s">&#39;year&#39;</span><span class="p">:</span> <span class="n">year</span><span class="p">,</span>
+</span><span class='line'>                <span class="s">&#39;month&#39;</span><span class="p">:</span> <span class="n">month</span><span class="p">,</span>
+</span><span class='line'>                <span class="s">&#39;posts&#39;</span><span class="p">:</span> <span class="n">posts</span><span class="p">,</span>
+</span><span class='line'>                <span class="s">&#39;page&#39;</span><span class="p">:</span> <span class="n">page</span><span class="p">,</span>
+</span><span class='line'>                <span class="s">&#39;current_page&#39;</span><span class="p">:</span> <span class="n">current_page</span><span class="p">,</span>
+</span><span class='line'>                <span class="s">&#39;link&#39;</span><span class="p">:</span> <span class="n">link</span><span class="p">},</span>
+</span><span class='line'>                <span class="n">context_instance</span> <span class="o">=</span> <span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</span><span class='line'>                <span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>这里拿的是来自 <a href="http://code.google.com/p/pulog" target="_blank">Pulog</a> 的 <a href="http://code.google.com/p/pulog/source/browse/trunk/pulog/views/post.py" target="_blank">Views.py</a> 里面的一段代码。</p>
+
+
+<p>Django 的官方文档里面所讲述的做法就是这样的，当然我不是讲这种方法有错，而是我们需要对它进行抽像，好处在于当某天我们需要统一对 Views 到 Templates 中间加入统一的处理的时候可以更方便，不用再从很多代码中一处一处修改。</p>
+
+
+<p>我在做我的 Coderblogs 的时候曾经是这样做的：</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">Http404</span><span class="p">,</span> <span class="n">HttpResponse</span><span class="p">,</span> <span class="n">HttpResponseRedirect</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">TemplateDoesNotExist</span><span class="p">,</span> <span class="n">RequestContext</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render_to_response</span><span class="p">,</span> <span class="n">get_object_or_404</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">_out_page</span><span class="p">(</span><span class="n">template</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+</span><span class='line'>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span class='line'><span class="sd">    summary:</span>
+</span><span class='line'><span class="sd">        输出页面HTML,template的Response</span>
+</span><span class='line'><span class="sd">    params:</span>
+</span><span class='line'><span class="sd">        filename    template 文件名</span>
+</span><span class='line'><span class="sd">        data    Context 的数据字典</span>
+</span><span class='line'><span class="sd">    &quot;&quot;&quot;</span>
+</span><span class='line'>    <span class="n">_template</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">_context</span> <span class="o">=</span> <span class="n">Context</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">_output</span> <span class="o">=</span> <span class="n">_template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">_context</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">_output</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">home</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">_out_page</span><span class="p">(</span><span class="s">&#39;home.html&#39;</span><span class="p">,{</span><span class="s">&#39;name&#39;</span> <span class="p">:</span> <span class="s">&#39;Jason Lee&#39;</span><span class="p">,</span><span class="s">&#39;sex&#39;</span><span class="p">:</span><span class="s">&#39;male&#39;</span><span class="p">})</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>但是刚才我在 Django的 Wiki 里面看到了 <a href="http://code.djangoproject.com/wiki/CookBookShortcutsPageDecoratorSimple" target="_blank">更好的做法</a></p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render_to_response</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">RequestContext</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">render_to</span><span class="p">(</span><span class="n">tmpl</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">renderer</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+</span><span class='line'>        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+</span><span class='line'>            <span class="n">output</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+</span><span class='line'>            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+</span><span class='line'>                <span class="k">return</span> <span class="n">output</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="n">tmpl</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span>
+</span><span class='line'>                                      <span class="n">context_instance</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">wrapper</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">renderer</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">@</span><span class="nd">@render_to</span><span class="p">(</span><span class="s">&#39;home.html&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">home</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">{</span><span class="s">&#39;name&#39;</span> <span class="p">:</span> <span class="s">&#39;Jason Lee&#39;</span><span class="p">,</span><span class="s">&#39;sex&#39;</span><span class="p">:</span><span class="s">&#39;male&#39;</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2008-11-13 08:00:00 +0800" pubdate>2008-11-13</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/django/'>Django</a>, <a class='category' href='/blog/category/python/'>Python</a>, <a class='category' href='/blog/category/技巧/'>技巧</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/improvement-django-template-render';
+	var disqus_url = 'http://huacnlee.github.com/blog/improvement-django-template-render';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

@@ -1,0 +1,308 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>完美兼容FF与IE的列表写法 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="完美兼容FF与IE的列表写法 前几天朋友一直在搞这个列表的样式与兼容问题,有序列表可能是初学者最烦的问题,做出来总是不哪么顺心,今天我这里发一个我的写法,以下这些在Firefox IE7 IE6这三种浏览器下都完美兼容,没有一点差距,可以看一下CSS的写法.重点是CSS里面我标注红色哪一段, &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/ul-css-in-firefox">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">完美兼容FF与IE的列表写法</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>前几天朋友一直在搞这个列表的样式与兼容问题,有序列表可能是初学者最烦的问题,做出来总是不哪么顺心,今天我这里发一个我的写法,以下这些在Firefox IE7 IE6这三种浏览器下都完美兼容,没有一点差距,可以看一下CSS的写法.<br />重点是CSS里面我标注红色哪一段,其实就是Display:block这个东西,只要应用好了,就很少出现兼容性的问题.</p>
+
+<p>还有一点很重要,FF的UL与IE下的ul的margin值是不同的,所以,如果你不给ul设定margin的值的话,哪两个浏览器就会有出入,所以最好的办法就是给ul的margin写上值就没有问题了.</p>
+
+<h3>HTML代码:</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;div&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;ul&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>全美各媒体测试报告倾巢出动<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>非美国公民无缘iPhone<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>讨论:报纸还能活多久<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>[图]江民KV系列26日升级后出现系统崩溃问题<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>iPhone将能与微软Exchange Server互联<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>iPhone将能与微软Exchange Server互联<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>iPhone将能与微软Exchange Server互联<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>iPhone将能与微软Exchange Server互联<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/ul&gt;</span>
+</span><span class='line'><span class="nt">&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>CSS代码:</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">body</span><span class="p">{</span>
+</span><span class='line'>  <span class="k">background</span><span class="o">:</span><span class="m">#EEE</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">text-align</span><span class="o">:</span><span class="k">center</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">font-family</span><span class="o">:</span><span class="err">宋体</span><span class="o">,</span> <span class="n">verdana</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">font-size</span><span class="o">:</span><span class="m">12px</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nc">.item</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">margin</span><span class="o">:</span><span class="m">40px</span> <span class="k">auto</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">background</span><span class="o">:</span><span class="m">#FFF</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">border</span><span class="o">:</span><span class="m">1px</span> <span class="k">solid</span> <span class="m">#CCC</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">width</span><span class="o">:</span><span class="m">250px</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">padding</span><span class="o">:</span><span class="m">8px</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">text-align</span><span class="o">:</span><span class="k">left</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nc">.item</span> <span class="nt">ul</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">margin</span><span class="o">:</span><span class="m">0</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">padding</span><span class="o">:</span><span class="m">0</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">list-style-type</span><span class="o">:</span><span class="k">none</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">border</span><span class="o">:</span><span class="m">1px</span> <span class="k">solid</span> <span class="m">#F0F0F0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nc">.item</span> <span class="nt">ul</span> <span class="nt">li</span> <span class="p">{</span> <span class="k">margin</span><span class="o">:</span><span class="m">0</span><span class="p">;</span><span class="k">padding</span><span class="o">:</span><span class="m">0</span><span class="p">;}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nc">.item</span> <span class="nt">ul</span> <span class="nt">li</span> <span class="nt">a</span><span class="nd">:link</span><span class="o">,</span><span class="nc">.item</span> <span class="nt">ul</span> <span class="nt">li</span> <span class="nt">a</span><span class="nd">:visited</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">width</span><span class="o">:</span><span class="m">100</span><span class="o">%</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">background</span><span class="o">:</span><span class="m">#F5F5F5</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">display</span><span class="o">:</span><span class="k">block</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">line-height</span><span class="o">:</span><span class="m">22px</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">border-bottom</span><span class="o">:</span><span class="m">1px</span> <span class="k">solid</span> <span class="m">#F0F0F0</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">color</span><span class="o">:</span><span class="nb">blue</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">text-decoration</span><span class="o">:</span><span class="k">none</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nc">.item</span> <span class="nt">ul</span> <span class="nt">li</span> <span class="nt">a</span><span class="nd">:actived</span> <span class="p">{</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nc">.item</span> <span class="nt">ul</span> <span class="nt">li</span> <span class="nt">a</span><span class="nd">:hover</span><span class="p">{</span>
+</span><span class='line'>  <span class="k">background</span><span class="o">:</span><span class="m">#FFF</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://www.cnblogs.com/images/cnblogs_com/huacn/Ul_Li_listStyle_WebStand.PNG" border="0" /></p>
+
+<p>演示地址: <a href="http://www.wathon.com/opensource/xhtml/liststyle.html" target="_blank">http://www.wathon.com/opensource/xhtml/liststyle.html</a></p>
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2008-04-24 08:17:00 +0800" pubdate>2008-04-24</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/css/'>CSS</a>, <a class='category' href='/blog/category/web标准/'>Web标准</a>, <a class='category' href='/blog/category/前端/'>前端</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/ul-css-in-firefox';
+	var disqus_url = 'http://huacnlee.github.com/blog/ul-css-in-firefox';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

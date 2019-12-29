@@ -1,0 +1,201 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>腾讯社区开放平台 SDK for Ruby - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="腾讯社区开放平台 SDK for Ruby 腾讯终于开放平台了，期盼了很久。 正准备试试在目前的项目中于它整合，却发现木有 SDK for Ruby 的&#8230;下载了官方提供的 SDK(php 的)，看了一下，就只是简单的 curl 调用远程地址获得 JSON 数据而已，代码量也不多， &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/tencent-qq-opensns-sdk-for-ruby">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">腾讯社区开放平台 SDK for Ruby</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>腾讯终于开放平台了，期盼了很久。</p>
+
+
+<p>正准备试试在目前的项目中于它整合，却发现木有 SDK for Ruby 的&#8230;下载了官方提供的 <a href="http://wiki.opensns.qq.com/wiki/SDK%E4%B8%8B%E8%BD%BD" target="_blank">SDK</a>(php 的)，看了一下，就只是简单的 curl 调用远程地址获得 JSON 数据而已，代码量也不多，于是自己做了一个 for Ruby 的类库，功能接口基本等于从 php 那个 SDK 翻译过来的，我已经对里面实现的方法进行了测试，并成功的获得了返回结果。</p>
+
+
+<p>如果你也正准备用&nbsp;<strong><a href="http://opensns.qq.com/" target="_blank">腾讯开放平台</a> </strong>，可以试试这个东西。</p>
+
+
+<h2>项目地址</h2>
+
+<p><a href="http://github.com/huacnlee/qq-pengyou">http://github.com/huacnlee/qq-pengyou</a></p>
+
+<h2>文档</h2>
+
+<p><a href="http://rdoc.info/github/huacnlee/qq-pengyou/master/frames">http://rdoc.info/github/huacnlee/qq-pengyou/master/frames</a></p>
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2010-09-17 11:00:00 +0800" pubdate>2010-09-17</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/ruby/'>Ruby</a>, <a class='category' href='/blog/category/qq-pengyou/'>qq-pengyou</a>, <a class='category' href='/blog/category/开源/'>开源</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/tencent-qq-opensns-sdk-for-ruby';
+	var disqus_url = 'http://huacnlee.github.com/blog/tencent-qq-opensns-sdk-for-ruby';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

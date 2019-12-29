@@ -1,0 +1,455 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Python IDLE 代码高亮主题 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Python IDLE 代码高亮主题 最近在看Python，先用着IDLE这个简单点的开发工具，今天从网上找到了IDLE的代码主题配置文件地址，于是从一个之前喜欢的网站 http://pastie.caboo.se/ 里面仿了几个风格。 效果图： &nbsp; 使用方法： 请打开C盘我的 C:\ &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/share-someting-python-idle-hightlight-theme">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Python IDLE 代码高亮主题</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>最近在看Python，先用着<span style="color: #008000;">IDLE</span>这个简单点的开发工具，今天从网上找到了IDLE的<span style="color: #008000;">代码主题</span>配置文件地址，于是从一个之前喜欢的网站 <a href="http://pastie.caboo.se/" target="_blank">http://pastie.caboo.se/</a> 里面仿了几个风格。</p>
+
+
+<p>效果图：</p>
+
+
+<p>&nbsp;<img src="http://pic.yupoo.com/huacn/30484575781b/r16n6zz3.jpg" border="0" alt="blackboard" /></p>
+
+
+<p><img src="http://pic.yupoo.com/huacn/62642575781a/vbruhz74.jpg" border="0" alt="cobalt" width="581" height="512" /></p>
+
+
+<p><img src="http://pic.yupoo.com/huacn/09789575781a/ay5hpzht.jpg" border="0" /></p>
+
+
+<p><img src="http://pic.yupoo.com/huacn/42135575781a/sqg29jg3.jpg" border="0" alt="twilight" width="581" height="512" /></p>
+
+
+<p>使用方法：</p>
+
+
+<ol>
+<li>请打开C盘我的 <span style="color: #008000;">C:\Documents and Settings\你的用户名&#46;idlerc</span>&nbsp; 文件夹</li>
+<li>里面会有一个&nbsp; <span style="color: #ea145d;"><span style="color: #008000;">config-highlight.cfg</span> <span style="color: #000000;">如果没有请自已创建一个</span></span></li>
+<li><span style="color: #000000;">将下面的代码放到 </span><span style="color: #000000;"><span style="color: #008000;">config-highlight.cfg</span> 里面，并重启IDLE</span></li>
+<li><span style="color: #000000;">这下在IDLE的设置</span><span style="color: #000000;">highlight项里面就有几个主题了</span></li>
+</ol>
+
+
+<h2>配置文件：</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+</pre></td><td class='code'><pre><code class='ini'><span class='line'><span class="k">[blackboard]</span>
+</span><span class='line'><span class="na">keyword-background</span> <span class="o">=</span> <span class="s">#0C1021</span>
+</span><span class='line'><span class="na">definition-foreground</span> <span class="o">=</span> <span class="s">#D63A1B</span>
+</span><span class='line'><span class="na">error-foreground</span> <span class="o">=</span> <span class="s">#ff0000</span>
+</span><span class='line'><span class="na">string-background</span> <span class="o">=</span> <span class="s">#0C1021</span>
+</span><span class='line'><span class="na">keyword-foreground</span> <span class="o">=</span> <span class="s">#FBDE2D</span>
+</span><span class='line'><span class="na">hilite-foreground</span> <span class="o">=</span> <span class="s">#000000</span>
+</span><span class='line'><span class="na">comment-background</span> <span class="o">=</span> <span class="s">#0C1021</span>
+</span><span class='line'><span class="na">hit-foreground</span> <span class="o">=</span> <span class="s">#ffffff</span>
+</span><span class='line'><span class="na">builtin-background</span> <span class="o">=</span> <span class="s">#0C1021</span>
+</span><span class='line'><span class="na">stdout-foreground</span> <span class="o">=</span> <span class="s">#eeeeee</span>
+</span><span class='line'><span class="na">cursor-foreground</span> <span class="o">=</span> <span class="s">#ffcc00</span>
+</span><span class='line'><span class="na">break-background</span> <span class="o">=</span> <span class="s">#ffff55</span>
+</span><span class='line'><span class="na">comment-foreground</span> <span class="o">=</span> <span class="s">#505050</span>
+</span><span class='line'><span class="na">hilite-background</span> <span class="o">=</span> <span class="s">gray</span>
+</span><span class='line'><span class="na">definition-background</span> <span class="o">=</span> <span class="s">#0C1021</span>
+</span><span class='line'><span class="na">stderr-background</span> <span class="o">=</span> <span class="s">#0C1021</span>
+</span><span class='line'><span class="na">hit-background</span> <span class="o">=</span> <span class="s">#0C1021</span>
+</span><span class='line'><span class="na">console-foreground</span> <span class="o">=</span> <span class="s">#87ceeb</span>
+</span><span class='line'><span class="na">normal-background</span> <span class="o">=</span> <span class="s">#0C1021</span>
+</span><span class='line'><span class="na">builtin-foreground</span> <span class="o">=</span> <span class="s">#fd9902</span>
+</span><span class='line'><span class="na">stdout-background</span> <span class="o">=</span> <span class="s">#0C1021</span>
+</span><span class='line'><span class="na">console-background</span> <span class="o">=</span> <span class="s">#0C1021</span>
+</span><span class='line'><span class="na">stderr-foreground</span> <span class="o">=</span> <span class="s">#ff3e40</span>
+</span><span class='line'><span class="na">normal-foreground</span> <span class="o">=</span> <span class="s">#F8F8F8</span>
+</span><span class='line'><span class="na">string-foreground</span> <span class="o">=</span> <span class="s">#61CE3C</span>
+</span><span class='line'><span class="na">break-foreground</span> <span class="o">=</span> <span class="s">black</span>
+</span><span class='line'><span class="na">error-background</span> <span class="o">=</span> <span class="s">#000000</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">[twilight]</span>
+</span><span class='line'><span class="na">keyword-background</span> <span class="o">=</span> <span class="s">#141414</span>
+</span><span class='line'><span class="na">definition-foreground</span> <span class="o">=</span> <span class="s">#c86428</span>
+</span><span class='line'><span class="na">error-foreground</span> <span class="o">=</span> <span class="s">#ff0000</span>
+</span><span class='line'><span class="na">string-background</span> <span class="o">=</span> <span class="s">#141414</span>
+</span><span class='line'><span class="na">keyword-foreground</span> <span class="o">=</span> <span class="s">#c2964b</span>
+</span><span class='line'><span class="na">hilite-foreground</span> <span class="o">=</span> <span class="s">#00ffff</span>
+</span><span class='line'><span class="na">comment-background</span> <span class="o">=</span> <span class="s">#141414</span>
+</span><span class='line'><span class="na">hit-foreground</span> <span class="o">=</span> <span class="s">#ffffff</span>
+</span><span class='line'><span class="na">builtin-background</span> <span class="o">=</span> <span class="s">#141414</span>
+</span><span class='line'><span class="na">stdout-foreground</span> <span class="o">=</span> <span class="s">#eeeeee</span>
+</span><span class='line'><span class="na">cursor-foreground</span> <span class="o">=</span> <span class="s">#ffcc00</span>
+</span><span class='line'><span class="na">break-background</span> <span class="o">=</span> <span class="s">#ffff55</span>
+</span><span class='line'><span class="na">comment-foreground</span> <span class="o">=</span> <span class="s">#524d53</span>
+</span><span class='line'><span class="na">hilite-background</span> <span class="o">=</span> <span class="s">#0000a0</span>
+</span><span class='line'><span class="na">definition-background</span> <span class="o">=</span> <span class="s">#141414</span>
+</span><span class='line'><span class="na">stderr-background</span> <span class="o">=</span> <span class="s">#141414</span>
+</span><span class='line'><span class="na">hit-background</span> <span class="o">=</span> <span class="s">#141414</span>
+</span><span class='line'><span class="na">console-foreground</span> <span class="o">=</span> <span class="s">#87ceeb</span>
+</span><span class='line'><span class="na">normal-background</span> <span class="o">=</span> <span class="s">#141414</span>
+</span><span class='line'><span class="na">builtin-foreground</span> <span class="o">=</span> <span class="s">#ce3e24</span>
+</span><span class='line'><span class="na">stdout-background</span> <span class="o">=</span> <span class="s">#141414</span>
+</span><span class='line'><span class="na">console-background</span> <span class="o">=</span> <span class="s">#141414</span>
+</span><span class='line'><span class="na">stderr-foreground</span> <span class="o">=</span> <span class="s">#ff3e40</span>
+</span><span class='line'><span class="na">normal-foreground</span> <span class="o">=</span> <span class="s">#FFFFFF</span>
+</span><span class='line'><span class="na">string-foreground</span> <span class="o">=</span> <span class="s">#61CE3C</span>
+</span><span class='line'><span class="na">break-foreground</span> <span class="o">=</span> <span class="s">black</span>
+</span><span class='line'><span class="na">error-background</span> <span class="o">=</span> <span class="s">#000000</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">[desert]</span>
+</span><span class='line'><span class="na">keyword-background</span> <span class="o">=</span> <span class="s">#333333</span>
+</span><span class='line'><span class="na">definition-foreground</span> <span class="o">=</span> <span class="s">#98fb98</span>
+</span><span class='line'><span class="na">error-foreground</span> <span class="o">=</span> <span class="s">#ff0000</span>
+</span><span class='line'><span class="na">string-background</span> <span class="o">=</span> <span class="s">#333333</span>
+</span><span class='line'><span class="na">keyword-foreground</span> <span class="o">=</span> <span class="s">#cc6600</span>
+</span><span class='line'><span class="na">hilite-foreground</span> <span class="o">=</span> <span class="s">#000000</span>
+</span><span class='line'><span class="na">comment-background</span> <span class="o">=</span> <span class="s">#333333</span>
+</span><span class='line'><span class="na">hit-foreground</span> <span class="o">=</span> <span class="s">#ffffff</span>
+</span><span class='line'><span class="na">builtin-background</span> <span class="o">=</span> <span class="s">#333333</span>
+</span><span class='line'><span class="na">stdout-foreground</span> <span class="o">=</span> <span class="s">#eeeeee</span>
+</span><span class='line'><span class="na">cursor-foreground</span> <span class="o">=</span> <span class="s">#ffcc00</span>
+</span><span class='line'><span class="na">break-background</span> <span class="o">=</span> <span class="s">#ffff55</span>
+</span><span class='line'><span class="na">comment-foreground</span> <span class="o">=</span> <span class="s">#87ceeb</span>
+</span><span class='line'><span class="na">hilite-background</span> <span class="o">=</span> <span class="s">gray</span>
+</span><span class='line'><span class="na">definition-background</span> <span class="o">=</span> <span class="s">#333333</span>
+</span><span class='line'><span class="na">stderr-background</span> <span class="o">=</span> <span class="s">#333333</span>
+</span><span class='line'><span class="na">hit-background</span> <span class="o">=</span> <span class="s">#333333</span>
+</span><span class='line'><span class="na">console-foreground</span> <span class="o">=</span> <span class="s">#87ceeb</span>
+</span><span class='line'><span class="na">normal-background</span> <span class="o">=</span> <span class="s">#333333</span>
+</span><span class='line'><span class="na">builtin-foreground</span> <span class="o">=</span> <span class="s">#519e51</span>
+</span><span class='line'><span class="na">stdout-background</span> <span class="o">=</span> <span class="s">#333333</span>
+</span><span class='line'><span class="na">console-background</span> <span class="o">=</span> <span class="s">#333333</span>
+</span><span class='line'><span class="na">stderr-foreground</span> <span class="o">=</span> <span class="s">#ff3e40</span>
+</span><span class='line'><span class="na">normal-foreground</span> <span class="o">=</span> <span class="s">#f0e68c</span>
+</span><span class='line'><span class="na">string-foreground</span> <span class="o">=</span> <span class="s">#ffa0a0</span>
+</span><span class='line'><span class="na">break-foreground</span> <span class="o">=</span> <span class="s">black</span>
+</span><span class='line'><span class="na">error-background</span> <span class="o">=</span> <span class="s">#000000</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">[cobalt]</span>
+</span><span class='line'><span class="na">keyword-background</span> <span class="o">=</span> <span class="s">#001B33</span>
+</span><span class='line'><span class="na">definition-foreground</span> <span class="o">=</span> <span class="s">#FFDD11</span>
+</span><span class='line'><span class="na">error-foreground</span> <span class="o">=</span> <span class="s">#ff0000</span>
+</span><span class='line'><span class="na">string-background</span> <span class="o">=</span> <span class="s">#001B33</span>
+</span><span class='line'><span class="na">keyword-foreground</span> <span class="o">=</span> <span class="s">#FF7222</span>
+</span><span class='line'><span class="na">hilite-foreground</span> <span class="o">=</span> <span class="s">#00ffff</span>
+</span><span class='line'><span class="na">comment-background</span> <span class="o">=</span> <span class="s">#001B33</span>
+</span><span class='line'><span class="na">hit-foreground</span> <span class="o">=</span> <span class="s">#ffffff</span>
+</span><span class='line'><span class="na">builtin-background</span> <span class="o">=</span> <span class="s">#001B33</span>
+</span><span class='line'><span class="na">stdout-foreground</span> <span class="o">=</span> <span class="s">#eeeeee</span>
+</span><span class='line'><span class="na">cursor-foreground</span> <span class="o">=</span> <span class="s">#ffcc00</span>
+</span><span class='line'><span class="na">break-background</span> <span class="o">=</span> <span class="s">#ffff55</span>
+</span><span class='line'><span class="na">comment-foreground</span> <span class="o">=</span> <span class="s">#007699</span>
+</span><span class='line'><span class="na">hilite-background</span> <span class="o">=</span> <span class="s">#0000a0</span>
+</span><span class='line'><span class="na">definition-background</span> <span class="o">=</span> <span class="s">#001B33</span>
+</span><span class='line'><span class="na">stderr-background</span> <span class="o">=</span> <span class="s">#001B33</span>
+</span><span class='line'><span class="na">hit-background</span> <span class="o">=</span> <span class="s">#001B33</span>
+</span><span class='line'><span class="na">console-foreground</span> <span class="o">=</span> <span class="s">#87ceeb</span>
+</span><span class='line'><span class="na">normal-background</span> <span class="o">=</span> <span class="s">#001B33</span>
+</span><span class='line'><span class="na">builtin-foreground</span> <span class="o">=</span> <span class="s">#D40E36</span>
+</span><span class='line'><span class="na">stdout-background</span> <span class="o">=</span> <span class="s">#001B33</span>
+</span><span class='line'><span class="na">console-background</span> <span class="o">=</span> <span class="s">#001B33</span>
+</span><span class='line'><span class="na">stderr-foreground</span> <span class="o">=</span> <span class="s">#ff3e40</span>
+</span><span class='line'><span class="na">normal-foreground</span> <span class="o">=</span> <span class="s">#F8F8F8</span>
+</span><span class='line'><span class="na">string-foreground</span> <span class="o">=</span> <span class="s">#61CE3C</span>
+</span><span class='line'><span class="na">break-foreground</span> <span class="o">=</span> <span class="s">black</span>
+</span><span class='line'><span class="na">error-background</span> <span class="o">=</span> <span class="s">#000000</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>其它说明：</h2>
+
+<ul>
+<li>另外我这里使用的字体是 <span style="color: #0000ff;"><strong>monaco</strong></span> windows系统是没有自带的，请<a href="http://www.webdevkungfu.com/textmate-envy-aka-monaco-font-for-windows/" target="_blank">点击这里下载</a>。</li>
+</ul>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2008-04-26 07:52:00 +0800" pubdate>2008-04-26</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/idle/'>IDLE</a>, <a class='category' href='/blog/category/python/'>Python</a>, <a class='category' href='/blog/category/texteditor/'>TextEditor</a>, <a class='category' href='/blog/category/主题/'>主题</a>, <a class='category' href='/blog/category/技巧/'>技巧</a>, <a class='category' href='/blog/category/设计/'>设计</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/share-someting-python-idle-hightlight-theme';
+	var disqus_url = 'http://huacnlee.github.com/blog/share-someting-python-idle-hightlight-theme';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

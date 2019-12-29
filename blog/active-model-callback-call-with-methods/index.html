@@ -1,0 +1,246 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Rails ActiveModel callback 那些会调用 callback 那些不会 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Rails ActiveModel callback 那些会调用 callback 那些不会 今天才关注到这个文档，以前只是有个大概的印象&#8230; Rails Model 有许多 callback 事件 (before_save, after_save, before_create, &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/active-model-callback-call-with-methods">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Rails ActiveModel callback 那些会调用 callback 那些不会</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>今天才关注到这个文档，以前只是有个大概的印象&#8230;</p>
+
+<p>Rails Model 有许多 callback 事件 (<code>before_save</code>, <code>after_save</code>, <code>before_create</code>, <code>after_create</code> &#8230;)，可以让我们在数据更新的前后定义一些动作.
+比如我们偶尔会这样：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
+</span><span class='line'>  <span class="n">before_create</span> <span class="k">do</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">slug</span> <span class="o">=</span> <span class="nb">self</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">safe_slug</span> <span class="k">if</span> <span class="nb">self</span><span class="o">.</span><span class="n">slug</span><span class="o">.</span><span class="n">blank?</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>但是有一些动作是不会执行 callback 事件的，如下面的列表</p>
+
+<!-- more -->
+
+
+<h2>会调用 callback</h2>
+
+<ul>
+<li>create</li>
+<li>create!</li>
+<li>decrement!</li>
+<li>destroy</li>
+<li>destroy_all</li>
+<li>increment!</li>
+<li>save</li>
+<li>save!</li>
+<li>save(:validate => false)</li>
+<li>toggle!</li>
+<li>update</li>
+<li>update_attribute</li>
+<li>update_attributes</li>
+<li>update_attributes!</li>
+<li>valid?</li>
+</ul>
+
+
+<h2>而下面这些是不会调用 callback 方法的</h2>
+
+<ul>
+<li>decrement</li>
+<li>decrement_counter</li>
+<li>delete</li>
+<li>delete_all</li>
+<li>find_by_sql</li>
+<li>increment</li>
+<li>increment_counter</li>
+<li>toggle</li>
+<li>touch</li>
+<li>update_column</li>
+<li>update_all</li>
+<li>update_counters</li>
+</ul>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2012-02-28 14:12:00 +0800" pubdate>2012-02-28</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/activemodel/'>ActiveModel</a>, <a class='category' href='/blog/category/callback/'>Callback</a>, <a class='category' href='/blog/category/rails/'>Rails</a>, <a class='category' href='/blog/category/ruby/'>Ruby</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/active-model-callback-call-with-methods';
+	var disqus_url = 'http://huacnlee.github.com/blog/active-model-callback-call-with-methods';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

@@ -1,0 +1,231 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>搭建 nginx 反向代理，提高 gem 的安装速度 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="搭建 nginx 反向代理，提高 gem 的安装速度 最近时常遇到 Gem 安装东西的时候安装失败或异常缓慢，我试着用 &#8211;debug 参数查看，结果发现原来是 Rubygems 指向的亚马逊服务器偶尔回遇到被墙掉的地址，而有些服务器是间歇性的连接失败或者丢包严重。 结果自然会导致 &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/using-nginx-proxy-to-mirror-rubygem-org">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">搭建 nginx 反向代理，提高 gem 的安装速度</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>最近时常遇到 Gem 安装东西的时候安装失败或异常缓慢，我试着用 &#8211;debug 参数查看，结果发现原来是 <a href="http://rubygems.org" target="_blank">Rubygems</a> 指向的亚马逊服务器偶尔回遇到被墙掉的地址，而有些服务器是间歇性的连接失败或者丢包严重。</p>
+
+
+<p>结果自然会导致 gem 安装过程起慢。FUCK THE GFW</p>
+
+
+<p>难道我们只能这样忍受么？当然不能！！</p>
+
+
+<p>之前曾想过在国内搞个 <a href="http://rubygems.org" target="_blank">rubygems.org</a> 以及后面 gem 包的完整镜像站，我试过用官方提供的 <a href="https://github.com/rubygems/rubygems-mirror" target="_blank">rubygems-mirror</a>&nbsp;结果发现需要同步的东西太多了，在&nbsp;<a href="http://zheye.org" target="_blank">者也</a>&nbsp;那台服务器上面跑了两天还是没同步完（或许也是因为墙的原因），最后只好放弃。</p>
+
+
+<p>今天我又想到了另外个方式，通过在一台国外的 VPS 主机上面，用 <a href="http://nginx.org" target="_blank">Nginx</a> 反向代理到 rubygems.org 以及它的其他域名，然后本地改 hosts 文件指向那台主机不就能解决连接失败和丢包的问题么！</p>
+
+
+<p>于是动手在我的一台一直空着没用的 VPS 上面配置上了，结果表明效果确实不错，当年的安装速度又回来了！！</p>
+
+
+<p>如果你想用我这个跳板，可以修改 hosts 文件加入:</p>
+
+
+<!-- more -->
+
+
+<pre style="margin:0;background:#F0F0F0;padding:4px 10px;border: 1px solid #dddddd;"><span style="text-decoration: line-through;">184.82.37.134 rubygems.org<br />184.82.37.134 production.cf.rubygems.org<br />184.82.37.134 production.s3.rubygems.org</span></pre>
+
+
+<div><br /></div>
+
+
+<div>然后 gem install 的时候，访问 http://rubygems.org 的时候就会经过我那个服务器，当然这台不敢保证能有多稳定，建议您有国外 VPS 的话，还是自己搭建一个。</div>
+
+
+<div><br /></div>
+
+
+<div>自己搭建代理，Nginx 配置信息可以参考这个文件:</div>
+
+
+<div>
+<ul>
+<li><a href="https://gist.github.com/1216602" target="_blank">https://gist.github.com/1216602</a></li>
+</ul>
+<div><span style="font-family: mceinline;">PS: 那个好心人在国内搞个 Rubygems 的镜像吧，就像 mirrors.163.com 和 mirrors.sohu.com 那样。</span></div>
+</div>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2011-09-14 22:24:00 +0800" pubdate>2011-09-14</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/nginx/'>Nginx</a>, <a class='category' href='/blog/category/ruby/'>Ruby</a>, <a class='category' href='/blog/category/rubygems/'>Rubygems</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/using-nginx-proxy-to-mirror-rubygem-org';
+	var disqus_url = 'http://huacnlee.github.com/blog/using-nginx-proxy-to-mirror-rubygem-org';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

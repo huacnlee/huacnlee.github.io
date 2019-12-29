@@ -1,0 +1,325 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Mongoid 没有性能问题 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Mongoid 没有性能问题 昨天台湾的朋友发布了一篇将 ruby-china 代码迁移成从 Mongoid 迁移成 ActiveRecord 的文章，其中有提到 Mongoid 效率的问题。我认为多少有些对于 Mongoid 的误解，所以在此撰写这篇文章做一些解释，以免大家误解 Mongoid &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/ahout-mongoid-performance">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Mongoid 没有性能问题</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>昨天台湾的朋友发布了一篇将 <a href="http://github.com/huacnlee/ruby-china">ruby-china</a> 代码迁移成从 <a href="http://blog.yorkxin.org/2012/02/21/migrate-from-mongoid-to-activerecord/">Mongoid 迁移成 ActiveRecord</a> 的文章，其中有提到 Mongoid 效率的问题。我认为多少有些对于 Mongoid 的误解，所以在此撰写这篇文章做一些解释，以免大家误解 Mongoid 效率不好。</p>
+
+<h2>对比两个不同版本的差距</h2>
+
+<p>我昨晚特意下载了他们重构成 MySQL 版本的 <a href="http://github.com/rubytaiwan/ruby-taiwan">ruby-taiwan</a> 的代码与目前 <a href="http://github.com/huacnlee/ruby-china">ruby-china</a> 的代码在开发环境下面模拟数据做了一下对比.</p>
+
+<h3>数据场景</h3>
+
+<ul>
+<li>MongoDb 的数据基本和目前 <a href="http://ruby-china.org">Ruby China</a> 上面类似，而 MySQL 的测试数据只是简单的添加了足够的条数。</li>
+<li>开发环境下面，没有开启任何 cache</li>
+<li>ruby-1.9.3-p0-falcon</li>
+</ul>
+
+
+<h3>对比结果:</h3>
+
+<ul>
+<li>话题列表 /topics (15个话题)</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># ActiveRecord</span>
+</span><span class='line'>Completed 200 OK in 179ms <span class="o">(</span>Views: 169.0ms | ActiveRecord: 9.2ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 177ms <span class="o">(</span>Views: 167.4ms | ActiveRecord: 8.1ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 116ms <span class="o">(</span>Views: 105.5ms | ActiveRecord: 8.3ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 110ms <span class="o">(</span>Views: 99.2ms | ActiveRecord: 9.6ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 191ms <span class="o">(</span>Views: 181.5ms | ActiveRecord: 8.5ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 192ms <span class="o">(</span>Views: 180.7ms | ActiveRecord: 10.2ms<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Mongoid</span>
+</span><span class='line'>Completed 200 OK in 192ms <span class="o">(</span>Views: 117.4ms | Mongo: 73.8ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 378ms <span class="o">(</span>Views: 298.9ms | Mongo: 77.8ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 214ms <span class="o">(</span>Views: 138.7ms | Mongo: 73.9ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 185ms <span class="o">(</span>Views: 120.9ms | Mongo: 63.0ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 186ms <span class="o">(</span>Views: 122.2ms | Mongo: 63.0ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 207ms <span class="o">(</span>Views: 140.1ms | Mongo: 66.0ms | Solr: 0.0ms<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>话题查看页面 /topics/:id <em>27条回复的场景</em></li>
+</ul>
+
+
+<p>由于两边 Markdown 的算法不同，我把 Markdown 功能关闭了的，其他逻辑几乎相同</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># ActiveRecord</span>
+</span><span class='line'>Completed 200 OK in 283ms <span class="o">(</span>Views: 263.2ms | ActiveRecord: 5.5ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 282ms <span class="o">(</span>Views: 260.4ms | ActiveRecord: 5.8ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 284ms <span class="o">(</span>Views: 262.6ms | ActiveRecord: 5.3ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 283ms <span class="o">(</span>Views: 262.7ms | ActiveRecord: 5.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 191ms <span class="o">(</span>Views: 170.3ms | ActiveRecord: 5.1ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 195ms <span class="o">(</span>Views: 174.5ms | ActiveRecord: 5.3ms<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Mongoid</span>
+</span><span class='line'>Completed 200 OK in 119ms <span class="o">(</span>Views: 93.6ms | Mongo: 5.5ms | Solr: 3.2ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 176ms <span class="o">(</span>Views: 150.8ms | Mongo: 6.0ms | Solr: 3.3ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 115ms <span class="o">(</span>Views: 90.9ms | Mongo: 6.6ms | Solr: 3.4ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 115ms <span class="o">(</span>Views: 91.9ms | Mongo: 6.4ms | Solr: 3.7ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 119ms <span class="o">(</span>Views: 93.4ms | Mongo: 5.0ms | Solr: 6.1ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 121ms <span class="o">(</span>Views: 97.9ms | Mongo: 5.6ms | Solr: 3.3ms<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上两个页面的测试数据表示，ActiveRecord 并没有 <a href="http://twitter.com/xdite">@xdite</a> 声称的从 400ms 减少到 90ms 这么大的差距，虽然 Mongoid 确实是有一些慢，但是差距实际上是不大的。</p>
+
+<h2>实际 ruby-china.org 产品环境的运行数据 (有 cache)</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>Started GET <span class="s2">&quot;/topics/777&quot;</span> <span class="o">(</span>58条回复<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 107ms <span class="o">(</span>Views: 82.9ms | Mongo: 23.3ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 121ms <span class="o">(</span>Views: 33.7ms | Mongo: 27.5ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 135ms <span class="o">(</span>Views: 48.4ms | Mongo: 26.8ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>Started GET <span class="s2">&quot;/topics&quot;</span>
+</span><span class='line'>Completed 200 OK in 104ms <span class="o">(</span>Views: 80.5ms | Mongo: 22.1ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 108ms <span class="o">(</span>Views: 83.9ms | Mongo: 22.7ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 107ms <span class="o">(</span>Views: 82.9ms | Mongo: 22.5ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 143ms <span class="o">(</span>Views: 92.2ms | Mongo: 49.1ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 108ms <span class="o">(</span>Views: 84.5ms | Mongo: 22.3ms | Solr: 0.0ms<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>之前慢的原因解释</h2>
+
+<p>之前 ruby-china 某个时期在开发环境下面确实非常慢，但那个原因是下面几个</p>
+
+<ol>
+<li><a href="https://github.com/mislav/will_paginate">will_paginate</a> 由于不支持 MongoDb 的分页方式，所以每次分页都是 <code>Model.all</code> 以后，以 Array 来分页的，所以这个是之前性能的罪魁祸首,<a href="https://github.com/lucasas/will_paginate_mongoid">参见</a>；</li>
+<li>Mongoid 的 eager loading 需要手动配置 <code>identity_map_enabled: true</code> 才会有效果；</li>
+<li>之前 Rails 3.1 环境确实比较慢，已进入 Rails 3.2 已经感觉是非常明显的。</li>
+</ol>
+
+
+<h2>总结</h2>
+
+<p>总的来说，MongoDb 是非常不错的，而 Mongoid 长远来看也是值得使用的 Gem，虽然目前阶段它还不够完美，但是也不至于我们将他抛弃。
+我目前对于 MongoDb 的 <code>schema-less</code> 特性目前也是我比较困扰的地方，数据结构变化需要非常小心，这个需要经验。
+请不要误解 Mongoid 有性能问题。</p>
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2012-02-22 10:15:00 +0800" pubdate>2012-02-22</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/activerecord/'>ActiveRecord</a>, <a class='category' href='/blog/category/mongodb/'>MongoDB</a>, <a class='category' href='/blog/category/mysql/'>MySQL</a>, <a class='category' href='/blog/category/rails/'>Rails</a>, <a class='category' href='/blog/category/ruby/'>Ruby</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/ahout-mongoid-performance';
+	var disqus_url = 'http://huacnlee.github.com/blog/ahout-mongoid-performance';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

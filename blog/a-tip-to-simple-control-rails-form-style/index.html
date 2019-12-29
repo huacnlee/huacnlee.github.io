@@ -1,0 +1,272 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Rails 表单文本框或其他样式统一小技巧 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Rails 表单文本框或其他样式统一小技巧 我时长会苦恼，表单生成的时候需要对某些字段的文本框设定不同的长度，比如 Email，地址什么的要很长很长，而 姓名，邮编 之类的需要设置短的，还有一些多行的文本框需要设定一定的高宽。 以前我都是在 text_field 后面加 :style =&gt &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/a-tip-to-simple-control-rails-form-style">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Rails 表单文本框或其他样式统一小技巧</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>我时长会苦恼，表单生成的时候需要对某些字段的文本框设定不同的长度，比如 <code>Email，地址</code>什么的要很长很长，而 <code>姓名，邮编</code> 之类的需要设置短的，还有一些多行的文本框需要设定一定的高宽。</p>
+
+<p>以前我都是在 text_field 后面加 <code>:style =&gt; "width:100px"</code> 之类的参数，这样是可以设置，但是很土鳖！</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">simple_form_for</span><span class="p">(</span><span class="vi">@user</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">input</span> <span class="ss">:login</span><span class="p">,</span> <span class="ss">:input_html</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">:style</span> <span class="o">=&gt;</span> <span class="s2">&quot;width:100px&quot;</span> <span class="p">}</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">input</span> <span class="ss">:password</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">input</span> <span class="ss">:password_confirmation</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">input</span> <span class="ss">:email</span><span class="p">,</span> <span class="ss">:input_html</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">:style</span> <span class="o">=&gt;</span> <span class="s2">&quot;width:300px&quot;</span> <span class="p">}</span>  <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>大的问题还是有时候同样的一个表单有可能会出现在前台，后台，或者前台的好几个页面（某些页面需要的字段要少一些），这就得每个用到的地方都要设置 <code>:style</code> 及其土鳖，而且有时候还写出来不统一&#8230;</p>
+
+<hr />
+
+<h2>解决方法</h2>
+
+<p>我最近发现一个规律可以很好解决上面的难题&#8230;</p>
+
+<p>Rails 用 form_for (不管你是用 <a href="https://github.com/justinfrench/formtastic">Formtastic</a> 还是 <a href="https://github.com/plataformatec/simple_form">simple_form</a> 还是 Rails <a href="http://guides.rubyonrails.org/form_helpers.html">默认的</a> 生成表单以后每个表单会有一个固定的 class ，每个文本框会有固定的 id</p>
+
+<ul>
+<li>form 的 class 是根据 Model 名称转换而来的</li>
+<li>文本框的 id 是更具 Model + 字段名出来的</li>
+</ul>
+
+
+<p>比如这个例子</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">simple_form_for</span><span class="p">(</span><span class="vi">@user</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">inputs</span> <span class="ss">:login</span><span class="p">,</span> <span class="ss">:password</span><span class="p">,</span> <span class="ss">:password_confirmation</span><span class="p">,</span> <span class="ss">:email</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>会得到</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">&quot;/users&quot;</span> <span class="na">method=</span><span class="s">&quot;POST&quot;</span> <span class="na">class=</span><span class="s">&quot;user&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>   <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">name=</span><span class="s">&quot;user[login]&quot;</span> <span class="na">id=</span><span class="s">&quot;user_id&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>   <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">name=</span><span class="s">&quot;user[password]&quot;</span> <span class="na">id=</span><span class="s">&quot;user_password&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>   <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">name=</span><span class="s">&quot;user[password_confirmation]&quot;</span> <span class="na">id=</span><span class="s">&quot;user_password_confirmation&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>   <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">name=</span><span class="s">&quot;user[email]&quot;</span> <span class="na">id=</span><span class="s">&quot;user_email&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'><span class="nt">&lt;/form&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后，其实就只需要在 application.css 里面这么写，那么所有用到的表单都能正确的显示长度了（并且绝对靠谱！）</p>
+
+<p>application.scss</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">form</span><span class="nc">.user</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">input</span><span class="m">#user</span><span class="err">_</span><span class="n">login</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">input</span><span class="m">#user</span><span class="err">_</span><span class="n">password</span><span class="err">_</span><span class="n">confirmation</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">input</span><span class="m">#user</span><span class="err">_</span><span class="n">password</span> <span class="err">{</span> <span class="k">width</span><span class="o">:</span> <span class="m">100px</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>  <span class="nt">input</span><span class="nf">#user_email</span> <span class="p">{</span> <span class="k">width</span><span class="o">:</span><span class="m">200px</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'><span class="err">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>由于用了 form 打头，也就不用担心这么些会影响到其他地方的样式。
+以后再也不用把 simple_form 提供的 inputs 方法拆开来一个一个的写的，直接一个 <code>f.inputs :name, :login, :email</code> 搞定，一行多省事情啊！
+同时，这个方式你还可以写一个特别的样式，比如，让密码的 label 保持为红色等等。</p>
+
+<p>在 Ruby China 上面关于这个的讨论： <a href="http://ruby-china.org/topics/4972">http://ruby-china.org/topics/4972</a></p>
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2012-08-15 23:32:00 +0800" pubdate>2012-08-15</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/formtastic/'>Formtastic</a>, <a class='category' href='/blog/category/rails/'>Rails</a>, <a class='category' href='/blog/category/ruby/'>Ruby</a>, <a class='category' href='/blog/category/simple-form/'>simple_form</a>, <a class='category' href='/blog/category/技巧/'>技巧</a>, <a class='category' href='/blog/category/教程/'>教程</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/a-tip-to-simple-control-rails-form-style';
+	var disqus_url = 'http://huacnlee.github.com/blog/a-tip-to-simple-control-rails-form-style';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

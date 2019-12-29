@@ -1,0 +1,207 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>E-Texteditor for Ubuntu DEB 安装包 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="E-Texteditor for Ubuntu DEB 安装包 今天晚上重新安装了 Ubuntu Desktop 9.04 ，本来是准备测试 Redcar 的，从源代码编译安装是一件很痛苦的事情，漫长啊！Redcar目前的功能不怎么样，于是有试试 E-Texteditor，从 github &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/e-texteditor-for-ubuntu-deb-install-package">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">E-Texteditor for Ubuntu DEB 安装包</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>今天晚上重新安装了 Ubuntu Desktop 9.04 ，本来是准备测试 Redcar 的，从源代码编译安装是一件很痛苦的事情，漫长啊！Redcar目前的功能不怎么样，于是有试试 E-Texteditor，从 github 上面下载到了<a href="http://github.com/etexteditor/e/" target="_blank"> E-Texteditor 的源代码</a> 又是一个很漫长的过程，Redcar还好，因为是 Ruby 开发的，没多少编译，而 E-Texteditor 就长了，起码半个小时以上&#8230;最后郁闷的是差个文件，编译失败&#8230;
+最后没想到在 E-Texteditor 官方论坛 上面找解决办法的时候，尽然发现了一个编译好的 DEB 安装包，于是下载之&#8230;安装测试，成功了，哈哈</p>
+
+<p><a href="http://farm3.static.flickr.com/2666/3884167479_b6c6fe0a96_o.png" target="_blank"><img src="http://farm3.static.flickr.com/2666/3884167479_e337cfdd70.jpg" border="0" width="500" height="313" /></a></p>
+
+
+<!-- more -->
+
+
+<h2>那个论坛上面的下载地址慢，我转移到了这里：</h2>
+
+<p><a href="http://code.google.com/p/textmate-huacnlee/downloads/list">E-Texteditor for Ubuntu x86 deb package</a></p>
+
+<p>如果你是 64位系统的话，请移步这里：<a href="http://www.e-texteditor.com/forum/viewtopic.php?p=13379#13379">《binaries for linux》</a>
+另外，这个包是把 E-Texteditor 安装在<strong> /opt/e</strong> 里面的，如果想实现快捷打开的话，可以在 /usr/bin 下面建立一个连接如：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>sudo ln -s /opt/e/e /usr/bin/e
+</span><span class='line'><span class="nv">$ </span>e ./project
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2009-09-04 01:23:00 +0800" pubdate>2009-09-04</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/e-texteditor/'>E-Texteditor</a>, <a class='category' href='/blog/category/linux/'>Linux</a>, <a class='category' href='/blog/category/texteditor/'>TextEditor</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/e-texteditor-for-ubuntu-deb-install-package';
+	var disqus_url = 'http://huacnlee.github.com/blog/e-texteditor-for-ubuntu-deb-install-package';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

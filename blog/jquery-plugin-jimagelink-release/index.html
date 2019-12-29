@@ -1,0 +1,227 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>jQuery插件 jImageLink.js - 模拟yupoo的缩略图上的小图标效果 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="jQuery插件 jImageLink.js - 模拟yupoo的缩略图上的小图标效果 不知道大家有没有见过Yupoo照片列表里面的效果，当鼠标经过照片时会出现一个小图标，点击小图标时，就可以直接查看大图，它使用了Lightwindow这个JS. &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/jquery-plugin-jimagelink-release">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">jQuery插件 jImageLink.js - 模拟yupoo的缩略图上的小图标效果</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>不知道大家有没有见过<a href="http://huacn.yupoo.com/" target="_blank">Yupoo</a>照片列表里面的效果，当鼠标经过照片时会出现一个小图标，点击小图标时，就可以直接查看大图，它使用了<a href="http://www.stickmanlabs.com/lightwindow" target="_blank">Lightwindow</a>这个JS.</p>
+
+<p>像这种方式的体现有一个很大的好处就是用户可以点击图片的其它区域进入详细页面，也可以点击小图标，直接查看完整的图片。用户体验有有很大的提高。因为很多情况下，列表中的图片可能会引起用户想看看完整图片，或者说大图片的欲望，如果有这样的一个功能，哪就可以不影响现有功能情况下满足用户的这个&ldquo;欲望&rdquo;。</p>
+
+<p>今天我也弄了一个类似的功能，实现方式基本跟<a href="http://huacn.yupoo.com/" target="_blank">Yupoo</a>的一样，再把它弄也了jQuery插件，方便使用。</p>
+
+<h2>Yupoo 的效果图：</h2>
+
+<p>  <img src="/images/cnblogs_com/huacn/yupoo.albumslist.photo.PNG" border="0" /></p>
+
+<h2>我这个的效果：</h2>
+
+<p><img src="http://www.cnblogs.com/images/cnblogs_com/huacn/jquery.jimagelink.screenshoot.png" border="0" /></p>
+
+<h2>调用的时候只用这样一段代码：</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>  <span class="cm">/*</span>
+</span><span class='line'><span class="cm">      there is the jImageLink code</span>
+</span><span class='line'><span class="cm">   */</span>
+</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;a.imgLink&quot;</span><span class="p">).</span><span class="nx">jImageLink</span><span class="p">({</span>
+</span><span class='line'>      <span class="nx">iconClassName</span> <span class="o">:</span> <span class="s2">&quot;linkIcon&quot;</span><span class="p">,</span>        <span class="cm">/* 在这里写“小图标&quot;的样式，包括图片 */</span>
+</span><span class='line'>      <span class="nx">iconRel</span> <span class="o">:</span> <span class="s2">&quot;shadowbox&quot;</span><span class="p">,</span>            <span class="cm">/* 这里是Shadownbox 或 Lightwindow 这类JS用的 rel 属性定义,用过的朋友一定知道 */</span>
+</span><span class='line'>      <span class="nx">iconWidth</span> <span class="o">:</span> <span class="mi">14</span><span class="p">,</span>                    <span class="cm">/* 图标宽度 这里会影响小图标的位置，建议输入跟 iconClassName 这个样式里面的图标大小一样 */</span>
+</span><span class='line'>      <span class="nx">iconHeight</span> <span class="o">:</span> <span class="mi">14</span>                    <span class="cm">/* 图标高度 */</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>项目地址：<a href="http://code.google.com/p/jimagelink/" target="_blank">http://code.google.com/p/jimagelink/</a></p>
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2008-04-24 08:17:00 +0800" pubdate>2008-04-24</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/javascript/'>Javascript</a>, <a class='category' href='/blog/category/yupoo/'>Yupoo</a>, <a class='category' href='/blog/category/jimagelink/'>jImageLink</a>, <a class='category' href='/blog/category/jquery/'>jQuery</a>, <a class='category' href='/blog/category/开源/'>开源</a>, <a class='category' href='/blog/category/插件/'>插件</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/jquery-plugin-jimagelink-release';
+	var disqus_url = 'http://huacnlee.github.com/blog/jquery-plugin-jimagelink-release';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

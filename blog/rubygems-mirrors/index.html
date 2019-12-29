@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Rubygems 国内镜像服务器 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Rubygems 国内镜像服务器 今年下半年开始， rubygems.org 就开始因为 GFW 的原因倒是时常无法安装，再到后面根本就无法安装，之前我还有写过一篇《搭建 nginx 反向代理，提高 gem 的安装速度》，但是这样的作法无法保持长久，那些反向代理服务器都是个人VPS搭建， &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/rubygems-mirrors">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Rubygems 国内镜像服务器</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>今年下半年开始， rubygems.org 就开始因为 GFW 的原因倒是时常无法安装，再到后面根本就无法安装，之前我还有写过一篇《<a href="http://huacnlee.com/blog/using-nginx-proxy-to-mirror-rubygem-org" target="_blank" title="搭建 nginx 反向代理，提高 gem 的安装速度">搭建 nginx 反向代理，提高 gem 的安装速度</a>》，但是这样的作法无法保持长久，那些反向代理服务器都是个人VPS搭建，而且由于依然会访问 rubygems.org ，gem 的安装过程依然会很慢&#8230;</p>
+
+
+<p>半个月前就在 Ruby China 里面<a href="http://ruby-china.org/search?q=Gem+镜像" target="_blank">讨论</a>说要搞些国内的镜像服务器，结果因为中途遇到种种困难，一直到现在在解决，过程曲折啊，15W+ 的 gem 包还是 @<a href="http://twitter.com/zhuangbiaowei" target="_blank">zhuangbiaowei</a>&nbsp;帮忙下载，然后同步过来的。</p>
+
+
+<p>现在，它已经搞好了</p>
+
+
+<!-- more -->
+
+
+<p>地址: <a href="http://ruby.taobao.org" target="_blank">http://ruby.taobao.org</a></p>
+
+
+<p>以后这个服务将会一直有淘宝的人来维护下去（至少我还在的时候它一定能保持稳定）</p>
+
+
+<p>&nbsp;</p>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2011-12-23 17:34:00 +0800" pubdate>2011-12-23</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/gems/'>Gems</a>, <a class='category' href='/blog/category/ruby/'>Ruby</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/rubygems-mirrors';
+	var disqus_url = 'http://huacnlee.github.com/blog/rubygems-mirrors';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

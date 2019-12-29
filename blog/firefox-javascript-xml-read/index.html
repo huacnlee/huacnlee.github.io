@@ -1,0 +1,391 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Javascript 支持在 Firefox 下读取 XML 节点的方法 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Javascript 支持在 Firefox 下读取 XML 节点的方法 最近在修改项目的用到Ajax功能的页面，发现很多写法在Firefox下都存在问题，主要是因为当时开发时只在IE下测试通过就提交了，而Firefox的写法与IE有很大的区别，主大的问题是当在读取XML节点或子节点的内容时， &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/firefox-javascript-xml-read">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Javascript 支持在 Firefox 下读取 XML 节点的方法</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>最近在修改项目的用到<span style="font-weight: bold">Ajax功能</span>的页面，发现很多写法在<span style="font-weight: bold">Firefox</span>下都存在问题，主要是因为当时开发时只在IE下测试通过就提交了，而Firefox的写法与IE有很大的区别，主大的问题是当在读取<span style="font-weight: bold">XML节点</span>或子节点的内容时，IE下一般使用<span style="color: #000000"><span style="font-weight: bold">selectNodes</span> </span>、<span style="color: #000000"><span style="font-weight: bold">selectSingleNode</span> </span>这些方法，而Firefox并没有这些方法，所以不能使用，前几天找了好久终于，一直没有找到一个很好的解决方法，很多网站提供的要不就是根本不支持，要不就是使用方法，不方便不实用，今天我终于找到一个很好的解决方法了，我把它弄成一个JS文件，只要引用它就可以像IE一样使用了。<br /><br />代码如下：</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">GetNodeValue</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">str</span> <span class="o">=</span> <span class="err">””</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">ActiveXObject</span><span class="p">)</span>    <span class="c1">//IE</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>      <span class="nx">str</span> <span class="o">=</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">text</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">else</span> <span class="c1">//Mozilla</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>      <span class="k">try</span>
+</span><span class='line'>      <span class="p">{</span>
+</span><span class='line'>        <span class="nx">str</span> <span class="o">=</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">childNodes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">nodeValue</span><span class="p">;</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>      <span class="k">catch</span><span class="p">(</span><span class="nx">ex</span><span class="p">)</span>
+</span><span class='line'>      <span class="p">{</span>
+</span><span class='line'>        <span class="nx">str</span> <span class="o">=</span> <span class="err">””</span><span class="p">;</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">str</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">implementation</span> <span class="o">&amp;&amp;</span> <span class="nb">document</span><span class="p">.</span><span class="nx">implementation</span><span class="p">.</span><span class="nx">createDocument</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>    <span class="nx">XMLDocument</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">loadXML</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">xmlString</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>      <span class="kd">var</span> <span class="nx">childNodes</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">childNodes</span><span class="p">;</span>
+</span><span class='line'>      <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="nx">childNodes</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span><span class="err">–</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">this</span><span class="p">.</span><span class="nx">removeChild</span><span class="p">(</span><span class="nx">childNodes</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="kd">var</span> <span class="nx">dp</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">DOMParser</span><span class="p">();</span>
+</span><span class='line'>      <span class="kd">var</span> <span class="nx">newDOM</span> <span class="o">=</span> <span class="nx">dp</span><span class="p">.</span><span class="nx">parseFromString</span><span class="p">(</span><span class="nx">xmlString</span><span class="p">,</span> <span class="err">”</span><span class="nx">text</span><span class="o">/</span><span class="nx">xml</span><span class="err">”</span><span class="p">);</span>
+</span><span class='line'>      <span class="kd">var</span> <span class="nx">newElt</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">importNode</span><span class="p">(</span><span class="nx">newDOM</span><span class="p">.</span><span class="nx">documentElement</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+</span><span class='line'>      <span class="k">this</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">newElt</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// check for XPath implementation</span>
+</span><span class='line'>    <span class="k">if</span><span class="p">(</span> <span class="nb">document</span><span class="p">.</span><span class="nx">implementation</span><span class="p">.</span><span class="nx">hasFeature</span><span class="p">(</span><span class="err">”</span><span class="nx">XPath</span><span class="err">”</span><span class="p">,</span> <span class="err">”</span><span class="mf">3.0</span><span class="err">”</span><span class="p">)</span> <span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>       <span class="c1">// prototying the XMLDocument</span>
+</span><span class='line'>       <span class="nx">XMLDocument</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">selectNodes</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">cXPathString</span><span class="p">,</span> <span class="nx">xNode</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span><span class="p">(</span> <span class="o">!</span><span class="nx">xNode</span> <span class="p">)</span> <span class="p">{</span> <span class="nx">xNode</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>        <span class="kd">var</span> <span class="nx">oNSResolver</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">createNSResolver</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">documentElement</span><span class="p">)</span>
+</span><span class='line'>        <span class="kd">var</span> <span class="nx">aItems</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">(</span><span class="nx">cXPathString</span><span class="p">,</span> <span class="nx">xNode</span><span class="p">,</span> <span class="nx">oNSResolver</span><span class="p">,</span>
+</span><span class='line'>         <span class="nx">XPathResult</span><span class="p">.</span><span class="nx">ORDERED_NODE_SNAPSHOT_TYPE</span><span class="p">,</span> <span class="kc">null</span><span class="p">)</span>
+</span><span class='line'>        <span class="kd">var</span> <span class="nx">aResult</span> <span class="o">=</span> <span class="p">[];</span>
+</span><span class='line'>        <span class="k">for</span><span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">aItems</span><span class="p">.</span><span class="nx">snapshotLength</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>         <span class="nx">aResult</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span>  <span class="nx">aItems</span><span class="p">.</span><span class="nx">snapshotItem</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+</span><span class='line'>       <span class="p">}</span>
+</span><span class='line'>       <span class="k">return</span> <span class="nx">aResult</span><span class="p">;</span>
+</span><span class='line'>     <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>       <span class="c1">// prototying the Element</span>
+</span><span class='line'>       <span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">selectNodes</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">cXPathString</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">ownerDocument</span><span class="p">.</span><span class="nx">selectNodes</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">ownerDocument</span><span class="p">.</span><span class="nx">selectNodes</span><span class="p">(</span><span class="nx">cXPathString</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
+</span><span class='line'>       <span class="p">}</span>
+</span><span class='line'>       <span class="k">else</span><span class="p">{</span><span class="k">throw</span> <span class="err">”</span><span class="nx">For</span> <span class="nx">XML</span> <span class="nx">Elements</span> <span class="nx">Only</span><span class="err">”</span><span class="p">;}</span>
+</span><span class='line'>     <span class="p">}</span>
+</span><span class='line'>   <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// check for XPath implementation</span>
+</span><span class='line'>    <span class="k">if</span><span class="p">(</span> <span class="nb">document</span><span class="p">.</span><span class="nx">implementation</span><span class="p">.</span><span class="nx">hasFeature</span><span class="p">(</span><span class="err">”</span><span class="nx">XPath</span><span class="err">”</span><span class="p">,</span> <span class="err">”</span><span class="mf">3.0</span><span class="err">”</span><span class="p">)</span> <span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>       <span class="c1">// prototying the XMLDocument</span>
+</span><span class='line'>       <span class="nx">XMLDocument</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">selectSingleNode</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">cXPathString</span><span class="p">,</span> <span class="nx">xNode</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span><span class="p">(</span> <span class="o">!</span><span class="nx">xNode</span> <span class="p">)</span> <span class="p">{</span> <span class="nx">xNode</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>        <span class="kd">var</span> <span class="nx">xItems</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">selectNodes</span><span class="p">(</span><span class="nx">cXPathString</span><span class="p">,</span> <span class="nx">xNode</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">if</span><span class="p">(</span> <span class="nx">xItems</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>         <span class="k">return</span> <span class="nx">xItems</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+</span><span class='line'>       <span class="p">}</span>
+</span><span class='line'>       <span class="k">else</span>
+</span><span class='line'>       <span class="p">{</span>
+</span><span class='line'>         <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+</span><span class='line'>       <span class="p">}</span>
+</span><span class='line'>     <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>       <span class="c1">// prototying the Element</span>
+</span><span class='line'>       <span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">selectSingleNode</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">cXPathString</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">ownerDocument</span><span class="p">.</span><span class="nx">selectSingleNode</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">ownerDocument</span><span class="p">.</span><span class="nx">selectSingleNode</span><span class="p">(</span><span class="nx">cXPathString</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
+</span><span class='line'>       <span class="p">}</span>
+</span><span class='line'>       <span class="k">else</span><span class="p">{</span><span class="k">throw</span> <span class="err">”</span><span class="nx">For</span> <span class="nx">XML</span> <span class="nx">Elements</span> <span class="nx">Only</span><span class="err">”</span><span class="p">;}</span>
+</span><span class='line'>     <span class="p">}</span>
+</span><span class='line'>   <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p><br />只要把以上代码存成一个JS文件，在页面上引用它，当XML节点的读取操作就可以像IE一样使用了，已经通过测试。</p>
+
+
+<ul>
+<li><span style="font-weight: bold">Firefox XML读取类</span>下载地址：<a href="http://www.cnblogs.com/Files/huacn/jquery.xml.js" target="_blank">http://www.cnblogs.com/Files/huacn/jquery.xml.js</a></li>
+<li><span style="font-weight: bold">演示</span><strong>下载</strong>：<a href="http://www.cnblogs.com/Files/huacn/mutilayer_fixed.zip" target="_blank">http://www.cnblogs.com/Files/huacn/mutilayer_fixed.zip</a></li>
+</ul>
+
+
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2008-04-24 08:17:00 +0800" pubdate>2008-04-24</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/javascript/'>Javascript</a>, <a class='category' href='/blog/category/xml/'>XML</a>, <a class='category' href='/blog/category/前端/'>前端</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/firefox-javascript-xml-read';
+	var disqus_url = 'http://huacnlee.github.com/blog/firefox-javascript-xml-read';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

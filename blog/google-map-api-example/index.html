@@ -1,0 +1,795 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Google Map API应用例子源代码(已修正) - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Google Map API应用例子源代码(已修正) 最近项目需要做一个地图的功能，上面要加上一些地标，以方便用户使用，所以今天花时间看了看Google API搞了好一会儿，终于做到满足自已的功能要求了，发布出来给需要的朋友看看。 其实GoogleMap API还是比较好用的， &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/google-map-api-example">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Google Map API应用例子源代码(已修正)</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>最近项目需要做一个地图的功能，上面要加上一些地标，以方便用户使用，所以今天花时间看了看Google API搞了好一会儿，终于做到满足自已的功能要求了，发布出来给需要的朋友看看。</p>
+
+<p>其实GoogleMap API还是比较好用的，慢慢看GoogleMap API的帮助都可以做出来，我这里主要介绍的是怎么将地标存放起来，再读出来。不然只是一个地图在哪儿没有什么意义。</p>
+
+<p>我这里是用XML来存放的，存下来的数据还是比较简单，你可以根据自已的需要做一些修改就可以了，也可以换成数据库来存放。</p>
+
+<h3>Jquery.GoogleMap.js 源代码内容</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm">– GoogleMap操作类</span>
+</span><span class='line'><span class="cm">– 作者:李华顺</span>
+</span><span class='line'><span class="cm">– 官方网站：http://www.wathon.com</span>
+</span><span class='line'><span class="cm">– 我的博客：http://huacn.cnblogs.com</span>
+</span><span class='line'><span class="cm">– 演示地址：http://www.wathon.com/opensource/js/GoogleMap/Default.aspx</span>
+</span><span class='line'><span class="cm">– 使用请保存署名</span>
+</span><span class='line'><span class="cm">*/</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">//创建GoogleMap</span>
+</span><span class='line'><span class="c1">//panelMap - 显示地图的对象区域</span>
+</span><span class='line'><span class="c1">//showScale - 是否显示改变大小的控件 true false</span>
+</span><span class='line'><span class="c1">//showLargeControl - 是否显示切换控件  true false</span>
+</span><span class='line'><span class="c1">//showTypeControl - 是否显示切换显示类型的按钮</span>
+</span><span class='line'><span class="c1">//showZoom - 是否显示左下角的小地图</span>
+</span><span class='line'><span class="c1">//zoomSize - 视觉距离</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">clickListener</span> <span class="p">;</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">GoogleMapCreate</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">panelMap</span><span class="p">,</span><span class="nx">showScale</span><span class="p">,</span><span class="nx">showLargeControl</span><span class="p">,</span><span class="nx">showTypeControl</span><span class="p">,</span><span class="nx">showZoom</span><span class="p">,</span><span class="nx">zoomSize</span><span class="p">){</span>
+</span><span class='line'>    <span class="nx">myMap</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GMap2</span><span class="p">(</span><span class="nx">panelMap</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="nx">showLargeControl</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="nx">myMap</span><span class="p">.</span><span class="nx">addControl</span><span class="p">(</span><span class="k">new</span> <span class="nx">GLargeMapControl</span><span class="p">());</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>       <span class="nx">myMap</span><span class="p">.</span><span class="nx">addControl</span><span class="p">(</span><span class="k">new</span> <span class="nx">GSmallMapControl</span><span class="p">());</span>
+</span><span class='line'>   <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>   <span class="k">if</span><span class="p">(</span><span class="nx">showTypeControl</span><span class="p">)</span>
+</span><span class='line'>   <span class="p">{</span>
+</span><span class='line'>    <span class="nx">myMap</span><span class="p">.</span><span class="nx">addControl</span><span class="p">(</span><span class="k">new</span> <span class="nx">GMapTypeControl</span><span class="p">());</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span><span class="p">(</span><span class="nx">showScale</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="nx">myMap</span><span class="p">.</span><span class="nx">addControl</span><span class="p">(</span><span class="k">new</span> <span class="nx">GScaleControl</span><span class="p">());</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span><span class="p">(</span><span class="nx">showZoom</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="nx">myMap</span><span class="p">.</span><span class="nx">addControl</span><span class="p">(</span><span class="k">new</span> <span class="nx">GOverviewMapControl</span><span class="p">());</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">myMap</span><span class="p">.</span><span class="nx">enableDoubleClickZoom</span><span class="p">();</span>
+</span><span class='line'><span class="nx">myMap</span><span class="p">.</span><span class="nx">enableContinuousZoom</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">myMap</span><span class="p">.</span><span class="nx">setCenter</span><span class="p">(</span><span class="k">new</span> <span class="nx">GLatLng</span><span class="p">(</span><span class="mf">39.917</span><span class="p">,</span> <span class="mf">116.397</span><span class="p">),</span> <span class="nx">zoomSize</span><span class="p">,</span><span class="nx">G_SATELLITE_MAP</span><span class="p">);</span>
+</span><span class='line'><span class="k">return</span> <span class="nx">myMap</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c1">//添加事件</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">GoogleMapAddEvent</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">myMap</span><span class="p">,</span><span class="nx">eventName</span><span class="p">,</span><span class="nx">fun</span><span class="p">){</span>
+</span><span class='line'>    <span class="nx">clickListener</span> <span class="o">=</span> <span class="nx">GEvent</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="nx">myMap</span><span class="p">,</span><span class="nx">eventName</span><span class="p">,</span><span class="nx">fun</span><span class="p">);</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">//去除事件</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">GoogleMapRemoveEvent</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">myMap</span><span class="p">,</span><span class="nx">eventName</span><span class="p">){</span>
+</span><span class='line'>    <span class="nx">GEvent</span><span class="p">.</span><span class="nx">removeListener</span><span class="p">(</span><span class="nx">clickListener</span><span class="p">);</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c1">//在指定坐标上显示tip提示</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">GoogleMapShowTip</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">myMap</span><span class="p">,</span><span class="nx">point</span><span class="p">,</span><span class="nx">text</span><span class="p">){</span>
+</span><span class='line'>    <span class="nx">myMap</span><span class="p">.</span><span class="nx">openInfoWindow</span><span class="p">(</span><span class="nx">point</span><span class="p">,</span><span class="nb">document</span><span class="p">.</span><span class="nx">createTextNode</span><span class="p">(</span><span class="nx">text</span><span class="p">));</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c1">//在指定坐标上加入地标</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">GoogleMapNewMarker</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">myMap</span><span class="p">,</span><span class="nx">point</span><span class="p">){</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">marker</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GMarker</span><span class="p">(</span><span class="nx">point</span><span class="p">);</span>
+</span><span class='line'>    <span class="nx">myMap</span><span class="p">.</span><span class="nx">addOverlay</span><span class="p">(</span><span class="nx">marker</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">marker</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">//根据坐标点取得X坐标</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">GoogleMapPointX</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">point</span><span class="p">){</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">point</span><span class="p">.</span><span class="nx">lat</span><span class="p">();</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">//根据坐标点取得Y坐标</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">GoogleMapPointY</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">point</span><span class="p">){</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">point</span><span class="p">.</span><span class="nx">lng</span><span class="p">();</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>服务端部分的源代码内容</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
+<span class='line-number'>127</span>
+<span class='line-number'>128</span>
+<span class='line-number'>129</span>
+<span class='line-number'>130</span>
+<span class='line-number'>131</span>
+<span class='line-number'>132</span>
+<span class='line-number'>133</span>
+<span class='line-number'>134</span>
+<span class='line-number'>135</span>
+<span class='line-number'>136</span>
+<span class='line-number'>137</span>
+<span class='line-number'>138</span>
+<span class='line-number'>139</span>
+<span class='line-number'>140</span>
+<span class='line-number'>141</span>
+<span class='line-number'>142</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm">– GoogleMap操作类</span>
+</span><span class='line'><span class="cm">– 作者:李华顺</span>
+</span><span class='line'><span class="cm">– 官方网站：http://www.wathon.com</span>
+</span><span class='line'><span class="cm">– 我的博客：http://huacn.cnblogs.com</span>
+</span><span class='line'><span class="cm">– 演示地址：http://www.wathon.com/opensource/js/GoogleMap/Default.aspx</span>
+</span><span class='line'><span class="cm">– 使用请保存署名</span>
+</span><span class='line'><span class="cm">*/</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Data</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Configuration</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Web</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Web.Security</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Web.UI</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Web.UI.WebControls</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Web.UI.WebControls.WebParts</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Web.UI.HtmlControls</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Xml</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">namespace</span> <span class="nn">GoogleMap</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">public</span> <span class="k">partial</span> <span class="k">class</span> <span class="nc">_Default</span> <span class="p">:</span> <span class="n">System</span><span class="p">.</span><span class="n">Web</span><span class="p">.</span><span class="n">UI</span><span class="p">.</span><span class="n">Page</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">protected</span> <span class="kt">string</span> <span class="n">mapName</span> <span class="p">=</span> <span class="err">””</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">protected</span> <span class="kt">string</span> <span class="n">mapAreaX</span> <span class="p">=</span> <span class="err">””</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">protected</span> <span class="kt">string</span> <span class="n">mapAreaY</span> <span class="p">=</span> <span class="err">””</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">protected</span> <span class="k">void</span> <span class="nf">Page_Load</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="n">initPage</span><span class="p">();</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">public</span> <span class="k">void</span> <span class="nf">initPage</span><span class="p">()</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="n">AreaList</span> <span class="n">myArea</span> <span class="p">=</span> <span class="k">new</span> <span class="n">AreaList</span><span class="p">(</span><span class="n">Server</span><span class="p">.</span><span class="n">MapPath</span><span class="p">(</span><span class="err">”</span><span class="n">App_Data</span><span class="err">\”</span><span class="p">));</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">Request</span><span class="p">[</span><span class="err">”</span><span class="n">type</span><span class="err">”</span><span class="p">]</span> <span class="p">==</span> <span class="err">”</span><span class="n">savearea</span><span class="err">”</span><span class="p">)</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="n">Response</span><span class="p">.</span><span class="n">ContentType</span> <span class="p">=</span> <span class="err">”</span><span class="n">text</span><span class="p">/</span><span class="n">xml</span><span class="err">”</span><span class="p">;</span>
+</span><span class='line'>                <span class="n">Response</span><span class="p">.</span><span class="n">ContentEncoding</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">Text</span><span class="p">.</span><span class="n">Encoding</span><span class="p">.</span><span class="n">UTF8</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="c1">//保存地标</span>
+</span><span class='line'>                <span class="kt">string</span> <span class="n">strName</span> <span class="p">=</span> <span class="n">Request</span><span class="p">[</span><span class="err">”</span><span class="n">name</span><span class="err">”</span><span class="p">];</span>
+</span><span class='line'>                <span class="kt">string</span> <span class="n">strAreaX</span> <span class="p">=</span> <span class="n">Request</span><span class="p">[</span><span class="err">”</span><span class="n">x</span><span class="err">”</span><span class="p">];</span>
+</span><span class='line'>                <span class="kt">string</span> <span class="n">strAreaY</span> <span class="p">=</span> <span class="n">Request</span><span class="p">[</span><span class="err">”</span><span class="n">y</span><span class="err">”</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="n">myArea</span><span class="p">.</span><span class="n">AppendNew</span><span class="p">(</span><span class="n">strName</span><span class="p">,</span> <span class="n">strAreaX</span><span class="p">,</span> <span class="n">strAreaY</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>                <span class="n">WriteResult</span><span class="p">(</span><span class="n">Request</span><span class="p">[</span><span class="err">”</span><span class="n">name</span><span class="err">”</span><span class="p">]);</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="n">Response</span><span class="p">.</span><span class="n">End</span><span class="p">();</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">System</span><span class="p">.</span><span class="n">Xml</span><span class="p">.</span><span class="n">XmlNodeList</span> <span class="n">myNodes</span> <span class="p">=</span> <span class="n">myArea</span><span class="p">.</span><span class="n">GetAreaList</span><span class="p">();</span>
+</span><span class='line'>            <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="n">myNodes</span><span class="p">.</span><span class="n">Count</span><span class="p">;</span> <span class="n">i</span><span class="p">++)</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="p">&gt;</span> <span class="m">0</span><span class="p">)</span>
+</span><span class='line'>                <span class="p">{</span>
+</span><span class='line'>                    <span class="n">mapName</span> <span class="p">+=</span> <span class="err">”</span><span class="p">,</span><span class="err">”</span><span class="p">;</span>
+</span><span class='line'>                    <span class="n">mapAreaX</span> <span class="p">+=</span> <span class="err">”</span><span class="p">,</span><span class="err">”</span><span class="p">;</span>
+</span><span class='line'>                    <span class="n">mapAreaY</span> <span class="p">+=</span> <span class="err">”</span><span class="p">,</span><span class="err">”</span><span class="p">;</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="n">mapName</span> <span class="p">+=</span> <span class="err">”’”</span> <span class="p">+</span> <span class="n">myNodes</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">SelectSingleNode</span><span class="p">(</span><span class="err">”</span><span class="n">name</span><span class="err">”</span><span class="p">).</span><span class="n">InnerText</span> <span class="p">+</span> <span class="err">”’”</span><span class="p">;</span>
+</span><span class='line'>                <span class="n">mapAreaX</span> <span class="p">+=</span> <span class="err">”’”</span> <span class="p">+</span> <span class="n">myNodes</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">SelectSingleNode</span><span class="p">(</span><span class="err">”</span><span class="n">x</span><span class="err">”</span><span class="p">).</span><span class="n">InnerText</span> <span class="p">+</span> <span class="err">”’”</span><span class="p">;</span>
+</span><span class='line'>                <span class="n">mapAreaY</span> <span class="p">+=</span> <span class="err">”’”</span> <span class="p">+</span> <span class="n">myNodes</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">SelectSingleNode</span><span class="p">(</span><span class="err">”</span><span class="n">y</span><span class="err">”</span><span class="p">).</span><span class="n">InnerText</span> <span class="p">+</span> <span class="err">”’”</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">private</span> <span class="k">void</span> <span class="nf">WriteResult</span><span class="p">(</span><span class="kt">string</span> <span class="n">strValue</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="kt">string</span> <span class="n">strContent</span> <span class="p">=</span> <span class="err">””</span><span class="m">1.0</span><span class="err">\”</span> <span class="n">encoding</span><span class="p">=</span><span class="err">\”</span><span class="n">utf</span><span class="p">-</span><span class="m">8</span><span class="err">\”</span><span class="p">?&gt;</span><span class="err">”</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">strContent</span> <span class="p">+=</span> <span class="err">””</span> <span class="p">+</span> <span class="n">strValue</span> <span class="p">+</span> <span class="err">””</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">Response</span><span class="p">.</span><span class="n">Write</span><span class="p">(</span><span class="n">strContent</span><span class="p">);</span>
+</span><span class='line'>            <span class="n">Response</span><span class="p">.</span><span class="n">End</span><span class="p">();</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// AreaList 的摘要说明</span>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="k">public</span> <span class="k">class</span> <span class="nc">AreaList</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="n">XmlDocument</span> <span class="n">xmlControl</span> <span class="p">=</span> <span class="k">new</span> <span class="n">XmlDocument</span><span class="p">();</span>
+</span><span class='line'>        <span class="kt">string</span> <span class="n">strFileName</span> <span class="p">=</span> <span class="err">”\</span><span class="n">MapArea</span><span class="p">.</span><span class="n">xml</span><span class="err">”</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">public</span> <span class="nf">AreaList</span><span class="p">(</span><span class="kt">string</span> <span class="n">appPath</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="n">strFileName</span> <span class="p">=</span> <span class="n">appPath</span> <span class="p">+</span> <span class="n">strFileName</span><span class="p">;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(!</span><span class="n">System</span><span class="p">.</span><span class="n">IO</span><span class="p">.</span><span class="n">File</span><span class="p">.</span><span class="n">Exists</span><span class="p">(</span><span class="n">strFileName</span><span class="p">))</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="n">CreateAreaListFile</span><span class="p">();</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">xmlControl</span><span class="p">.</span><span class="n">Load</span><span class="p">(</span><span class="n">strFileName</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">private</span> <span class="k">void</span> <span class="nf">CreateAreaListFile</span><span class="p">()</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="n">xmlControl</span><span class="p">.</span><span class="n">LoadXml</span><span class="p">(</span><span class="err">””</span><span class="m">1.0</span><span class="err">\”</span> <span class="n">encoding</span><span class="p">=</span><span class="err">\”</span><span class="n">utf</span><span class="p">-</span><span class="m">8</span><span class="err">\”</span> <span class="p">?&gt;</span><span class="err">”</span><span class="p">);</span>
+</span><span class='line'>            <span class="n">xmlControl</span><span class="p">.</span><span class="n">Save</span><span class="p">(</span><span class="n">strFileName</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">public</span> <span class="k">void</span> <span class="nf">AppendNew</span><span class="p">(</span><span class="kt">string</span> <span class="n">strName</span><span class="p">,</span> <span class="kt">string</span> <span class="n">strX</span><span class="p">,</span> <span class="kt">string</span> <span class="n">strY</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="n">XmlNode</span> <span class="n">xmlNodeLast</span> <span class="p">=</span> <span class="n">xmlControl</span><span class="p">.</span><span class="n">SelectSingleNode</span><span class="p">(</span><span class="err">”</span><span class="c1">//list”);</span>
+</span><span class='line'>            <span class="kt">string</span> <span class="n">strXml</span> <span class="p">=</span> <span class="err">””</span> <span class="p">+</span> <span class="n">makeCDATA</span><span class="p">(</span><span class="n">strName</span><span class="p">)</span> <span class="p">+</span> <span class="err">””</span> <span class="p">+</span> <span class="n">makeCDATA</span><span class="p">(</span><span class="n">strX</span><span class="p">)</span> <span class="p">+</span> <span class="err">””</span> <span class="p">+</span> <span class="n">makeCDATA</span><span class="p">(</span><span class="n">strY</span><span class="p">)</span> <span class="p">+</span> <span class="err">””</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">XmlNode</span> <span class="n">xmlNode</span> <span class="p">=</span> <span class="n">xmlControl</span><span class="p">.</span><span class="n">CreateNode</span><span class="p">(</span><span class="n">XmlNodeType</span><span class="p">.</span><span class="n">Element</span><span class="p">,</span> <span class="err">”</span><span class="n">item</span><span class="err">”</span><span class="p">,</span> <span class="err">””</span><span class="p">);</span>
+</span><span class='line'>            <span class="n">xmlNode</span><span class="p">.</span><span class="n">InnerXml</span> <span class="p">=</span> <span class="n">strXml</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">xmlNodeLast</span><span class="p">.</span><span class="n">AppendChild</span><span class="p">(</span><span class="n">xmlNode</span><span class="p">);</span>
+</span><span class='line'>            <span class="n">xmlControl</span><span class="p">.</span><span class="n">Save</span><span class="p">(</span><span class="n">strFileName</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">///</span>
+</span><span class='line'>        <span class="c1">/// 取得旧的列表</span>
+</span><span class='line'>        <span class="c1">/// name,area</span>
+</span><span class='line'>        <span class="c1">/// 地标名,坐标</span>
+</span><span class='line'>        <span class="c1">///</span>
+</span><span class='line'>        <span class="c1">///</span>
+</span><span class='line'>        <span class="k">public</span> <span class="n">System</span><span class="p">.</span><span class="n">Xml</span><span class="p">.</span><span class="n">XmlNodeList</span> <span class="n">GetAreaList</span><span class="p">()</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="n">System</span><span class="p">.</span><span class="n">Xml</span><span class="p">.</span><span class="n">XmlDocument</span> <span class="n">xmlDoc</span> <span class="p">=</span> <span class="k">new</span> <span class="n">System</span><span class="p">.</span><span class="n">Xml</span><span class="p">.</span><span class="n">XmlDocument</span><span class="p">();</span>
+</span><span class='line'>            <span class="n">xmlDoc</span><span class="p">.</span><span class="n">Load</span><span class="p">(</span><span class="n">strFileName</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">System</span><span class="p">.</span><span class="n">Xml</span><span class="p">.</span><span class="n">XmlNodeList</span> <span class="n">myNodes</span> <span class="p">=</span> <span class="n">xmlDoc</span><span class="p">.</span><span class="n">SelectNodes</span><span class="p">(</span><span class="err">”</span><span class="c1">//list//item”);</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">myNodes</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">private</span> <span class="kt">string</span> <span class="nf">makeCDATA</span><span class="p">(</span><span class="kt">string</span> <span class="n">strValue</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="err">””</span> <span class="p">+</span> <span class="n">strValue</span> <span class="p">+</span> <span class="err">”</span><span class="p">]]&gt;</span><span class="err">”</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>HTML部分的源代码内容</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;html</span> <span class="na">xmlns=</span><span class="s">&quot;http://www.w3.org/1999/xhtml&quot;</span> <span class="nt">&gt;</span>
+</span><span class='line'><span class="nt">&lt;head</span> <span class="na">runat=</span><span class="s">&quot;server&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;title&gt;</span>GoogleMap例子<span class="nt">&lt;/title&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src=</span><span class="s">&quot;scripts/jquery.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src=</span><span class="s">&quot;scripts/jquery.interface.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src=</span><span class="s">&quot;scripts/jquery.xml.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src=</span><span class="s">&quot;scripts/jquery.corner.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src=</span><span class="s">&quot;scripts/jquery.googlemap.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src=</span><span class="s">&quot;http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAC-ble-vmy_g7-Qvem5P86xS0EUK71C1jmG2AnVsYTJQQEVD0-RQfglPje0X6A_y2FM1T2dU6BPVKQg&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;style </span><span class="na">type=</span><span class="s">&quot;text/css&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">body</span><span class="p">{</span>
+</span><span class='line'>    <span class="k">font-size</span><span class="o">:</span><span class="m">12px</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">font-family</span><span class="o">:</span><span class="err">宋体</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">text-align</span><span class="o">:</span><span class="k">center</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nf">#layer</span> <span class="p">{</span> <span class="k">margin</span><span class="o">:</span><span class="m">20px</span> <span class="k">auto</span><span class="p">;</span> <span class="k">text-align</span><span class="o">:</span><span class="k">left</span><span class="p">;</span> <span class="k">width</span><span class="o">:</span><span class="m">800px</span><span class="p">;}</span>
+</span><span class='line'>  <span class="nc">.toolbar</span><span class="o">,</span><span class="nc">.arealist</span> <span class="p">{</span> <span class="k">background</span><span class="o">:</span><span class="m">#F5F5F5</span><span class="p">;</span><span class="k">border</span><span class="o">:</span><span class="m">1px</span> <span class="k">solid</span> <span class="m">#F0F0F0</span><span class="p">;</span> <span class="k">padding</span><span class="o">:</span><span class="m">5px</span><span class="p">;</span> <span class="k">margin-bottom</span><span class="o">:</span><span class="m">8px</span><span class="p">;}</span>
+</span><span class='line'>  <span class="nf">#panelMap</span> <span class="p">{</span><span class="k">width</span><span class="o">:</span><span class="m">800px</span><span class="p">;</span> <span class="k">height</span><span class="o">:</span><span class="m">450px</span><span class="p">;}</span>
+</span><span class='line'>  <span class="nc">.window</span> <span class="p">{</span> <span class="p">}</span>
+</span><span class='line'>  <span class="nt">&lt;/style&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">myMap</span><span class="p">;</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">MapName</span> <span class="o">=</span> <span class="p">[</span><span class="o">&lt;%=</span><span class="nx">mapName</span> <span class="o">%&gt;</span><span class="p">];</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">MapAreaX</span> <span class="o">=</span> <span class="p">[</span><span class="o">&lt;%=</span><span class="nx">mapAreaX</span> <span class="o">%&gt;</span><span class="p">];</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">MapAreaY</span> <span class="o">=</span> <span class="p">[</span><span class="o">&lt;%=</span><span class="nx">mapAreaY</span> <span class="o">%&gt;</span><span class="p">];</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">zoomSize</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>    <span class="nx">myMap</span> <span class="o">=</span> <span class="nx">GoogleMapCreate</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">&quot;panelMap&quot;</span><span class="p">),</span><span class="kc">true</span><span class="p">,</span><span class="kc">true</span><span class="p">,</span><span class="kc">true</span><span class="p">,</span><span class="kc">true</span><span class="p">,</span><span class="nx">zoomSize</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//给“添加&quot;按钮的click放入事件</span>
+</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="err">’#</span><span class="nx">lblAddArea</span><span class="err">’</span><span class="p">).</span><span class="nx">click</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="c1">//$(’div#info’).show(’slow’);</span>
+</span><span class='line'>      <span class="nx">GoogleMapAddEvent</span><span class="p">(</span><span class="nx">myMap</span><span class="p">,</span> <span class="s2">&quot;click&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">marker</span><span class="p">,</span> <span class="nx">point</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">GoogleMapNewMarker</span><span class="p">(</span><span class="nx">myMap</span><span class="p">,</span><span class="nx">point</span><span class="p">);</span>
+</span><span class='line'>        <span class="kd">var</span> <span class="nx">areaName</span> <span class="o">=</span> <span class="nx">prompt</span><span class="p">(</span><span class="s2">&quot;请输入地标名称：&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
+</span><span class='line'>        <span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="nx">GoogleMapPointX</span><span class="p">(</span><span class="nx">point</span><span class="p">);</span>
+</span><span class='line'>        <span class="kd">var</span> <span class="nx">y</span> <span class="o">=</span> <span class="nx">GoogleMapPointY</span><span class="p">(</span><span class="nx">point</span><span class="p">);</span>
+</span><span class='line'>        <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">({</span>
+</span><span class='line'>          <span class="nx">url</span><span class="o">:</span><span class="s2">&quot;default.aspx?type=savearea&amp;x=&quot;</span><span class="o">+</span><span class="nx">x</span><span class="o">+</span><span class="s2">&quot;&amp;y=&quot;</span><span class="o">+</span><span class="nx">y</span><span class="o">+</span><span class="s2">&quot;&amp;name=&quot;</span><span class="o">+</span><span class="nx">areaName</span><span class="p">,</span>
+</span><span class='line'>          <span class="nx">type</span><span class="o">:</span><span class="s2">&quot;post&quot;</span><span class="p">,</span>
+</span><span class='line'>          <span class="nx">success</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">xmlData</span><span class="p">){</span>
+</span><span class='line'>            <span class="nx">GoogleMapShowTip</span><span class="p">(</span><span class="nx">myMap</span><span class="p">,</span><span class="nx">point</span><span class="p">,</span><span class="nx">GetNodeValue</span><span class="p">(</span><span class="nx">xmlData</span><span class="p">.</span><span class="nx">selectSingleNode</span><span class="p">(</span><span class="s2">&quot;result&quot;</span><span class="p">)));</span>
+</span><span class='line'>          <span class="p">}</span>
+</span><span class='line'>          <span class="p">});</span>
+</span><span class='line'>        <span class="nx">GoogleMapRemoveEvent</span><span class="p">(</span><span class="nx">myMap</span><span class="p">,</span><span class="s2">&quot;click&quot;</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">});</span>
+</span><span class='line'>      <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//读旧的地标</span>
+</span><span class='line'>    <span class="nx">writeAreaList</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//开启自动切换地标</span>
+</span><span class='line'>    <span class="c1">//autoSelectMarker();</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">//创建地标到地图上</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">setMapArea</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">tip</span><span class="p">,</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">){</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">point</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GLatLng</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">,</span><span class="nx">zoomSize</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">myMarker</span> <span class="o">=</span> <span class="nx">GoogleMapNewMarker</span><span class="p">(</span><span class="nx">myMap</span><span class="p">,</span><span class="nx">point</span><span class="p">);</span>
+</span><span class='line'>    <span class="nx">GEvent</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="nx">myMarker</span><span class="p">,</span> <span class="s2">&quot;click&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">GoogleMapShowTip</span><span class="p">(</span><span class="nx">myMap</span><span class="p">,</span><span class="nx">point</span><span class="p">,</span><span class="nx">tip</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">};</span>
+</span><span class='line'>  <span class="nt">&lt;/script&gt;</span>
+</span><span class='line'><span class="nt">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2008-04-24 08:17:00 +0800" pubdate>2008-04-24</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/google-map/'>Google Map</a>, <a class='category' href='/blog/category/javascript/'>Javascript</a>, <a class='category' href='/blog/category/教程/'>教程</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/google-map-api-example';
+	var disqus_url = 'http://huacnlee.github.com/blog/google-map-api-example';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

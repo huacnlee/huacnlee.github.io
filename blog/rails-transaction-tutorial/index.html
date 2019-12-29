@@ -1,0 +1,247 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Rails 的 transaction 事务处理 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Rails 的 transaction 事务处理 最近太做一个数据排名统计，统计过程中需要删除旧的缓存统计数据，最开始写的时候就直接 CachePostTotal.connection.execute("truncate table cache_post_totals") 先把这个表给重置了， &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/rails-transaction-tutorial">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Rails 的 transaction 事务处理</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>最近太做一个数据排名统计，统计过程中需要删除旧的缓存统计数据，最开始写的时候就直接 <code>CachePostTotal.connection.execute("truncate table cache_post_totals")</code> 先把这个表给重置了，然后再循环往里面插入新的统计数据。</p>
+
+<h3>但后面发现，这样的做法存在大问题：</h3>
+
+<ul>
+<li>当我 <code>truncate table</code> 的时候， <code>cache_post_totals</code> 表已经被清除了。但新的数据还没有存上去，如果在这个时候有人读取这张表时，就会找不到数据，这样是有问题的。</li>
+<li>在中间插入新数据的循环中有可能会出现异常、Model 验证不通过等情况而使得统计流程中断，但这个时候 <code>cache_post_totals</code> 表的数据已被改变。</li>
+</ul>
+
+
+<p>要解决这个问题哪就要上 <strong>事务</strong> 了！
+Rails ActiveRecord 对事务的处理实现的很方便，只用Model.transaction do &#8230; end 将对 Model 表的操作的代码包起来就可以了，这样一来，在 transaction do .. end 之间的数据更新动作并不会立刻改变表里面的数据，而是要等到完全执行完成后，过了 end 才更新。</p>
+
+<!-- more -->
+
+
+<h3>来看一下这一段例子:</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">begin</span>
+</span><span class='line'>  <span class="no">Post</span><span class="o">.</span><span class="n">transaction</span> <span class="k">do</span>
+</span><span class='line'>    <span class="c1"># 删除旧数据</span>
+</span><span class='line'>    <span class="no">Post</span><span class="o">.</span><span class="n">delete_all</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1"># 例子 新数据</span>
+</span><span class='line'>    <span class="n">datas</span> <span class="o">[</span><span class="p">{</span><span class="ss">:title</span> <span class="o">=&gt;</span> <span class="s2">&quot;title1&quot;</span><span class="p">,</span> <span class="ss">:slug</span> <span class="o">=&gt;</span> <span class="s2">&quot;title-1&quot;</span><span class="p">},{</span><span class="ss">:title</span> <span class="o">=&gt;</span> <span class="s2">&quot;Title 2&quot;</span><span class="p">,</span> <span class="ss">:slug</span> <span class="o">=&gt;</span> <span class="s2">&quot;Title 2&quot;</span><span class="p">}</span><span class="o">]</span>
+</span><span class='line'>    <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'>    <span class="n">datas</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">d</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">if</span> <span class="ow">not</span> <span class="n">post</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>        <span class="k">raise</span> <span class="s2">&quot;*** </span><span class="si">#{</span><span class="n">post</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">full_messages</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;=== Done&quot;</span>
+</span><span class='line'><span class="k">rescue</span> <span class="no">Exception</span> <span class="o">=&gt;</span> <span class="n">ex</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;*** transaction abored!&quot;</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;*** errors: </span><span class="si">#{</span><span class="n">ex</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>另外有个小细节需要注意，如果你是使用 <code>Model.connection.execute()</code> 方法执行的语句，那么事务将不会起作用！</p>
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2009-11-10 07:56:00 +0800" pubdate>2009-11-10</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/rails/'>Rails</a>, <a class='category' href='/blog/category/事务/'>事务</a>, <a class='category' href='/blog/category/教程/'>教程</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/rails-transaction-tutorial';
+	var disqus_url = 'http://huacnlee.github.com/blog/rails-transaction-tutorial';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

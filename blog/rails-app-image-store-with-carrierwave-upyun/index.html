@@ -1,0 +1,583 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>在 Rails 项目里面使用又拍云用于存储上传图片 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="在 Rails 项目里面使用又拍云用于存储上传图片 又拍云 进过我的长期使用，确实非常不错，价格合理，速度给力。 这里分享一下我在 Rails 项目里面使用又拍云管理文件的经验。 让又拍云结合在 CarrierWave 里面使用；
+合理利用又拍云的图片空间功能；
+使用又拍云作为 Assets &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/rails-app-image-store-with-carrierwave-upyun">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">在 Rails 项目里面使用又拍云用于存储上传图片</h1>
+    
+  </header>
+
+  <div class="entry_content"><p><a href="https://www.upyun.com/?utm_source=ruby-china&amp;utm_medium=ad&amp;utm_campaign=upyun&amp;md=ruby-china">又拍云</a> 进过我的长期使用，确实非常不错，价格合理，速度给力。</p>
+
+<p>这里分享一下我在 Rails 项目里面使用又拍云管理文件的经验。</p>
+
+<ul>
+<li><a href="#use-carrierwave">让又拍云结合在 CarrierWave 里面使用</a>；</li>
+<li><a href="#use-upyun-image-space">合理利用又拍云的图片空间功能</a>；</li>
+<li><a href="#cdn-asset-files">使用又拍云作为 Assets 文件的 CDN 分发</a>；</li>
+</ul>
+
+
+<h2 id="use-carrierwave">让又拍云结合在 CarrierWave 里面使用</h2>
+
+
+<p>Ruby 社区的人都知道，用于文件上传的 Gem 就两个最出名（<a href="https://github.com/thoughtbot/paperclip">Paperclip</a>, <a href="https://github.com/jnicklas/carrierwave">CarrierWave</a>），而 CarrierWave 由于其有灵活性很好，现在受到了越来越多人的青睐。</p>
+
+<blockquote><p>Paperclip 暂时还没有人给它实现又拍云集成 <br />
+CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另外还有我实现的<a href="https://github.com/huacnlee/carrierwave-aliyun">阿里云存储的插件</a>。</p></blockquote>
+
+<p>如果你想在 CarrierWave 里面使用又拍云作为存储介质，那么你需要用:</p>
+
+<ul>
+<li><a href="https://github.com/nowa/carrierwave-upyun">https://github.com/nowa/carrierwave-upyun</a></li>
+</ul>
+
+
+<p>Gemfile</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s2">&quot;carrierwave&quot;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;carrierwave-upyun&quot;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;rest-client&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>只需要简单的配置就能很好的将他们结合起来:</p>
+
+<p>config/initializes/carrierwave.rb</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">CarrierWave</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="ss">:upyun</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">upyun_username</span> <span class="o">=</span> <span class="s2">&quot;账号&quot;</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">upyun_password</span> <span class="o">=</span> <span class="s1">&#39;密码&#39;</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">upyun_bucket</span> <span class="o">=</span> <span class="s2">&quot;空间名&quot;</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">upyun_bucket_domain</span> <span class="o">=</span> <span class="s2">&quot;空间名.b0.upaiyun.com 或 使用你独立配置的域名&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面这段是简单介绍一下使用又拍云需要的组件，具体使用步骤的细节由于 CarrierWave 和 carrierwave-upyun 的 Github 页面上都有介绍，我这里就不用细说了。</p>
+
+<h2 id="use-upyun-image-space">合理利用又拍云的图片空间功能</h2>
+
+
+<p>在以往我们使用 CarrierWave 或 Paperclip 的时候，我们习惯于在 Rails 里面直接使用 ImageMagick 将图片处理成不同的缩略图版本（尺寸，格式，水印，锐化，模糊&#8230;）以适应我们的业务需求。</p>
+
+<blockquote><p> 这个也是 Ruby 社区的一大优点!<br />CarrierWave 或 Paperclip 可以很容易的将图片自动化的处理掉，使得我们的代码干净利落！</p></blockquote>
+
+<p>不过如果你用了又拍云以后，CarrierWave 提供的 <a href="https://github.com/jnicklas/carrierwave#adding-versions">缩略图生成</a> 功能或许你就不该使用了，由于远程网络访问以及服务器带宽会带来上传速度的问题，我们需要尽可能的减少服务器到又拍云服务器的网络使用，具体看我在 Ruby China 上面发帖描述的情况: 《<a href="http://ruby-china.org/topics/5059">盛大云和又拍云配合起来使用的问题</a>》</p>
+
+<p>你有两个选择:</p>
+
+<ol>
+<li>使用又拍云的 Form API 来上传图片，你可以看看这个 <a href="https://gist.github.com/3414491">Gist</a> ,这个里面的代码只是将上传调通了，后面还有许多事情需要手工处理；</li>
+<li>使用又拍云的图片空间的功能是实现缩略图生成，它可以让你配置 30 种缩略图版本；</li>
+</ol>
+
+
+<p>如果你选择用图片空间，那你还可以继续使用 CarrierWave 和 carrierwave-upyun 来实现图片处理，以前那套思路都还可以继续使用，只是需要对 CarrierWave 进行一些 Hack 就可以和“图片空间”很好的搭配起来了。</p>
+
+<h3>以前我们的 CarrierWave 自定义 Uploader 可能是这样的:</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;carrierwave/processing/mini_magick&#39;</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">AvatarUploader</span> <span class="o">&lt;</span> <span class="no">CarrierWave</span><span class="o">::</span><span class="no">Uploader</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">CarrierWave</span><span class="o">::</span><span class="no">MiniMagick</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">store_dir</span>
+</span><span class='line'>    <span class="s2">&quot;</span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">underscore</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">mounted_as</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">extension_white_list</span>
+</span><span class='line'>    <span class="sx">%w(jpg jpeg gif png)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">default_url</span>
+</span><span class='line'>    <span class="s2">&quot;avatar/</span><span class="si">#{</span><span class="n">version_name</span><span class="si">}</span><span class="s2">.jpg&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">filename</span>
+</span><span class='line'>    <span class="k">if</span> <span class="k">super</span><span class="o">.</span><span class="n">present?</span>
+</span><span class='line'>      <span class="n">model</span><span class="o">.</span><span class="n">uploader_secure_token</span> <span class="o">||=</span> <span class="no">SecureRandom</span><span class="o">.</span><span class="n">uuid</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="no">Rails</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;(BaseUploader.filename) </span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">uploader_secure_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="s2">&quot;</span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">uploader_secure_token</span><span class="si">}</span><span class="s2">.</span><span class="si">#{</span><span class="n">file</span><span class="o">.</span><span class="n">extension</span><span class="o">.</span><span class="n">downcase</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">version</span> <span class="ss">:tiny</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">process</span> <span class="ss">:resize_to_fill</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">version</span> <span class="ss">:small</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">process</span> <span class="ss">:resize_to_fill</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">version</span> <span class="ss">:normal</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">process</span> <span class="ss">:resize_to_fill</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">version</span> <span class="ss">:large</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">process</span> <span class="ss">:resize_to_fill</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">240</span><span class="p">,</span> <span class="mi">240</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 你可以能还有 PhotoUploader, CoverUploader ... 用于处理 Photo 和 Cover 格式的图片</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">mount_uploader</span> <span class="ss">:avatar</span><span class="p">,</span> <span class="no">AvatarUploader</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Photo</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">mount_uploader</span> <span class="ss">:photo</span><span class="p">,</span> <span class="no">PhotoUploader</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 Views 里面你是这样:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">image_tag</span><span class="p">(</span><span class="vi">@user</span><span class="o">.</span><span class="n">avatar</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="ss">:small</span><span class="p">))</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>改用又拍云图片空间以后，你需要这样</h3>
+
+<p>先在又拍云的图片空间里面配置好你需要的“自定义缩略图尺寸”.</p>
+
+<blockquote><p>定义缩略图一定要提前想好!<br />因为版本一定义好，名称就不能修改了，也不能删除，并且最多有 30 种的限制。</p></blockquote>
+
+<p>接下来改造你的代码，将 AvatarUploader, PhotoUploader, CoverUploader 扔掉，改用一个 ImageUploader 代替:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># coding: utf-8</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;carrierwave/processing/mini_magick&#39;</span>
+</span><span class='line'><span class="c1"># 在图片空间里面定义好的“缩略图版本名称”，以防止调用错误</span>
+</span><span class='line'><span class="no">IMAGE_UPLOADER_ALLOW_IMAGE_VERSION_NAMES</span> <span class="o">=</span> <span class="sx">%(20x20 30x30 240x240 100x100 120x90 160x120 250x187 320 640 800)</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">ImageUploader</span> <span class="o">&lt;</span> <span class="no">CarrierWave</span><span class="o">::</span><span class="no">Uploader</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">store_dir</span>
+</span><span class='line'>    <span class="s2">&quot;</span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">underscore</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">mounted_as</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">default_url</span>
+</span><span class='line'>    <span class="c1"># 搞一个大一点的默认图片取名 blank.png 用 FTP 传入图片空间，用于作为默认图片</span>
+</span><span class='line'>    <span class="c1"># 由于有自动的缩略图处理，小图也不成问题</span>
+</span><span class='line'>    <span class="c1"># Setting.upload_url 这个是你的图片空间 URL</span>
+</span><span class='line'>    <span class="s2">&quot;</span><span class="si">#{</span><span class="no">Setting</span><span class="o">.</span><span class="n">upload_url</span><span class="si">}</span><span class="s2">/blank.png</span><span class="si">#{</span><span class="n">version_name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># 覆盖 url 方法以适应“图片空间”的缩略图命名</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">url</span><span class="p">(</span><span class="n">version_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@url</span> <span class="o">||=</span> <span class="k">super</span><span class="p">({})</span>
+</span><span class='line'>    <span class="n">version_name</span> <span class="o">=</span> <span class="n">version_name</span><span class="o">.</span><span class="n">to_s</span>
+</span><span class='line'>    <span class="k">return</span> <span class="vi">@url</span> <span class="k">if</span> <span class="n">version_name</span><span class="o">.</span><span class="n">blank?</span>
+</span><span class='line'>    <span class="k">if</span> <span class="ow">not</span> <span class="n">version_name</span><span class="o">.</span><span class="n">in?</span><span class="p">(</span><span class="no">IMAGE_UPLOADER_ALLOW_IMAGE_VERSION_NAMES</span><span class="p">)</span>
+</span><span class='line'>      <span class="c1"># 故意在调用了一个没有定义的“缩略图版本名称”的时候抛出异常，以便开发的时候能及时看到调错了</span>
+</span><span class='line'>      <span class="k">raise</span> <span class="s2">&quot;ImageUploader version_name:</span><span class="si">#{</span><span class="n">version_name</span><span class="si">}</span><span class="s2"> not allow.&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="o">[</span><span class="vi">@url</span><span class="p">,</span><span class="n">version_name</span><span class="o">].</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;!&quot;</span><span class="p">)</span> <span class="c1"># 我这里在图片空间里面选用 ! 作为“间隔标志符”</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">extension_white_list</span>
+</span><span class='line'>    <span class="sx">%w(jpg jpeg gif png)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">filename</span>
+</span><span class='line'>    <span class="k">if</span> <span class="k">super</span><span class="o">.</span><span class="n">present?</span>
+</span><span class='line'>      <span class="n">model</span><span class="o">.</span><span class="n">uploader_secure_token</span> <span class="o">||=</span> <span class="no">SecureRandom</span><span class="o">.</span><span class="n">uuid</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="no">Rails</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;(BaseUploader.filename) </span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">uploader_secure_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="s2">&quot;</span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">uploader_secure_token</span><span class="si">}</span><span class="s2">.</span><span class="si">#{</span><span class="n">file</span><span class="o">.</span><span class="n">extension</span><span class="o">.</span><span class="n">downcase</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">mount_uploader</span> <span class="ss">:avatar</span><span class="p">,</span> <span class="no">ImageUploader</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Photo</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">mount_uploader</span> <span class="ss">:image</span><span class="p">,</span> <span class="no">ImageUploader</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Category</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">mount_uploader</span> <span class="ss">:cover</span><span class="p">,</span> <span class="no">ImageUploader</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># ... 所有需要图片上传 Uploader 的地方都用 ImageUploader</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后 Views 里面调用的时候你就需要将以前的 :small, :large &#8230; 改成新的版本名称了</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">image_tag</span><span class="p">(</span><span class="vi">@user</span><span class="o">.</span><span class="n">avatar</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="s2">&quot;20x20&quot;</span><span class="p">))</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当然我不建议你直接这么写，你应该写个 <code>user_avatar_tag</code> 的 Helper 来做上面这段的事情:</p>
+
+<p>users_helper.rb</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">user_avatar_tag</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{})</span>
+</span><span class='line'>  <span class="n">options</span><span class="o">[</span><span class="ss">:style</span><span class="o">]</span> <span class="o">||=</span> <span class="ss">:small</span>
+</span><span class='line'>  <span class="n">style</span> <span class="o">=</span> <span class="k">case</span> <span class="n">options</span><span class="o">[</span><span class="ss">:style</span><span class="o">].</span><span class="n">to_s</span>
+</span><span class='line'>  <span class="k">when</span> <span class="s2">&quot;small&quot;</span> <span class="k">then</span> <span class="s2">&quot;30x30&quot;</span>
+</span><span class='line'>  <span class="k">when</span> <span class="s2">&quot;normal&quot;</span> <span class="k">then</span> <span class="s2">&quot;100x100&quot;</span>
+</span><span class='line'>  <span class="k">when</span> <span class="s2">&quot;large&quot;</span> <span class="k">then</span> <span class="s2">&quot;240x240&quot;</span>
+</span><span class='line'>  <span class="k">when</span> <span class="s2">&quot;tiny&quot;</span> <span class="k">then</span> <span class="s2">&quot;20x20&quot;</span>
+</span><span class='line'>  <span class="k">else</span> <span class="n">options</span><span class="o">[</span><span class="ss">:style</span><span class="o">].</span><span class="n">to_s</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="n">link_to</span> <span class="n">image_tag</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">avatar</span><span class="p">(</span><span class="n">style</span><span class="p">)),</span> <span class="n">user</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>View 里面用 helper</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">user_avatar_tag</span><span class="p">(</span><span class="vi">@user</span><span class="p">,</span> <span class="ss">:style</span> <span class="o">=&gt;</span> <span class="ss">:tiny</span><span class="p">)</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后一切都爽了，你都不需要装 ImageMagick (RMagick, mini_magick) 了，上传的时候只会有一张原图发往又拍云，然后通过不同的 URL 规则就能调用到缩略图。</p>
+
+<h2 id="cdn-asset-files">使用又拍云的 CDN 来部署你的 Assets 文件</h2>
+
+
+<p>由于又拍云的存储还带有 CDN 分发功能，我们可以直接用它来存储我们的 Javascripts, Stylesheets, Images 这些资源文件，这样可以让访客在国内的任意地方下载这些文件都可以尽可能的使用最近的 CDN 节点，页面加载速度就自然能快起来。</p>
+
+<p>参考一下 Ruby China 的这个 Commit 的代码：</p>
+
+<ul>
+<li><a href="https://github.com/ruby-china/ruby-china/commit/d050f7f8b7441fbd88671e0008205f4ccffca8b5">https://github.com/ruby-china/ruby-china/commit/d050f7f8b7441fbd88671e0008205f4ccffca8b5</a></li>
+</ul>
+
+
+<p>里面包含 4 个文件的改动:</p>
+
+<ul>
+<li><code>lib/ftp_sync.rb</code> - FTP 同步功能，此文件无需修改</li>
+<li><code>config/environments/production.rb</code> - 将 asset_host 改成你的又拍云域名</li>
+<li><code>lib/tasks/assets/cdn.rake</code> - 搞个 rake assets:cdn 命令用于执行同步功能，此文件你需要修改又拍云的配置信息</li>
+<li><code>config/deploy.rb</code> - 在 Capistrano 的部署过程加入调用 rake assets:cdn</li>
+</ul>
+
+
+<blockquote><p> 注意，如果你在用图片空间的话，要注意改写 <code>cdn.rake</code> 的时候 Bucket 一定要用一个“文件空间”!<br />
+因为图片空间是没法存放 js,css 文件的，你可以定义两个 Bucket, 一个用于存图片，一个用于存 Assets 文件。</p></blockquote>
+
+<p>当你在 <code>rake assets:precomplie</code> 编译出 Assets 文件以后，就可以执行 <code>rake assets:cdn</code> 将预编译好的 Assets 文件同步到又拍云里面了。 (Ruby China 里面那个脚本以经过反复尝试，靠谱！)</p>
+
+<hr />
+
+<p>后面没了，以后有时间再研究一下 又拍的 Form API 与 Rails 项目结合。</p>
+
+<h2>上面提及的资源的地址</h2>
+
+<ul>
+<li><a href="https://www.upyun.com/?utm_source=ruby-china&amp;utm_medium=ad&amp;utm_campaign=upyun&amp;md=ruby-china">又拍云存储</a></li>
+<li><a href="https://github.com/jnicklas/carrierwave">CarrierWave</a></li>
+<li><a href="https://github.com/nowa/carrierwave-upyun">carrierwave-upyun</a></li>
+<li><a href="https://gist.github.com/3414491">Rails 调用又拍云 Form API 的例子</a></li>
+<li><a href="https://github.com/ruby-china/ruby-china">Ruby China 的源代码</a></li>
+</ul>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2012-08-23 09:48:00 +0800" pubdate>2012-08-23</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/rails/'>Rails</a>, <a class='category' href='/blog/category/carrierwave/'>carrierwave</a>, <a class='category' href='/blog/category/carrierwave-upyun/'>carrierwave-upyun</a>, <a class='category' href='/blog/category/云服务/'>云服务</a>, <a class='category' href='/blog/category/又拍云/'>又拍云</a>, <a class='category' href='/blog/category/存储/'>存储</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/rails-app-image-store-with-carrierwave-upyun';
+	var disqus_url = 'http://huacnlee.github.com/blog/rails-app-image-store-with-carrierwave-upyun';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

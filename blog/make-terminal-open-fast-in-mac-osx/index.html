@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Mac OS X 终端打开速度慢的解决办法  - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Mac OS X 终端打开速度慢的解决办法 最近越来越觉得在 Mac 里面打开终端(Terminal)，或新开一个终端标签页的时候速度很慢，几乎都要等上好几秒&#8230;而系统资源其实是足足的，一直不解这个原因，而对于一个开发人员来说终端是经常需要用到的，这样不行啊，虽然时间不多， &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/make-terminal-open-fast-in-mac-osx">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Mac OS X 终端打开速度慢的解决办法 </h1>
+    
+  </header>
+
+  <div class="entry_content"><p>最近越来越觉得在 Mac 里面打开终端(Terminal)，或新开一个终端标签页的时候速度很慢，几乎都要等上好几秒&#8230;而系统资源其实是足足的，一直不解这个原因，而对于一个开发人员来说终端是经常需要用到的，这样不行啊，虽然时间不多，但慢哪么一点就是感觉不爽，记得刚才始的时候都是很快的。今天有机会终于把它解决了&#8230;
+Mac 里面有个这个文件:&nbsp;<strong>/usr/libexec/path_helper</strong>&nbsp;,每次 bash 打开的时候都会运行它，从&nbsp;<strong>/etc/paths.d </strong>里面得到 <strong>PATH</strong> 信息，以前 Windows 在环境变量里面设置，Linux 是写在 .bashrc 里面的，而这个文件加载速度非常慢。</p>
+
+<h2>如何解决?</h2>
+
+<ul>
+<li>先执行 time /usr/libexec/path_helper 得到当前的 PATH 信息，如我的：</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">time</span> /usr/libexec/path_helper
+</span><span class='line'><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;/Users/matt/bin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/local/mysql/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/X11/bin&quot;</span>; <span class="nb">export </span>PATH <span class="nv">MANPATH</span><span class="o">=</span><span class="s2">&quot;/opt/local/man:/usr/share/man:/usr/local/share/man:/usr/X11/man&quot;</span>; <span class="nb">export </span>MANPATH
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>删除里面的所有文件和目录；</li>
+<li>把刚才 path_helper 返回的&amp;信息写在 ~/.bash_profile 这个文件里面（注：Linux 里面是 .bashrc 而 Mac 是 .bash_profile）。</li>
+</ul>
+
+
+<!-- more -->
+
+
+<p>现在关掉重新打开终端，速度如飞一般的感觉，这才像 Mac 的体验嘛！</p>
+
+<h2>参考资料：</h2>
+
+<ul>
+<li><a href="http://superuser.com/questions/31403/how-can-i-speed-up-terminal-app-or-iterm-on-mac-osx">http://superuser.com/questions/31403/how-can-i-speed-up-terminal-app-or-iterm-on-mac-osx</a></li>
+<li><a href="http://mjtsai.com/blog/2009/04/01/slow-opening-terminal-windows/">http://mjtsai.com/blog/2009/04/01/slow-opening-terminal-windows/</a></li>
+</ul>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2010-09-14 22:56:00 +0800" pubdate>2010-09-14</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/mac/'>Mac</a>, <a class='category' href='/blog/category/电脑维护/'>电脑维护</a>, <a class='category' href='/blog/category/终端/'>终端</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/make-terminal-open-fast-in-mac-osx';
+	var disqus_url = 'http://huacnlee.github.com/blog/make-terminal-open-fast-in-mac-osx';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

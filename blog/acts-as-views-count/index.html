@@ -1,0 +1,259 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Rails 插件 acts_as_views_count - Model访问量延迟统计 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Rails 插件 acts_as_views_count - Model访问量延迟统计 项目有很多时候需要进行统计单篇文章的访问次数，如文章、帖子、图片&#8230;
+于是在表里面设计一个 views_count 字段作为计数器，然后查看页面的时候更新这个字段。
+但为了提要效率， &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/acts-as-views-count">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Rails 插件 acts_as_views_count - Model访问量延迟统计</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>项目有很多时候需要进行统计单篇文章的访问次数，如文章、帖子、图片&#8230;
+于是在表里面设计一个 <code>views_count</code> 字段作为计数器，然后查看页面的时候更新这个字段。
+但为了提要效率，一般情况下我们都需要对 <code>views_count</code> 的写入数据库做一下延迟，存到缓存里面去，到了一定数量在更新数据库。
+为了方便使用，我把之前的方式改写成了一个插件，第一次做 Rails 插件，比较简单</p>
+
+<h2>项目地址：</h2>
+
+<p><a href="http://github.com/huacnlee/acts_as_views_count">http://github.com/huacnlee/acts_as_views_count</a></p>
+
+<h2>使用例子</h2>
+
+<!-- more -->
+
+
+<h3>Models</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">acts_as_views_count</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Topic</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="c1"># set delay save to db with 30</span>
+</span><span class='line'>  <span class="n">acts_as_views_count</span> <span class="ss">:delay</span> <span class="o">=&gt;</span> <span class="mi">30</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Controllers</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1"># update views_count</span>
+</span><span class='line'>    <span class="vi">@post</span><span class="o">.</span><span class="n">update_views_count</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Views</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="x">&lt;div id=&quot;post_show&quot;&gt;</span>
+</span><span class='line'><span class="x">  &lt;h1&gt;</span><span class="cp">&lt;%=</span> <span class="vi">@post</span><span class="o">.</span><span class="n">title</span> <span class="cp">%&gt;</span><span class="x">&lt;/h1&gt;</span>
+</span><span class='line'><span class="x">  &lt;div class=&quot;info&quot;&gt;</span>
+</span><span class='line'><span class="x">    &lt;span&gt;</span><span class="cp">&lt;%=</span> <span class="vi">@post</span><span class="o">.</span><span class="n">views_count_s</span> <span class="cp">%&gt;</span><span class="x"> views&lt;/span&gt;</span>
+</span><span class='line'><span class="x">    &lt;span&gt;</span><span class="cp">&lt;%=</span> <span class="vi">@post</span><span class="o">.</span><span class="n">comments_count</span> <span class="cp">%&gt;</span><span class="x"> comments&lt;/span&gt;</span>
+</span><span class='line'><span class="x">  &lt;/div&gt;</span>
+</span><span class='line'><span class="x">&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2010-01-14 17:56:00 +0800" pubdate>2010-01-14</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/plugin/'>Plugin</a>, <a class='category' href='/blog/category/rails/'>Rails</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/acts-as-views-count';
+	var disqus_url = 'http://huacnlee.github.com/blog/acts-as-views-count';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

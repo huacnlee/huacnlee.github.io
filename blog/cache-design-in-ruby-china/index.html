@@ -1,0 +1,549 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Ruby China 里面我是如何设计缓存的 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Ruby China 里面我是如何设计缓存的 看最近 @quakewang 分享的 《总结 web 应用中常用的各种 cache》，我也搭车分享一下在 Ruby China 里面，我们是如何做 Cache 的。 首先给大家看一下 NewRelic 的报表 最近 24h 的平均响应时间 &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/cache-design-in-ruby-china">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Ruby China 里面我是如何设计缓存的</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>看最近 @quakewang 分享的 《<a href="http://ruby-china.org/topics/19389">总结 web 应用中常用的各种 cache</a>》，我也搭车分享一下在 Ruby China 里面，我们是如何做 Cache 的。</p>
+
+<h2>首先给大家看一下 NewRelic 的报表</h2>
+
+<p>最近 24h 的平均响应时间</p>
+
+<p><img src="http://l.ruby-china.org/photo/2014/6a3a30c14222f8002114a253d4483018.png" alt="" /></p>
+
+<h3>流量高的那些页面 (Action)</h3>
+
+<p><img src="http://l.ruby-china.org/photo/2014/67cc2b577ab886eb4c66a54b5e9ce0b9.png" alt="" /></p>
+
+<h3>访问量搞的几个 Action 的情况：</h3>
+
+<h4>TopicsController#show</h4>
+
+<p><img src="http://l.ruby-china.org/photo/2014/8aa11ae13c2b0732aa11e6b27dc463e9.png" alt="" /></p>
+
+<h4>UsersController#show (比较惨，主要是 GitHub API 请求拖慢)</h4>
+
+<p><img src="http://l.ruby-china.org/photo/2014/771c1d75b08c01b268eb0e5223739d3e.png" alt="" /></p>
+
+<p>PS: 在发布这篇文章之前我有稍加修改了一下，GitHub 请求放到后台队列处理，新的结果是这样:</p>
+
+<p><img src="http://l.ruby-china.org/photo/2014/f05fab2bc39506da10c5a5ebb7172d79.png" alt="" /></p>
+
+<h4>TopicsController#index</h4>
+
+<p><img src="http://l.ruby-china.org/photo/2014/ed43a50fb2177a800c26bd9d80f97334.png" alt="" /></p>
+
+<h4>HomeController#index</h4>
+
+<p><img src="http://l.ruby-china.org/photo/2014/32519b34fc02877b893c5c3e4f370d6c.png" alt="" /></p>
+
+<p>从上面的报表来看，目前 Ruby China 后端的请求，排除用户主页之外，响应时间都在 100ms 以内，甚至更低。</p>
+
+<h2>我们是如何做到的？</h2>
+
+<ul>
+<li>Markdown 缓存</li>
+<li>Fragment Cache</li>
+<li>数据缓存</li>
+<li>ETag</li>
+<li>静态资源缓存 (JS,CSS,图片)</li>
+</ul>
+
+
+<h3>Markdown 缓存</h3>
+
+<p>在内容修改的时候就算好 Markdown 的结果，存到数据库，避免浏览的时候反复计算。</p>
+
+<p>此外这个东西也特意不放到 Cache，而是放到数据库里面：</p>
+
+<ol>
+<li>为了持久化，避免 Memcached 停掉的时候，大量丢失；</li>
+<li>避免过多占用缓存内存；</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Topic</span>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:body</span> <span class="c1"># 存放原始内容，用于修改</span>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:body_html</span> <span class="c1"># 存放计算好的结果，用于显示</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">before_save</span> <span class="ss">:markdown_body</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">markdown_body</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">body_html</span> <span class="o">=</span> <span class="no">MarkdownTopicConverter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="n">body</span><span class="p">)</span> <span class="k">if</span> <span class="nb">self</span><span class="o">.</span><span class="n">body_changed?</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Fragment Cache</h3>
+
+<p>这个是 Ruby China 里面用得最多的缓存方案，也是速度提升的原因所在。</p>
+
+<p>app/views/topics/_topic.html.erb</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%</span> <span class="n">cache</span><span class="p">(</span><span class="o">[</span><span class="n">topic</span><span class="p">,</span> <span class="n">suggest</span><span class="o">]</span><span class="p">)</span> <span class="k">do</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">&lt;div class=&quot;topic topic_line topic_</span><span class="cp">&lt;%=</span> <span class="n">topic</span><span class="o">.</span><span class="n">id</span> <span class="cp">%&gt;</span><span class="x">&quot;&gt;</span>
+</span><span class='line'><span class="x">   </span><span class="cp">&lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="n">topic</span><span class="o">.</span><span class="n">replies_count</span><span class="p">,</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">topic_path</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span><span class="si">}</span><span class="s2">#reply</span><span class="si">#{</span><span class="n">topic</span><span class="o">.</span><span class="n">replies_count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span class='line'>          <span class="ss">:class</span> <span class="o">=&gt;</span> <span class="s2">&quot;count state_false&quot;</span><span class="p">)</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  ... 省略内容部分</span>
+</span><span class='line'><span class="x">  </span>
+</span><span class='line'><span class="x">&lt;/div&gt;</span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>用 topic 的 cache_key 作为缓存 cache
+ <code>views/topics/{编号}-#{更新时间}/{suggest 参数}/{文件内容 MD5}</code> ->
+<code>views/topics/19105-20140508153844/false/bc178d556ecaee49971b0e80b3566f12</code></li>
+<li>某些涉及到根据用户帐号，有不同状态显示的地方，直接把完整 HTML 准备好，通过 JS 控制状态，比如目前的“喜欢“功能。</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">readed_topic_ids</span> <span class="o">=</span> <span class="o">&lt;%=</span> <span class="nx">current_user</span><span class="p">.</span><span class="nx">filter_readed_topics</span><span class="p">(</span><span class="err">@</span><span class="nx">topics</span><span class="p">)</span> <span class="o">%&gt;</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">readed_topic_ids</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">topic_id</span> <span class="o">=</span> <span class="nx">readed_topic_ids</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;.topic_&quot;</span><span class="o">+</span> <span class="nx">topic_id</span> <span class="o">+</span> <span class="s2">&quot; .right_info .count&quot;</span><span class="p">).</span><span class="nx">addClass</span><span class="p">(</span><span class="s2">&quot;state_true&quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="nt">&lt;/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>再比如 <a href="https://github.com/ruby-china/ruby-china/blob/47b6ba0e2495484e273de1324e69bf27fec53f48/app/views/replies/_reply.html.erb">app/views/topics/_reply.html.erb
+</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%</span> <span class="n">cache</span><span class="p">(</span><span class="o">[</span><span class="n">reply</span><span class="p">,</span><span class="s2">&quot;raw:</span><span class="si">#{</span><span class="vi">@show_raw</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">]</span><span class="p">)</span> <span class="k">do</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">&lt;div class=&quot;reply&quot;&gt;</span>
+</span><span class='line'><span class="x">  &lt;div class=&quot;pull-left face&quot;&gt;</span><span class="cp">&lt;%=</span> <span class="n">user_avatar_tag</span><span class="p">(</span><span class="n">reply</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="ss">:normal</span><span class="p">)</span> <span class="cp">%&gt;</span><span class="x">&lt;/div&gt;</span>
+</span><span class='line'><span class="x">  &lt;div class=&quot;infos&quot;&gt;</span>
+</span><span class='line'><span class="x">    &lt;div class=&quot;info&quot;&gt;</span>
+</span><span class='line'><span class="x">      &lt;span class=&quot;name&quot;&gt;</span>
+</span><span class='line'><span class="x">        </span><span class="cp">&lt;%=</span> <span class="n">user_name_tag</span><span class="p">(</span><span class="n">reply</span><span class="o">.</span><span class="n">user</span><span class="p">)</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">      &lt;/span&gt;</span>
+</span><span class='line'><span class="x">      &lt;span class=&quot;opts&quot;&gt;</span>
+</span><span class='line'><span class="x">        </span><span class="cp">&lt;%=</span> <span class="n">likeable_tag</span><span class="p">(</span><span class="n">reply</span><span class="p">,</span> <span class="ss">:cache</span> <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">)</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">        </span><span class="cp">&lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">edit_topic_reply_path</span><span class="p">(</span><span class="vi">@topic</span><span class="p">,</span><span class="n">reply</span><span class="p">),</span> <span class="ss">:class</span> <span class="o">=&gt;</span> <span class="s2">&quot;edit icon small_edit&quot;</span><span class="p">,</span> <span class="s1">&#39;data-uid&#39;</span> <span class="o">=&gt;</span> <span class="n">reply</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span> <span class="ss">:title</span> <span class="o">=&gt;</span> <span class="s2">&quot;修改回帖&quot;</span><span class="p">)</span><span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">        </span><span class="cp">&lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;#&quot;</span><span class="p">,</span> <span class="s1">&#39;data-floor&#39;</span> <span class="o">=&gt;</span> <span class="n">floor</span><span class="p">,</span> <span class="s1">&#39;data-login&#39;</span> <span class="o">=&gt;</span> <span class="n">reply</span><span class="o">.</span><span class="n">user_login</span><span class="p">,</span>
+</span><span class='line'>            <span class="ss">:title</span> <span class="o">=&gt;</span> <span class="n">t</span><span class="p">(</span><span class="s2">&quot;topics.reply_this_floor&quot;</span><span class="p">),</span> <span class="ss">:class</span> <span class="o">=&gt;</span> <span class="s2">&quot;icon small_reply&quot;</span> <span class="p">)</span>
+</span><span class='line'>        <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">      &lt;/span&gt;</span>
+</span><span class='line'><span class="x">    &lt;/div&gt;</span>
+</span><span class='line'><span class="x">    &lt;div class=&quot;body&quot;&gt;</span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">sanitize_reply</span> <span class="n">reply</span><span class="o">.</span><span class="n">body_html</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">    &lt;/div&gt;</span>
+</span><span class='line'><span class="x">  &lt;/div&gt;</span>
+</span><span class='line'><span class="x">&lt;/div&gt;</span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>同样也是通过 <code>reply</code> 的 cache_key 来缓存 <code>views/replies/202695-20140508081517/raw:false/d91dddbcb269f3e0172bf5d0d27e9088</code>
+同时这里还有复杂的用户权限控制，用 JS 实现；</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>    <span class="o">&lt;%</span> <span class="k">if</span> <span class="nx">admin</span><span class="o">?</span> <span class="o">%&gt;</span>
+</span><span class='line'>      <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#replies .reply a.edit&quot;</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;display&#39;</span><span class="p">,</span><span class="s1">&#39;inline-block&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="o">&lt;%</span> <span class="nx">elsif</span> <span class="nx">current_user</span> <span class="o">%&gt;</span>
+</span><span class='line'>      <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#replies .reply a.edit[data-uid=&#39;&lt;%= current_user.id %&gt;&#39;]&quot;</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;display&#39;</span><span class="p">,</span><span class="s1">&#39;inline-block&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="o">&lt;%</span> <span class="nx">end</span> <span class="o">%&gt;</span>
+</span><span class='line'>    <span class="o">&lt;%</span> <span class="k">if</span> <span class="nx">current_user</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="err">@</span><span class="nx">user_liked_reply_ids</span><span class="p">.</span><span class="nx">blank</span><span class="o">?</span> <span class="o">%&gt;</span>
+</span><span class='line'>      <span class="nx">Topics</span><span class="p">.</span><span class="nx">checkRepliesLikeStatus</span><span class="p">([</span><span class="o">&lt;%=</span> <span class="err">@</span><span class="nx">user_liked_reply_ids</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="o">%&gt;</span><span class="p">]);</span>
+</span><span class='line'>    <span class="o">&lt;%</span> <span class="nx">end</span> <span class="o">%&gt;</span>
+</span><span class='line'>  <span class="p">})</span>
+</span><span class='line'><span class="nt">&lt;/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>数据缓存</h3>
+
+<p>其实 Ruby China 的大多数 Model 查询都没有上 Cache 的，因为据实际状况来看，<a href="http://mongodb.org">MongoDB</a> 的查询响应时间都是很快的，大部分场景都是在 5ms 以内，甚至更低。</p>
+
+<p>我们会做一些比价负责的数据查询缓存，比如：GitHub Repos 获取</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">github_repos</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">cache_key</span> <span class="o">=</span> <span class="s2">&quot;user:</span><span class="si">#{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">:github_repos&quot;</span>
+</span><span class='line'>  <span class="n">items</span> <span class="o">=</span> <span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">if</span> <span class="n">items</span><span class="o">.</span><span class="n">blank?</span>
+</span><span class='line'>    <span class="n">items</span> <span class="o">=</span> <span class="n">real_fetch_from_github</span><span class="p">()</span>
+</span><span class='line'>    <span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">expires_in</span><span class="p">:</span> <span class="mi">15</span><span class="o">.</span><span class="n">days</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">items</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>ETag</h3>
+
+<p>ETag 是在 HTTP Request, Response 可以带上的一个参数，用于检测内容是否有更新过，以减少网络开销。</p>
+
+<p>过程大概是这样</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">第一次请求</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="o">[</span><span class="err">浏览器</span><span class="o">]</span>                   <span class="err">浏览器收到，并记录到本地</span> <span class="no">Cache</span>
+</span><span class='line'>         <span class="o">|</span>                         <span class="o">|</span>
+</span><span class='line'>         <span class="o">|</span>  <span class="o">[</span><span class="no">GET</span><span class="sr"> /index.html]      | [HTTP status 200]</span>
+</span><span class='line'><span class="sr">         |                         | [ETag: abc]</span>
+</span><span class='line'><span class="sr">         |                         |</span>
+</span><span class='line'><span class="sr">  [Rails Controller]               |</span>
+</span><span class='line'><span class="sr">         |                         |</span>
+</span><span class='line'><span class="sr">      [Views]                      |</span>
+</span><span class='line'><span class="sr">         |-------------------------|-</span>
+</span><span class='line'><span class="sr">                             </span>
+</span><span class='line'><span class="sr">第二次请求 /in</span><span class="n">dex</span><span class="o">.</span><span class="n">html</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="o">[</span><span class="err">浏览器</span><span class="o">]</span>                   <span class="err">浏览器收到，并记录到本地</span> <span class="no">Cache</span>
+</span><span class='line'>         <span class="o">|</span>                         <span class="o">|</span>                          <span class="o">|</span>
+</span><span class='line'>         <span class="o">|</span>  <span class="o">[</span><span class="no">GET</span><span class="sr"> /index.html]      | [HTTP status 304]        | [HTTP Status 200]</span>
+</span><span class='line'><span class="sr">         |  [ETag: abc]            | [ETag: abc]              | [ETag: efg]</span>
+</span><span class='line'><span class="sr">         |                         |                          |</span>
+</span><span class='line'><span class="sr">  [Rails Controller] --------------|                          |</span>
+</span><span class='line'><span class="sr">         |                      ETag 相同                      |</span>
+</span><span class='line'><span class="sr">         |                                                    |</span>
+</span><span class='line'><span class="sr">      [Views] ------------------------------------------------|-</span>
+</span><span class='line'><span class="sr">                                ETag 不同</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Rails 的 <a href="http://api.rubyonrails.org/classes/ActionController/ConditionalGet.html#method-i-fresh_when">fresh_when</a> 方法可以帮助将你的查询内容生成 ETag 信息</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>  <span class="vi">@topic</span> <span class="o">=</span> <span class="no">Topic</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">fresh_when</span><span class="p">(</span><span class="n">etag</span><span class="p">:</span> <span class="o">[</span><span class="vi">@topic</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>静态资源缓存</h3>
+
+<p>请不要小看这个东西，后端写得再快，也有可能被这些拖慢（浏览器上面的表现）!</p>
+
+<p>1、合理利用 Rails Assets Pipeline，一定要开启！</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># config/environments/production.rb</span>
+</span><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">assets</span><span class="o">.</span><span class="n">digest</span> <span class="o">=</span> <span class="kp">true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>2、在 Nginx 里面将 CSS, JS, Image 的缓存有效期设成 max；</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='nginx'><span class='line'><span class="k">location</span> <span class="p">~</span> <span class="sr">(/assets|/favicon.ico|/*.txt)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kn">access_log</span>        <span class="no">off</span><span class="p">;</span>
+</span><span class='line'>  <span class="kn">expires</span>           <span class="s">max</span><span class="p">;</span>
+</span><span class='line'>  <span class="kn">gzip_static</span> <span class="no">on</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>3、尽可能的减少一个页面 JS, CSS, Image 的数量，简单的方法是合并它们，减少 HTTP 请求开销；</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='nginx'><span class='line'><span class="k">&lt;head&gt;</span>
+</span><span class='line'>  <span class="s">...</span>
+</span><span class='line'>  <span class="s">只有两个</span>
+</span><span class='line'>  <span class="s">&lt;link</span> <span class="s">href=&quot;http://l.ruby-china.org/assets/front-1a909fc4f255c12c1b613b3fe373e527.css&quot;</span> <span class="s">rel=&quot;stylesheet&quot;</span> <span class="s">/&gt;</span>
+</span><span class='line'>  <span class="s">&lt;script</span> <span class="s">src=&quot;http://l.ruby-china.org/assets/app-24d4280cc6fda926e73419c126c71206.js&quot;&gt;&lt;/script&gt;</span>
+</span><span class='line'>  <span class="s">...</span>
+</span><span class='line'><span class="s">&lt;/head&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>一些 Tips</h2>
+
+<ol>
+<li>看统计日志，优先处理流量高的页面；</li>
+<li>updated_at 是一个非常有利于帮助你清理缓存的东西，善用它！修改数据的时候别忽略它！</li>
+<li>多关注你的 Rails Log 里面的查询时间，100ms 一下的页面响应时间是一个比较好的状态，超过 200ms 用户就会感觉到迟钝了。</li>
+</ol>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2014-05-21 11:11:00 +0800" pubdate>2014-05-21</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/cache/'>Cache</a>, <a class='category' href='/blog/category/etag/'>ETag</a>, <a class='category' href='/blog/category/newrelic/'>NewRelic</a>, <a class='category' href='/blog/category/nginx/'>Nginx</a>, <a class='category' href='/blog/category/rails/'>Rails</a>, <a class='category' href='/blog/category/ruby-china/'>Ruby China</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/cache-design-in-ruby-china';
+	var disqus_url = 'http://huacnlee.github.com/blog/cache-design-in-ruby-china';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

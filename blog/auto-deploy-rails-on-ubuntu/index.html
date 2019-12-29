@@ -1,0 +1,348 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Ubuntu 自动安装部署 Rails 环境 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Ubuntu 自动安装部署 Rails 环境 你需要经常安装部署 Rails 到新的 Web 服务器吗？ 你是否还在经历每次从安装 Ruby Rubygems MySQL&#8230; 再到安装 Web Server 组件&#8230; 反复烦躁的安装流程呢？ 现在你可以改用这个脚本实现在 &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/auto-deploy-rails-on-ubuntu">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Ubuntu 自动安装部署 Rails 环境</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>你需要经常安装部署 Rails 到新的 Web 服务器吗？</p>
+
+
+<p>你是否还在经历每次从安装 Ruby Rubygems MySQL&#8230; 再到安装 Web Server 组件&#8230; 反复烦躁的安装流程呢？</p>
+
+
+<p>现在你可以改用这个脚本实现在 Ubuntu Server 上面部署 <span style="color: #000080;"><span style="background-color: #99ccff;"><strong>Ruby1.8</strong> + <strong>Rails </strong>+ <strong>Passenger </strong>+ </span></span><strong><span style="color: #000080;"><span style="background-color: #99ccff;">Nginx</span></span> </strong>的环境：</p>
+
+
+<!-- more -->
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/bin/sh</span>
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;=== YTRIPTHIRD UBUNTU INSTALL ===&quot;</span>
+</span><span class='line'><span class="nb">cd</span> /tmp
+</span><span class='line'>
+</span><span class='line'><span class="c"># Ruby</span>
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;=== Install Ruby library...&quot;</span>
+</span><span class='line'>sudo apt-get install g++ ruby1.8 rubygems rake irb ruby1.8-dev build-essential libopenssl-ruby imagemagick rmagick
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;=== Ruby library install done.&quot;</span>
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># MySQL Server</span>
+</span><span class='line'><span class="nb">echo</span> -n <span class="s2">&quot;Do you wan&#39;t install MySQL automatic[y/n]:&quot;</span>
+</span><span class='line'><span class="nb">read </span>KEY
+</span><span class='line'><span class="k">case</span> <span class="nv">$KEY</span> in
+</span><span class='line'>y|Y<span class="o">)</span>
+</span><span class='line'>  <span class="nb">echo</span> <span class="s2">&quot;=== Install MySQL server...&quot;</span>
+</span><span class='line'>  sudo apt-get install mysql-server mysql
+</span><span class='line'>  ;;
+</span><span class='line'><span class="k">esac</span>
+</span><span class='line'>sudo apt-get install libmysqlclient-dev
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;=== MySQL install done.&quot;</span>
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Rubygems</span>
+</span><span class='line'><span class="nb">echo</span> -n <span class="s2">&quot;Do you wan&#39;t install Rubygems?[y/n]:&quot;</span>
+</span><span class='line'><span class="nb">read </span>KEY
+</span><span class='line'><span class="k">case</span> <span class="nv">$KEY</span> in
+</span><span class='line'>y|Y<span class="o">)</span>
+</span><span class='line'>  <span class="nb">echo</span> <span class="s2">&quot;=== Install Rubygems from source file...&quot;</span>
+</span><span class='line'>  wget http://rubyforge.org/frs/download.php/60719/rubygems-1.3.5.zip
+</span><span class='line'>  unzip rubygems-1.3.5.zip
+</span><span class='line'>  <span class="nb">cd </span>rubygems-1.3.5
+</span><span class='line'>  sudo ruby setup.rb
+</span><span class='line'>  sudo gem sources -a http://gems.github.com
+</span><span class='line'>  <span class="nb">cd</span> ..
+</span><span class='line'>  sudo rm -R /tmp/rubygems-1.3.5
+</span><span class='line'>  <span class="nb">echo</span> <span class="s2">&quot;=== Rubygems install done.&quot;</span>
+</span><span class='line'>  ;;
+</span><span class='line'><span class="k">esac</span>
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Install Rails</span>
+</span><span class='line'><span class="nb">echo</span> -n <span class="s2">&quot;Do you wan&#39;t install Rails?[y/n]&quot;</span>
+</span><span class='line'><span class="nb">read </span>KEY
+</span><span class='line'><span class="k">case</span> <span class="nv">$KEY</span> in
+</span><span class='line'>y|Y<span class="o">)</span>
+</span><span class='line'>  <span class="nb">echo</span> <span class="s2">&quot;=== Install Rails and some Gems...&quot;</span>
+</span><span class='line'>  sudo gem install rails passenger --no-rdoc
+</span><span class='line'>  <span class="nb">echo</span> <span class="s2">&quot;=== Rails install done.&quot;</span>
+</span><span class='line'>  ;;
+</span><span class='line'><span class="k">esac</span>
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Install Web server</span>
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;=== Install Web Server&quot;</span>
+</span><span class='line'>wget http://sysoev.ru/nginx/nginx-0.7.64.tar.gz
+</span><span class='line'>tar zxf nginx-0.7.64.tar.gz
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;===*** Nginx install Warring! ***===&quot;</span>
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;   *** nginx source path: /tmp/nginx-0.7.64 &quot;</span>
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;   *** must be install nginx in: /etc/nginx &quot;</span>
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
+</span><span class='line'>sudo passenger-install-nginx-module
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;=== Web Server install done.&quot;</span>
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>此脚本一在 Ubuntu Server 9.04 版本上面测试通过，不过可能有些时候需要对这个脚本做一些微调后方可适应你的环境，如 Ruby 的版本、Rails的版本&#8230;</p>
+
+
+<p>或者你不想用 Passenger + Nginx 来部署你的 Rails App，也可以修改 <strong>Install Web Server</strong> 这段。</p>
+
+
+<p>或者还可以在 第一段批处理的地方加入更多的类库安装&#8230;.</p>
+
+
+<p>总之，本脚本是给你一个参考例子，以后部署 Rails App 别再手动安装了，把你的安装过程整理到 Shell 脚本中去，然后： `$ sh install-ubuntu.sh`
+<p>搞定所有流程，方便省事，又不用每次部署的时候反复的在 Google 上面查资料！</p>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2009-11-19 08:54:00 +0800" pubdate>2009-11-19</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/passenger/'>Passenger</a>, <a class='category' href='/blog/category/rails/'>Rails</a>, <a class='category' href='/blog/category/ruby/'>Ruby</a>, <a class='category' href='/blog/category/shell/'>Shell</a>, <a class='category' href='/blog/category/ubuntu/'>Ubuntu</a>, <a class='category' href='/blog/category/服务器/'>服务器</a>, <a class='category' href='/blog/category/部署/'>部署</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/auto-deploy-rails-on-ubuntu';
+	var disqus_url = 'http://huacnlee.github.com/blog/auto-deploy-rails-on-ubuntu';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

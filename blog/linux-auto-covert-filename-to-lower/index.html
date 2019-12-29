@@ -1,0 +1,230 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Linux 遍历目录下面所有文件，将文件名转为小写  - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Linux 遍历目录下面所有文件，将文件名转为小写 当你从 Windows 服务器换到 Linux 服务器的时候，以前的上传目录的目录名、文件名会遇到大小写的问题。在 Windows 环境下面没有文件区分大小写的概念，而 Linux 却有严格的文件名大小写区分。
+这样一来但来自 Windows &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/linux-auto-covert-filename-to-lower">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Linux 遍历目录下面所有文件，将文件名转为小写 </h1>
+    
+  </header>
+
+  <div class="entry_content"><p>当你从 Windows 服务器换到 Linux 服务器的时候，以前的上传目录的目录名、文件名会遇到大小写的问题。在 Windows 环境下面没有文件区分大小写的概念，而 Linux 却有严格的文件名大小写区分。
+这样一来但来自 Windows 服务器上面那些文件就有可能遇到因为文件名中带有大写字母而无法被找到。需要将这些文件的文件名从大写转换为小写字母&#8230;在将调用时候使用的地址全改为小写。
+在网上找了好久，都没有一个合适的脚本，看过好几个论坛上面贴出来的 Shell 脚本，试试都还是不行（我需要遍历目录、子目录下的所有文件，当然也包括目录名称），于是自己写了一个</p>
+
+<p>这是是 Python 脚本：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c">#!/usr/bin/python</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span><span class="nn">re</span>
+</span><span class='line'><span class="k">print</span> <span class="s">&quot;Auto convert Upper filename to Lower filename&quot;</span>
+</span><span class='line'><span class="nb">dir</span> <span class="o">=</span> <span class="s">&#39;/home/huacnlee/uploadfiles&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">print</span> <span class="s">&quot;find files...&quot;</span>
+</span><span class='line'><span class="k">for</span> <span class="n">root</span><span class="p">,</span><span class="n">dirs</span><span class="p">,</span><span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="nb">dir</span><span class="p">):</span>
+</span><span class='line'>  <span class="k">print</span> <span class="n">root</span>
+</span><span class='line'>  <span class="k">print</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">))</span> <span class="o">+</span> <span class="s">&quot; found.&quot;</span>
+</span><span class='line'>    <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="n">root</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+</span><span class='line'>    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+</span><span class='line'>       <span class="n">filename</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;/&quot;</span> <span class="o">+</span> <span class="n">f</span>
+</span><span class='line'>       <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&#39;[A-Z]&#39;</span><span class="p">,</span><span class="n">filename</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+</span><span class='line'>          <span class="k">print</span> <span class="n">filename</span>
+</span><span class='line'>          <span class="n">newfilename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</span><span class='line'>          <span class="k">print</span> <span class="s">&quot;Renaming&quot;</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="s">&quot;to&quot;</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="s">&quot;...&quot;</span>
+</span><span class='line'>           <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">newfilename</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>将里面的 dir 变量改为需要处理的目录，然后运行就好了。</p>
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2010-01-07 15:18:00 +0800" pubdate>2010-01-07</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/linux/'>Linux</a>, <a class='category' href='/blog/category/python/'>Python</a>, <a class='category' href='/blog/category/scripts/'>Scripts</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/linux-auto-covert-filename-to-lower';
+	var disqus_url = 'http://huacnlee.github.com/blog/linux-auto-covert-filename-to-lower';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

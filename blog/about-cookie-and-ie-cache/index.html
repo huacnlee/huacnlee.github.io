@@ -1,0 +1,435 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>谈谈Cookie存取和IE页面缓存的问题 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="谈谈Cookie存取和IE页面缓存的问题 最近老是发现在IE里会有Cookie的问题，如IE下面无法登出，或无法登录，或者登录后信息却无法取到，而Firefox下面一直是通过的，都试过好多次了，今天终于找回的主要的原因； Cookie的问题： 首先看一下我的Cookie存取代码 ( &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/about-cookie-and-ie-cache">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">谈谈Cookie存取和IE页面缓存的问题</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>最近老是发现在IE里会有Cookie的问题，如IE下面无法登出，或无法登录，或者登录后信息却无法取到，而Firefox下面一直是通过的，都试过好多次了，今天终于找回的主要的原因；<br /> <br /> <strong><span style="font-size: 24pt"><span style="font-family: 微软雅黑"> Cookie的问题：</span></span></strong><br /> <br /> 首先看一下我的Cookie存取代码 (这个Cookie操作支持二级域名访问)</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="cp">#region 存取Cookie</span>
+</span><span class='line'><span class="c1">///</span>
+</span><span class='line'><span class="c1">/// 存Cookie</span>
+</span><span class='line'><span class="c1">/// Json Lee 2007-09-24</span>
+</span><span class='line'><span class="c1">///</span>
+</span><span class='line'><span class="c1">/// 名称</span>
+</span><span class='line'><span class="c1">/// 值</span>
+</span><span class='line'><span class="c1">/// 到期时间</span>
+</span><span class='line'><span class="c1">///</span>
+</span><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">SetCookie</span><span class="p">(</span><span class="kt">string</span> <span class="n">cookieName</span><span class="p">,</span> <span class="kt">string</span> <span class="n">cookieValue</span><span class="p">,</span> <span class="kt">int</span> <span class="n">cookieExpiryMinute</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">cookieName</span> <span class="p">=</span> <span class="n">cookieName</span><span class="p">.</span><span class="n">ToLower</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">HttpCookie</span> <span class="n">cookie</span> <span class="p">=</span> <span class="k">new</span> <span class="n">HttpCookie</span><span class="p">(</span><span class="n">cookieName</span><span class="p">,</span><span class="n">cookieValue</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">cookie</span><span class="p">.</span><span class="n">Expires</span> <span class="p">=</span> <span class="n">DateTime</span><span class="p">.</span><span class="n">Now</span><span class="p">.</span><span class="n">AddMinutes</span><span class="p">(</span><span class="n">cookieExpiryMinute</span><span class="p">);</span>  <span class="c1">//设置Cookie过期时间</span>
+</span><span class='line'>    <span class="n">cookie</span><span class="p">.</span><span class="n">Path</span> <span class="p">=</span> <span class="s">&quot;/&quot;</span><span class="p">;</span>
+</span><span class='line'>    <span class="c1">//设置可访问Cookie的路径 为项目下的cookie文件夹及其子文件夹下所有页面</span>
+</span><span class='line'>    <span class="c1">//如果需要整个应用程序可访问 则设置为cookie.Path = &quot;/&quot;;即可</span>
+</span><span class='line'>    <span class="n">cookie</span><span class="p">.</span><span class="n">Domain</span> <span class="p">=</span> <span class="err">“</span><span class="p">.</span><span class="m">163.</span><span class="n">com</span><span class="s">&quot;;</span>
+</span><span class='line'>    <span class="c1">//以www.163.com为例，若要在 news.163.com等不同主机访问可以如上设置</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//删除旧的同名Cookie</span>
+</span><span class='line'>    <span class="n">HttpContext</span><span class="p">.</span><span class="n">Current</span><span class="p">.</span><span class="n">Response</span><span class="p">.</span><span class="n">Cookies</span><span class="p">.</span><span class="n">Remove</span><span class="p">(</span><span class="n">cookieName</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">HttpContext</span><span class="p">.</span><span class="n">Current</span><span class="p">.</span><span class="n">Response</span><span class="p">.</span><span class="n">Cookies</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">cookie</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">///</span>
+</span><span class='line'><span class="c1">/// 存Cookie</span>
+</span><span class='line'><span class="c1">/// Json Lee 2007-09-24</span>
+</span><span class='line'><span class="c1">///</span>
+</span><span class='line'><span class="c1">/// 名称</span>
+</span><span class='line'><span class="c1">/// 值</span>
+</span><span class='line'><span class="c1">///</span>
+</span><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">SetCookie</span><span class="p">(</span><span class="kt">string</span> <span class="n">cookieName</span><span class="p">,</span> <span class="kt">string</span> <span class="n">cookieValue</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">SetCookie</span><span class="p">(</span><span class="n">cookieName</span><span class="p">,</span> <span class="n">cookieValue</span><span class="p">,</span> <span class="m">60</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">///</span>
+</span><span class='line'><span class="c1">/// 清除Cookie</span>
+</span><span class='line'><span class="c1">///</span>
+</span><span class='line'><span class="c1">/// 名称</span>
+</span><span class='line'><span class="c1">///</span>
+</span><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">ClearCookie</span><span class="p">(</span><span class="kt">string</span> <span class="n">cookieName</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">SetCookie</span><span class="p">(</span><span class="n">cookieName</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">,-</span><span class="m">5</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">///</span>
+</span><span class='line'><span class="c1">/// 取Cookie</span>
+</span><span class='line'><span class="c1">/// Json Lee 2007-09-24</span>
+</span><span class='line'><span class="c1">///</span>
+</span><span class='line'><span class="c1">/// 名称</span>
+</span><span class='line'><span class="c1">/// 当没有值的时候的默认值</span>
+</span><span class='line'><span class="c1">///</span>
+</span><span class='line'><span class="k">public</span> <span class="kt">string</span> <span class="nf">GetCookie</span><span class="p">(</span><span class="kt">string</span> <span class="n">cookieName</span><span class="p">,</span> <span class="kt">string</span> <span class="n">defaultValue</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">cookieName</span> <span class="p">=</span> <span class="n">cookieName</span><span class="p">.</span><span class="n">ToLower</span><span class="p">();</span>
+</span><span class='line'>    <span class="kt">string</span> <span class="n">strResult</span> <span class="p">=</span> <span class="n">defaultValue</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">try</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">HttpContext</span><span class="p">.</span><span class="n">Current</span><span class="p">.</span><span class="n">Request</span><span class="p">.</span><span class="n">Cookies</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">HttpContext</span><span class="p">.</span><span class="n">Current</span><span class="p">.</span><span class="n">Request</span><span class="p">.</span><span class="n">Cookies</span><span class="p">[</span><span class="n">cookieName</span><span class="p">]</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="n">strResult</span> <span class="p">=</span> <span class="n">HttpContext</span><span class="p">.</span><span class="n">Current</span><span class="p">.</span><span class="n">Request</span><span class="p">.</span><span class="n">Cookies</span><span class="p">[</span><span class="n">cookieName</span><span class="p">].</span><span class="n">Value</span><span class="p">;</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">ex</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="p">.</span><span class="n">WriteWrongLog</span><span class="p">(</span><span class="n">ex</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">strResult</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">///</span>
+</span><span class='line'><span class="c1">/// 取Cookie</span>
+</span><span class='line'><span class="c1">/// Json Lee 2007-09-24</span>
+</span><span class='line'><span class="c1">///</span>
+</span><span class='line'><span class="c1">/// 名称</span>
+</span><span class='line'><span class="c1">///</span>
+</span><span class='line'><span class="k">public</span> <span class="kt">string</span> <span class="nf">GetCookie</span><span class="p">(</span><span class="kt">string</span> <span class="n">strName</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nf">GetCookie</span><span class="p">(</span><span class="n">strName</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="cp">#endregion</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p><br /> Cookie存取看起来的确很简单，而在.NET里面好像更简单。<br /> 但是&#8230;&#8230;&#8230;&#8230;&#8230;&#8230;&#8230;.<br /> 往往简单的东西经常出现一些问题，让人找不到原因。<br /> 我之前这里出现的问题就是，在写Cookie的时候，没有处理旧的同名Cookie，例如：第一次登录的时候写入 Cookie username=jsonlee 和 password=123456<br /> 有时候有可能会在未退出的情况下重新登录一下，这样就会再次写入同样的Cookie，但这样的情况，好像没有把原来的覆盖(我用 IECookies 这个工具看到的)，而是新加入一个同名的。这样一来明显问题就存在了。<br /> 所以我在SetCookie的方法里面加入了</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="c1">//删除旧的同名Cookie</span>
+</span><span class='line'><span class="n">HttpContext</span><span class="p">.</span><span class="n">Current</span><span class="p">.</span><span class="n">Response</span><span class="p">.</span><span class="n">Cookies</span><span class="p">.</span><span class="n">Remove</span><span class="p">(</span><span class="n">cookieName</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>这样一来问题就解决了。<br /> <br /> <br /> <strong><span style="font-family: 微软雅黑"><span style="font-size: 24pt">IE页面缓存的问题：<br /> <br /> </span></span></strong>我现在的用户登录状态是通过 Ajax调用一个 GetUserBar.aspx 来取得用户状态栏信息的<br /> 以下是 GetUserbar.aspx 的代码</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="err">&lt;</span>%@ Page language=&quot;c#&quot;&quot; Codebehind=&quot;GetUserBar.aspx.cs&quot; AutoEventWireup=&quot;false&quot; Inherits=&quot;Web.GetUserBar&quot; %&gt;
+</span><span class='line'><span class="err">&lt;</span>%if(CheckIsLogin()){%&gt;
+</span><span class='line'>您好：<span class="err">&lt;</span>%=this.GetNickname()%&gt;
+</span><span class='line'><span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;&lt;%=UrlRewriteLink.GetUserHomeUrl()%&gt;&quot;</span><span class="nt">&gt;</span>您的主页<span class="nt">&lt;/a&gt;</span> |
+</span><span class='line'><span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&#39;/user/user_setup.aspx&#39;</span><span class="nt">&gt;</span>个人设置a&gt; |
+</span><span class='line'><span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&#39;/logout.aspx&#39;</span><span class="nt">&gt;</span>退出<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'><span class="err">&lt;</span>%}else{%&gt;
+</span><span class='line'><span class="nt">&lt;span</span> <span class="na">style=</span><span class="s">&quot;margin-right:10px;&quot;</span><span class="nt">&gt;</span>您已经登录了！span&gt;<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/reg.aspx&quot;</span><span class="nt">&gt;</span>注册a&gt; | <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/login.aspx&quot;</span><span class="nt">&gt;</span>登录<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'><span class="err">&lt;</span>%}%&gt;
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p><br /> 如上面这段代码，如果通过Ajax调用它，哪就可以在静态页面上取得用户的登录信息<br /> 可是&#8230;&#8230;.<br /> 这个问题就出来了，而且还不容易发现，哪就是<strong><span style="font-size: 18pt"><span style="color: red"><span style="font-family: 微软雅黑">IE的页面缓存</span></span></span></strong>，IE好像有个机制会把访问过的页面缓存到 <span style="color: #5ca414"><strong><span style="font-size: 12pt"><span style="font-family: Verdana">C:\Documents and Settings\用户名\Local Settings\Temporary Internet Files</span></span></strong> </span>这个文件夹里面。所以每个Ajax调用的GetUserBar.aspx时候IE取到的都是缓存信息，而不是GetUserBar.aspx运行的结果。所以才出现了，一直无法登出或无法登录的状态（其实是已经登录登出了的，只是表面上看不出来）。<br /> <br /> 解决办法就是在 GetUserBar.aspx 的Page_Load方法里面加入设定&#8221;<span style="color: #0817ff">Response.Expires</span>&#8220;的时间的处理，如：</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">private</span> <span class="k">void</span> <span class="nf">Page_Load</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">System</span><span class="p">.</span><span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="n">Response</span><span class="p">.</span><span class="n">Expires</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p><br /> <br /> 这样问题就解决了。<br /> <br /> 网上存在很多的Cookie操作的文章，可是这些东西都是抄来抄去的，哪个站长跟本就没有对这些代码做过测试，我以前试着看过好多个，很多是存在有问题的。<br /> 希望这篇文章会给需要的人带来帮助。</p>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2008-04-24 08:17:00 +0800" pubdate>2008-04-24</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/-net/'>.NET</a>, <a class='category' href='/blog/category/cookie/'>Cookie</a>, <a class='category' href='/blog/category/ie/'>IE</a>, <a class='category' href='/blog/category/前端/'>前端</a>, <a class='category' href='/blog/category/技巧/'>技巧</a>, <a class='category' href='/blog/category/缓存/'>缓存</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/about-cookie-and-ie-cache';
+	var disqus_url = 'http://huacnlee.github.com/blog/about-cookie-and-ie-cache';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

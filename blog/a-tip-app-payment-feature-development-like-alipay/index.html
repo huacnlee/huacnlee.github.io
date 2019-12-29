@@ -1,0 +1,238 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Rails 项目开发支付宝付款调试过程的技巧 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Rails 项目开发支付宝付款调试过程的技巧 最近做了两个带支付功能的项目，对于 Rails 项目来说，我们有 active_merchant 和 active_merchant_patch_china 开发起来会简单很多。 但是一个问题困扰我，就是本地开发支付网关回调通知的问题。 以支付宝为例 &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/a-tip-app-payment-feature-development-like-alipay">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Rails 项目开发支付宝付款调试过程的技巧</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>最近做了两个带支付功能的项目，对于 Rails 项目来说，我们有 <a href="https://github.com/Shopify/active_merchant">active_merchant</a> 和 <a href="https://github.com/flyerhzm/activemerchant_patch_for_china">active_merchant_patch_china</a> 开发起来会简单很多。</p>
+
+<p>但是一个问题困扰我，就是本地开发支付网关回调通知的问题。</p>
+
+<h2>以支付宝为例：</h2>
+
+<p>每次对支付宝发起的动作完成以后，支付宝都会将执行结果的信息通过“Notify”的方式返回回来，而这个“Notify”是直接由支付宝的服务端发起的 POST 请求。</p>
+
+<p>但是你知道，Rails 项目开发我们习惯于在本地跑一个 http://127.0.0.1:3000 来开发，支付宝的“Notify”根本无法从他们的服务端访问到这么个地址。</p>
+
+<p>之前在一淘有个项目涉及到付款的功能我是直接走内部通道，拿到一个 Alipay 的 VPN，才能收到“Notify”信息的，并且这个方式也非常的麻烦，每次搞还得联系支付宝的人给 VPN 随机密钥，连上支付宝 VPN，然后再测试，并且某些环境下面开了 VPN 还会带来“副作用”&#8230;</p>
+
+<hr />
+
+<p>其实支付宝的通知回调无非要求这么一点： <strong>notify_url 必须是网络上可访问的地址</strong></p>
+
+<p>那我们将开发环境跑在 VPS 上面不就可以了么？</p>
+
+<h2>通过远程开发环境联调支付功能</h2>
+
+<p>解决方案就是:</p>
+
+<p>在远程服务器上面跑开发环境调试</p>
+
+<ol>
+<li>找个速度快一些的 VPS，并把开发环境安装好</li>
+<li>VPS 上面配置 Nginx 方向代理到 http://127.0.0.1:3000, 并绑定一个真实的域名，(如: dev.huacnlee.com)</li>
+<li>通过 SSH 连到 VPS 上面，并启动项目开发环境</li>
+<li>通过 SFTP/FTP 的方式远程编辑文件，通过一些工具自动同步（你可以把你的 ssh pub key 存放服务器上面，这样连接 SFTP 的时候就不需要繁琐的输入密码)</li>
+<li>访问 dev.huacnlee.com 来调试</li>
+</ol>
+
+
+<h3>你需要下面几个软件:</h3>
+
+<p>我这里只搞过 Mac 平台的，其他平台可以寻找类似的替代方案</p>
+
+<ul>
+<li><a href="https://github.com/osxfuse/osxfuse/downloads">FUSE for OS X</a> - 将 FTP, SFTP 的地址 mount 成一个本地磁盘来使用</li>
+<li><a href="http://macfusionapp.org">Macfusion</a> - 图形化的界面调用 FUSE</li>
+</ul>
+
+
+<p>用起来也很简单，先安装 <a href="https://github.com/osxfuse/osxfuse/downloads">FUSE for OS X</a>，下载以后有安装包的，这个装好了无需配置。
+然后下载 <a href="http://macfusionapp.org">Macfusion</a>，这个无需安装直接运行，界面上就几个按钮而已，如图:</p>
+
+<p><img src="http://macfusionapp.org/screenshots/mf2_main.png" alt="" /> <img src="http://macfusionapp.org/screenshots/mf2_editing.png" alt="" /></p>
+
+<p>用 Macfusion mount 以后会在 <code>/Volumes</code> 里面出现一个新的磁盘，可以通过任意工具修改这个里面的文件，达到随时更新到 VPS 上面的目的了。</p>
+
+<blockquote><p>注意，如果你用 TextMate，别忘了关掉 Git 这个 Bundle，不然它会随时刷新文件状态，而是的用起来很卡，其他编辑器也是类似的，你得关掉有关刷新文件的功能，因为现在你连的是远程目录，每一次文件检查动作都是一个网络请求。</p></blockquote>
+
+<p>接下来一边修改，一边访问 <code>dev.huacnlee.com</code> 这个域名来调试支付功能，由于用上了实际的域名，支付宝的“Notify”能够顺利发送过来了。等支付功能调好了以后再切回本地开发的方式。</p>
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2012-08-22 09:48:00 +0800" pubdate>2012-08-22</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/rails/'>Rails</a>, <a class='category' href='/blog/category/技巧/'>技巧</a>, <a class='category' href='/blog/category/支付宝/'>支付宝</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/a-tip-app-payment-feature-development-like-alipay';
+	var disqus_url = 'http://huacnlee.github.com/blog/a-tip-app-payment-feature-development-like-alipay';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

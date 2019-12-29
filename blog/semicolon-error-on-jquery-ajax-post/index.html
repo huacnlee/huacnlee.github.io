@@ -1,0 +1,267 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>jQuery Ajax Post提交时候分号带来的问题 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="jQuery Ajax Post提交时候分号带来的问题 前段时间在做无刷新提交评论时，遇到一个怪怪的问题一直无法解决，其实这个问题看起来很小，也就是在提交评论时，如果评论内容里面包括有;(分号) 时，哪么分号后面的内容将会无故的丢失。 我当时的写法： 1
+2
+3
+4
+5
+6
+7
+8
+$.ajax &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/semicolon-error-on-jquery-ajax-post">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">jQuery Ajax Post提交时候分号带来的问题</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>前段时间在做无刷新提交评论时，遇到一个怪怪的问题一直无法解决，其实这个问题看起来很小，也就是在提交评论时，如果评论内容里面包括有<span style="color: #ff0000; font-size: x-large;">;</span>(分号) 时，哪么分号后面的内容将会无故的丢失。</p>
+
+
+<h3>我当时的写法：</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">({</span>
+</span><span class='line'> <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;/user/post/comment/add/&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">type</span><span class="o">:</span> <span class="nx">Componsents</span><span class="p">.</span><span class="nx">Settings</span><span class="p">.</span><span class="nx">AJAX_TYPE</span><span class="p">,</span>
+</span><span class='line'>   <span class="nx">data</span><span class="o">:</span><span class="s1">&#39;id=&#39;</span> <span class="o">+</span> <span class="nx">Post</span><span class="p">.</span><span class="nx">settings</span><span class="p">.</span><span class="nx">ID</span> <span class="o">+</span> <span class="s1">&#39;&amp;name=&#39;</span> <span class="o">+</span> <span class="nx">txtName</span><span class="p">.</span><span class="nx">val</span><span class="p">()</span>  <span class="o">+</span> <span class="s1">&#39;&amp;body=&#39;</span> <span class="o">+</span> <span class="nx">txtBody</span><span class="p">.</span><span class="nx">val</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;&amp;follow=&#39;</span> <span class="o">+</span> <span class="nx">follow</span><span class="o">+</span> <span class="s1">&#39;&amp;url=&#39;</span> <span class="o">+</span> <span class="nb">encodeURI</span><span class="p">(</span><span class="nx">txtUrl</span><span class="p">.</span><span class="nx">val</span><span class="p">())</span> <span class="o">+</span> <span class="s1">&#39;&amp;email=&#39;</span> <span class="o">+</span> <span class="nx">txtEmail</span><span class="p">.</span><span class="nx">val</span><span class="p">(),</span>
+</span><span class='line'> <span class="nx">dataType</span><span class="o">:</span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
+</span><span class='line'> <span class="nx">success</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">state</span><span class="p">){</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>这里 data 参数是像 GET 方法一样的写法，问题就在这里，组合成一长段时，在<a href="http://www.jquery.com" target="_blank">jQuery</a>解析成JSON提交给服务器的时候会把分号后面的截断。这个问题以前做了哪么多还一直没有遇到过，所以哪天我觉得很奇怪，以为是<a href="http://www.python.org" target="_blank">python</a>或者<a href="http://www.djangoproject.com" target="_blank">django</a>在处理时候出的问题，但通过<a href="http://www.getfirebug.com" target="_blank">Firebug</a>查看提交数据与换了几种方式提交，找出了问题确实是出在Javascript提交的时候。</p>
+
+
+<p>于是我试着给body的内容做 escape 处理，但这样做问题就来了，这样处理过的数据到了python里面会出现中文乱码&#8230;麻烦，哪天试了好多种方式还是不得解，于是暂时搁置。</p>
+
+
+<p><span style="color: #000000;">今天又试着去修正这个问题，突然想到<strong>jQuery</strong>在<strong>ajax</strong>提交的时候会不会有另外一种data格式以处理这种类似问题，于是再次看了看 <a href="http://docs.jquery.com/Ajax/jQuery.ajax#options" target="_blank">关于jquery ajax的文档</a> <span style="font-size: x-small;">（自从用熟悉以后很久都没看过它了）</span>。</span></p>
+
+
+<p><span style="color: #000000;">果然它有提供JSON格式的data参数，这下就爽了，问题迎刃而解！</span></p>
+
+
+<h3>正确的写法：</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">({</span>
+</span><span class='line'> <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;/user/post/comment/add/&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">type</span><span class="o">:</span> <span class="nx">Componsents</span><span class="p">.</span><span class="nx">Settings</span><span class="p">.</span><span class="nx">AJAX_TYPE</span><span class="p">,</span>
+</span><span class='line'>   <span class="nx">data</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>     <span class="nx">id</span><span class="o">:</span> <span class="nx">Post</span><span class="p">.</span><span class="nx">settings</span><span class="p">.</span><span class="nx">ID</span><span class="p">,</span>
+</span><span class='line'>       <span class="nx">name</span><span class="o">:</span> <span class="nx">txtName</span><span class="p">.</span><span class="nx">val</span><span class="p">(),</span>
+</span><span class='line'>        <span class="nx">body</span><span class="o">:</span> <span class="nx">txtBody</span><span class="p">.</span><span class="nx">val</span><span class="p">(),</span>
+</span><span class='line'>        <span class="nx">follow</span><span class="o">:</span> <span class="nx">follow</span><span class="p">,</span>
+</span><span class='line'>     <span class="nx">url</span><span class="o">:</span> <span class="nx">txtUrl</span><span class="p">.</span><span class="nx">val</span><span class="p">(),</span>
+</span><span class='line'>      <span class="nx">email</span><span class="o">:</span> <span class="nx">txtEmail</span><span class="p">.</span><span class="nx">val</span><span class="p">()</span>
+</span><span class='line'> <span class="p">},</span>
+</span><span class='line'>    <span class="nx">dataType</span><span class="o">:</span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
+</span><span class='line'> <span class="nx">success</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">state</span><span class="p">){</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>总的来说，这个问题是因为我一直习惯了像GET一样组合data参数的写法而带来的问题，希望这篇文章能给有类似习惯的开发人员带来帮助。</p>
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2008-12-04 07:40:00 +0800" pubdate>2008-12-04</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/ajax/'>AJAX</a>, <a class='category' href='/blog/category/bug/'>Bug</a>, <a class='category' href='/blog/category/jquery/'>jQuery</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/semicolon-error-on-jquery-ajax-post';
+	var disqus_url = 'http://huacnlee.github.com/blog/semicolon-error-on-jquery-ajax-post';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

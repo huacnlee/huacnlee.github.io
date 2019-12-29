@@ -1,0 +1,256 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>自定义 Rails 的 Scaffold 模板提高开发效率 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="自定义 Rails 的 Scaffold 模板提高开发效率 Rails Scaffold&nbsp;应该是每个 Rails 开发者最早接触的东西。它可以帮助我们快速生成对应的 Model Controller Views Routes 等东西。 但这玩意并不是那么好，默认的模板太过简单， &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/how-to-custom-scaffold-templates-in-rails3">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">自定义 Rails 的 Scaffold 模板提高开发效率</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>Rails Scaffold&nbsp;应该是每个 Rails 开发者最早接触的东西。它可以帮助我们快速生成对应的 Model Controller Views Routes 等东西。</p>
+
+
+<p>但这玩意并不是那么好，默认的模板太过简单，如果对它稍作一些该进，就会省区很多麻烦。</p>
+
+
+<p>例如下面这些情况：</p>
+
+
+<ol>
+<li>需要生成后台目录下面的 Controllers 就不给力了，虽然可以用 rails g controller admin/posts 来生成，但会出来一些多余的命名空间；</li>
+<li>我需要它直接就是中文的，免得反复修改；</li>
+<li>模板生成的 HTML 结构太过简单，无法满足实际需求，每次都得修改好多处；</li>
+<li>REST 的 xml 格式经常都用不上，把它去掉或者改成 json 或许会更好。</li>
+<li>列表页面改用 wice_grid 来代替</li>
+<li>用 <a href="https://github.com/plataformatec/simple_form" target="_blank">simple_form</a> 或者 <a href="https://github.com/justinfrench/formtastic" target="_blank">formtastic</a>&nbsp;来代替默认的表单</li>
+</ol>
+
+
+<!-- more -->
+
+
+<div><br /></div>
+
+
+<div>终于我忍不住了，这两天查了查资料，顺便研究了一下 Rails 源代码关于 Generator 的部分，原来 Rails 3 可以直接在 lib 文件夹里面创建自己的模板。</div>
+
+
+<div><br /></div>
+
+
+<h2>ERB 的模板</h2>
+
+
+<div>lib/templates/erb/scaffold/ &nbsp;里面放自定义模版,参考Rails源代码的<a href="https://github.com/rails/rails/tree/master/railties/lib/rails/generators/erb/scaffold/templates" target="_blank">那几个文件</a>,把他们下载回来,放到项目&nbsp;lib/templates/erb/scaffold/ 里面,就可以定制了.&nbsp;</div>
+
+
+<div><br /></div>
+
+
+<h2>Controller 模板</h2>
+
+
+<div>这个要放在 lib/templates/rails/scaffold_controller/controller.rb 里面，<a href="https://github.com/rails/rails/blob/master/railties/lib/rails/generators/rails/scaffold_controller/templates/controller.rb" target="_blank">参考文件</a></div>
+
+
+<div><br /></div>
+
+
+<h2>可以看一下我定制的模板</h2>
+
+
+<ul>
+<li><strong>代码：<a href="https://github.com/huacnlee/rails_templates" target="_blank">https://github.com/huacnlee/rails_templates</a></strong></li>
+</ul>
+
+
+<p>我这个用 wice_grid 和 simple_form 代替默认的表格和表单，views 新增一个 _base.html.erb 用于小栏目通用，并且一个大的改进是针对生成后台的情况做了修正。</p>
+
+
+<p>你可以 rails g scaffold Post title:string body:text user_id:integer 生成前台代码，然后再用&nbsp;rails g scaffold_controller admin/post title:string body:text user_id:integer 生成后台的 Controller 和 Views 并且互不影响，生成出来的代码不用修改就可使用。</p>
+
+
+<p>&nbsp;</p>
+
+
+<p>&nbsp;</p>
+
+
+<p>&nbsp;</p>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2011-01-06 17:59:00 +0800" pubdate>2011-01-06</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/rails/'>Rails</a>, <a class='category' href='/blog/category/scaffold/'>Scaffold</a>, <a class='category' href='/blog/category/模板/'>模板</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/how-to-custom-scaffold-templates-in-rails3';
+	var disqus_url = 'http://huacnlee.github.com/blog/how-to-custom-scaffold-templates-in-rails3';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

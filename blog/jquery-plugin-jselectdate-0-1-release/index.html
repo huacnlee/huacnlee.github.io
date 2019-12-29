@@ -1,0 +1,273 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>jQuery插件 - 下拉列表日期选择控件 jSelectDate - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="jQuery插件 - 下拉列表日期选择控件 jSelectDate 日期选择在开发中的应用应该是再常见不过的了~ 以前大多数的日期选择基本上以这种形式体现： 图1: 图2: 但是，在我们经过很多次的使用和用户反馈中得之，这种方式操作不够方便，虽然看起来很直观，但如果是选2009，以&ldquo; &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/jquery-plugin-jselectdate-0-1-release">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">jQuery插件 - 下拉列表日期选择控件 jSelectDate</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>日期选择在开发中的应用应该是再常见不过的了~<br /> 以前大多数的日期选择基本上以这种形式体现：<br /> <br /> 图1:<br /> <img src="http://www.cnblogs.com/images/cnblogs_com/huacn/calendar_1.PNG" border="0" /><br /> <br /> 图2:<br /> <img src="http://www.cnblogs.com/images/cnblogs_com/huacn/calendar_2.PNG" border="0" /><br /> <br /> <br /> 但是，在我们经过很多次的使用和用户反馈中得之，这种方式操作不够方便，虽然看起来很直观，但如果是选2009，以&ldquo;图1&rdquo;哪种方式就很难操作，需要用户点击好多次才可以选到。图2的还要好些，不过感觉上还是不怎么好。<br /> <br /> 于是，有些网站就出现了以这种形式出现的日期选择控件：<br /> <img src="http://www.cnblogs.com/images/cnblogs_com/huacn/calendar_3.PNG" border="0" /><br /> <br /> <span style="color: red">另外有一点比较重要的！图一图二的哪种方式，无法用键盘操作，比如我在填写表单的时候经常会直接去输入 2005 12 25 这种类似的，如果通过下拉列表来分别选择年、月、日，这种感觉就会好多了，也支持用键盘快速输入。</span><br /> <br /> 如何很方便的实现这种功能呢？如果按普通的方式放三个下拉列表框来实现的话，将会写很多复杂的代码。<br /> 于是我自已做了一个很简单的jQuery插件，实现这种下拉列表的日期选择功能。<br /> 使用的时候你只用调用一个js就可以将指定的文本框转换成这种形式的日期选择，但提交的时候依然还是读取哪个文本框。</p>
+
+
+<p>如以下代码：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;html&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;head&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">&quot;Content-Type&quot;</span> <span class="na">content=</span><span class="s">&quot;text/html; charset=utf-8&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;title&gt;</span>jQuery插件之下拉列表日期控件 - jQuery.jSelectDate<span class="nt">&lt;/title&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src=</span><span class="s">&quot;scripts/jquery.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src=</span><span class="s">&quot;scripts/jquery.jSelectDate.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>                <span class="c1">//应用方法</span>
+</span><span class='line'>                <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;input.date&quot;</span><span class="p">).</span><span class="nx">jSelectDate</span><span class="p">({</span>
+</span><span class='line'>                    <span class="nx">css</span><span class="o">:</span><span class="s2">&quot;date&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="nx">yearBeign</span><span class="o">:</span> <span class="mi">1995</span><span class="p">,</span>
+</span><span class='line'>                    <span class="nx">disabled</span> <span class="o">:</span> <span class="kc">false</span>
+</span><span class='line'>                <span class="p">});</span>
+</span><span class='line'>            <span class="p">})</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">jSelectDate</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nt">&lt;/script&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/head&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;body&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">id=</span><span class="s">&quot;txtName&quot;</span> <span class="na">class=</span><span class="s">&quot;date&quot;</span> <span class="na">value=</span><span class="s">&quot;2005-3-22&quot;</span> <span class="nt">/&gt;</span> <span class="nt">&lt;button</span> <span class="na">onclick=</span><span class="s">&quot;alert($(’#txtName’).val());&quot;</span><span class="nt">&gt;</span>当前值<span class="nt">&lt;/button&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;br</span> <span class="nt">/&gt;&lt;br</span> <span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">id=</span><span class="s">&quot;txtDate2&quot;</span> <span class="na">class=</span><span class="s">&quot;date&quot;</span> <span class="na">value=</span><span class="s">&quot;1995-5-2&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/body&gt;</span>
+</span><span class='line'><span class="nt">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>更新记录</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>Version 0.2 - 2008-1-24
+</span><span class='line'>1.加入了闰年、大小月和二月天数的处理
+</span><span class='line'>2.新增一个Span标签的外框，以便于设置样式
+</span><span class='line'>3.新增可设置是否在下拉列表后面加入“年、月、日”几个字
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>Version 0.1 - 2008-1-14
+</span><span class='line'>1.基本的功能实现
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>截图</h2>
+
+<p><img src="http://www.cnblogs.com/images/cnblogs_com/huacn/jSelectDate_Simple_Screenshoot.PNG" border="0" /></p>
+
+<p>项目地址：<a href="http://code.google.com/p/jselectdate/" target="_blank">http://code.google.com/p/jselectdate/</a></p>
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2008-04-24 08:17:00 +0800" pubdate>2008-04-24</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/javascript/'>Javascript</a>, <a class='category' href='/blog/category/jquery/'>jQuery</a>, <a class='category' href='/blog/category/jselectdate/'>jSelectDate</a>, <a class='category' href='/blog/category/开源/'>开源</a>, <a class='category' href='/blog/category/插件/'>插件</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/jquery-plugin-jselectdate-0-1-release';
+	var disqus_url = 'http://huacnlee.github.com/blog/jquery-plugin-jselectdate-0-1-release';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

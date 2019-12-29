@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>试着学习VIM - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="试着学习VIM 再次谈到纯文本编辑器的问题，之前我也有写过 类似的文章 ,Intype确实做得很不错，不过它的更新太慢了，也不能跨平台，所以一直在找更好的。 这段时间我试过 Geany ，这个是由Python+GTK开发的，跨平台，开源，对Python的支持也很不错，不过它对中文支持不够好， &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/learning-vim">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">试着学习VIM</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>再次谈到纯文本编辑器的问题，之前我也有写过 <a href="http://huacn.blogbus.com/logs/25832349.html" target="_blank">类似的文章</a> ,<a href="http://www.intype.info" target="_blank">Intype</a>确实做得很不错，不过它的更新太慢了，也不能跨平台，所以一直在找更好的。</p>
+
+
+<p>这段时间我试过 <a href="http://www.geany.org/" target="_blank">Geany</a> ，这个是由Python+GTK开发的，跨平台，开源，对Python的支持也很不错，不过它对中文支持不够好，另外插件没有几个，没有高亮主题管理功能，所以没有使用。另外它的虽然是GTK开发的，但在Windows下面无法修改窗口主题（它默认的做得很差）。</p>
+
+
+<p>关于<a href="http://www.vim.org" target="_blank">VIM</a>，很久以前就已经了解过，不过一直因为它的操作与配置太过麻烦，所以没有接受它，也一直在寻找像它一样好的软件。但它的功能实在太强大了，而且因为发展了很多年的原因，它的插件，主题等资源都很多。哪天在<a href="http://groups.google.com/group/python-cn" target="_blank">Python-cn论坛</a>里面看到有人讲学会VIM还是很快的，用心用几天就会了。于是我决定静下心来学一下，花点时间受益终身，呵呵。</p>
+
+
+<p>前几天家里面断网了，直到昨晚我才下载到VIM，现在已经配置到了我喜欢的方式，代码风格仍然用的是自已喜欢的blackboard，装了一些Python的插件。</p>
+
+
+<p>经过两天的学习，其实也没几个小时，现在VIM的基本操作还是搞懂的，不过在Windows下面还有些问题没搞懂。比如：Windows下面只能撤销一次这些问题。在Linux下面用着很爽，用Gnome的主题和图标，看着比Windows下面的爽多了。</p>
+
+
+<p>来个Ubuntu下面VIM的截图（<a href="http://www.gringod.com/2006/02/24/return-of-monacottf/" target="_blank">monaco</a>字体）</p>
+
+
+<p><img src="http://farm4.static.flickr.com/3016/2937645765_ebfe702cc5_o.png" border="0" /></p>
+
+
+<p>分享一下我的VIM配置文件：</p>
+
+
+<p><a href="http://tmitter.googlecode.com/files/vim-configure-python.tar.gz" target="_blank">http://tmitter.googlecode.com/files/vim-configure-python.tar.gz</a> (For Linux)</p>
+
+
+<p>&nbsp;</p>
+
+
+<p>&nbsp;</p>
+
+
+<p>&nbsp;</p>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2008-10-14 06:21:00 +0800" pubdate>2008-10-14</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/texteditor/'>TextEditor</a>, <a class='category' href='/blog/category/vim/'>Vim</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/learning-vim';
+	var disqus_url = 'http://huacnlee.github.com/blog/learning-vim';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

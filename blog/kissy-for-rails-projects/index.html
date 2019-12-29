@@ -1,0 +1,261 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>kissy-rals - 可以让你在 Rails 项目里面用 Kissy 代替 jQuery - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="kissy-rals - 可以让你在 Rails 项目里面用 Kissy 代替 jQuery 前面闲扯 在淘宝系里面有个苦恼的事情，全公司的前端都主要使用 Kissy 这个前端框架。我一直觉得这个东西使用起来过于复杂，不喜欢用。 据我了解: Kissy 实际上是从 jQuery (API or &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/kissy-for-rails-projects">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">kissy-rals - 可以让你在 Rails 项目里面用 Kissy 代替 jQuery</h1>
+    
+  </header>
+
+  <div class="entry_content"><h2>前面闲扯</h2>
+
+<p>在淘宝系里面有个苦恼的事情，全公司的前端都主要使用 <a href="https://github.com/kissyteam/kissy">Kissy</a> 这个前端框架。我一直觉得这个东西使用起来过于复杂，不喜欢用。</p>
+
+<h3>据我了解:</h3>
+
+<blockquote><p>Kissy 实际上是从 jQuery (API or 源代码？我不确定) 衍生过来的，很多功能都非常相似，而 Kissy 在 jQuery 这种功能的基础上实现了很多正对淘宝项目情况的功能扩充。</p></blockquote>
+
+<p>但是我觉得 Kissy 没有把 jQuery 精简好用的优点保留下来，反而整出了非常奇怪的 API 命名和调用方式</p>
+
+<h3>比如下面这些方法:</h3>
+
+<ul>
+<li>KISSY - 全大写的类名;</li>
+<li>KISSY.one / KISSY.all 两个 DOM 选择器，命名非常奇怪，我不知道为何原因会有两个（一个是返回单个对象，一个是返回数组）jQuery 一个不也用了;</li>
+<li>文档例子里面常见的 KISSY.ready(function(S){}) 然后在这样的 block 里面用 S 这个别名，又是一个奇怪的大写字母;</li>
+</ul>
+
+
+<p>所以，目前为止我也一直坚持在公司的项目里面的 Rails 项目里面继续使用 jQuery，可最后发现遇到一些复杂功能需要专业前端支持的时候比较麻烦，另外也不能直接使用公司现有的前端资源…</p>
+
+<p>当然其中还有一个重要点是 Rails 没有 Kissy 的支持，<a href="http://guides.rubyonrails.org/ajax_on_rails.html">Rails 内置的 Ajax 功能</a> 就没法直接使用，会很不方便。</p>
+
+<p>最近我们部门那边又正在开发一套类似 <a href="http://getbootstrap.com">Bootstrap</a> 的前端组件库 <a href="http://github.com/etaoux/brix">Brix</a>，这个东西搞完以后，等于以后可以想用 Bootstrap 那样的组件来开发公司的项目了，多省事啊。</p>
+
+<p>所以，开始正题了…</p>
+
+<h2>关于 kissy-rails</h2>
+
+<p>于是，我花了点时间基于 <a href="https://github.com/rails/jquery-rails">jquery-rails</a> 实现了 <a href="https://github.com/huacnlee/kissy-rails">kissy-rails</a> ，让 Rails 项目可以直接用 Kissy 代替 jQuery。</p>
+
+<ul>
+<li><a href="https://github.com/huacnlee/kissy-rails">https://github.com/huacnlee/kissy-rails</a></li>
+</ul>
+
+
+<p>这个过程还好有使用 Kissy 很久的 <a href="http://github.com/cricy">同事</a> 帮忙解释 Kissy 的使用问题…(说到这里我又不得不吐槽 Kissy 文档太差，就是看不懂…)</p>
+
+<p>总归，到最后， kissy-rails 还是实现了，用起来和 jquery-rails 差不多，也就是把之前 jquery 的地方换成 kissy:</p>
+
+<p>Gemfile</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s2">&quot;kissy-rails&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>app/assets/javascripts/application.js</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="c1">//= require kissy</span>
+</span><span class='line'><span class="c1">//= require kissy_ujs</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后 Rails Helper 里面提供的 Ajax 支持就能用 Kissy 的 API 来实现了，比如:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">link_to</span> <span class="s2">&quot;Delete&quot;</span><span class="p">,</span> <span class="vi">@post</span><span class="p">,</span> <span class="ss">:remote</span> <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">:confirm</span> <span class="o">=&gt;</span> <span class="s2">&quot;Are you sure?&quot;</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">&lt;%=</span> <span class="n">form_for</span><span class="p">(</span><span class="vi">@post</span><span class="p">,</span> <span class="ss">:remote</span> <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">text_field</span> <span class="ss">:login</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">text_field</span> <span class="ss">:password</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">submit</span><span class="p">,</span> <span class="ss">:disabled_with</span> <span class="o">=&gt;</span> <span class="s2">&quot;Submiting...&quot;</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2012-08-18 23:05:00 +0800" pubdate>2012-08-18</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/gem/'>Gem</a>, <a class='category' href='/blog/category/kissy/'>Kissy</a>, <a class='category' href='/blog/category/rails/'>Rails</a>, <a class='category' href='/blog/category/jquery/'>jQuery</a>, <a class='category' href='/blog/category/kissy-rails/'>kissy-rails</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/kissy-for-rails-projects';
+	var disqus_url = 'http://huacnlee.github.com/blog/kissy-for-rails-projects';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

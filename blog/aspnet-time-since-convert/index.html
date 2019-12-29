@@ -1,0 +1,410 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>ASP.NET 时间 Since 转换 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="ASP.NET 时间 Since 转换 目前 Web 2.0 的网站上很流行以：2秒前、3天前、1月前 这样的方式来显示一条消息的时间，这种做法想 Twitter、饭否&#8230;等网站都在使用，用在即时性高的文章或消息上面。 我这里写了一个 C# 的实现方式: 1
+2
+3
+4
+5
+6
+7
+8 &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/aspnet-time-since-convert">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">ASP.NET 时间 Since 转换</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>目前 Web 2.0 的网站上很流行以：2秒前、3天前、1月前 这样的方式来显示一条消息的时间，这种做法想 <a href="http://twitter.com" target="_blank">Twitter</a>、<a href="http://fanfou.com" target="_blank">饭否</a>&#8230;等网站都在使用，用在即时性高的文章或消息上面。</p>
+
+<p>我这里写了一个 C# 的实现方式:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">Since</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="n">DateTime</span> <span class="n">now</span><span class="p">,</span> <span class="n">System</span><span class="p">.</span><span class="n">DateTime</span> <span class="n">last</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="kt">string</span> <span class="n">strResult</span> <span class="p">=</span> <span class="s">&quot;&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">try</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="n">TimeSpan</span> <span class="n">ts</span> <span class="p">=</span> <span class="k">new</span> <span class="n">TimeSpan</span><span class="p">();</span>
+</span><span class='line'>        <span class="n">ts</span> <span class="p">=</span> <span class="n">now</span><span class="p">.</span><span class="n">Subtract</span><span class="p">(</span><span class="n">last</span><span class="p">);</span>
+</span><span class='line'>        <span class="kt">string</span> <span class="n">strNumber</span> <span class="p">=</span> <span class="s">&quot;&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalSeconds</span> <span class="p">&lt;=</span> <span class="m">30</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="c1">//30秒以前</span>
+</span><span class='line'>            <span class="n">strResult</span> <span class="p">=</span> <span class="s">&quot;刚刚&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalSeconds</span> <span class="p">&lt;=</span> <span class="m">59</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="c1">//小于1分钟</span>
+</span><span class='line'>            <span class="n">strResult</span> <span class="p">=</span> <span class="s">&quot;1分钟前&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalMinutes</span> <span class="p">&lt;=</span> <span class="m">60</span> <span class="p">&amp;&amp;</span> <span class="n">ts</span><span class="p">.</span><span class="n">TotalMinutes</span> <span class="p">!=</span> <span class="m">30</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="c1">//分钟，没有处理30分的时候</span>
+</span><span class='line'>            <span class="n">strNumber</span> <span class="p">=</span> <span class="n">Convert</span><span class="p">.</span><span class="n">ToInt32</span><span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalMinutes</span><span class="p">).</span><span class="n">ToString</span><span class="p">();</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalMinutes</span> <span class="p">==</span> <span class="m">2</span><span class="p">)</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="n">strNumber</span> <span class="p">=</span> <span class="s">&quot;两&quot;</span><span class="p">;</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">strResult</span> <span class="p">=</span> <span class="n">strNumber</span> <span class="p">+</span> <span class="s">&quot;分钟前&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalMinutes</span> <span class="p">==</span> <span class="m">30</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="c1">//半个小时</span>
+</span><span class='line'>            <span class="n">strResult</span> <span class="p">=</span> <span class="s">&quot;半小时前&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalHours</span> <span class="p">&lt;=</span> <span class="m">23</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="c1">//小时</span>
+</span><span class='line'>            <span class="n">strNumber</span> <span class="p">=</span> <span class="n">Convert</span><span class="p">.</span><span class="n">ToInt32</span><span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalHours</span><span class="p">).</span><span class="n">ToString</span><span class="p">();</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalHours</span> <span class="p">==</span> <span class="m">2</span><span class="p">)</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="n">strNumber</span> <span class="p">=</span> <span class="s">&quot;两&quot;</span><span class="p">;</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">strResult</span> <span class="p">=</span> <span class="n">ts</span><span class="p">.</span><span class="n">Hours</span> <span class="p">+</span> <span class="s">&quot;小时前&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalHours</span> <span class="p">==</span> <span class="m">24</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="c1">//刚好一天</span>
+</span><span class='line'>            <span class="n">strResult</span> <span class="p">=</span> <span class="s">&quot;一天前&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalDays</span> <span class="p">&lt;</span> <span class="m">30</span> <span class="p">&amp;&amp;</span> <span class="n">ts</span><span class="p">.</span><span class="n">TotalDays</span> <span class="p">!=</span> <span class="m">15</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="c1">//半个月以前</span>
+</span><span class='line'>            <span class="n">strNumber</span> <span class="p">=</span> <span class="n">Convert</span><span class="p">.</span><span class="n">ToInt32</span><span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalDays</span><span class="p">).</span><span class="n">ToString</span><span class="p">();</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalDays</span> <span class="p">==</span> <span class="m">2</span><span class="p">)</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="n">strNumber</span> <span class="p">=</span> <span class="s">&quot;两&quot;</span><span class="p">;</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">strResult</span> <span class="p">=</span> <span class="n">strNumber</span> <span class="p">+</span> <span class="s">&quot;天前&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalDays</span> <span class="p">==</span> <span class="m">15</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="c1">//半月</span>
+</span><span class='line'>            <span class="n">strResult</span> <span class="p">=</span> <span class="s">&quot;半个月前&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalDays</span> <span class="p">&lt;=</span> <span class="m">364</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="c1">//按月的</span>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">month</span> <span class="p">=</span> <span class="n">Convert</span><span class="p">.</span><span class="n">ToInt32</span><span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalDays</span><span class="p">)</span> <span class="p">/</span> <span class="m">30</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">strNumber</span> <span class="p">=</span> <span class="n">month</span><span class="p">.</span><span class="n">ToString</span><span class="p">();</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">month</span> <span class="p">==</span> <span class="m">2</span><span class="p">)</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="n">strNumber</span> <span class="p">=</span> <span class="s">&quot;两&quot;</span><span class="p">;</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>            <span class="n">strResult</span> <span class="p">=</span> <span class="n">strNumber</span> <span class="p">+</span> <span class="s">&quot;个月前&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalDays</span> <span class="p">&lt;=</span> <span class="m">547</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="c1">//一年半以下的</span>
+</span><span class='line'>            <span class="n">strResult</span> <span class="p">=</span> <span class="s">&quot;一年前&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalDays</span> <span class="p">&lt;=</span> <span class="m">910</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="c1">//两年半以下的</span>
+</span><span class='line'>            <span class="n">strResult</span> <span class="p">=</span> <span class="s">&quot;两年前&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">else</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="n">strResult</span> <span class="p">=</span> <span class="n">last</span><span class="p">.</span><span class="n">ToString</span><span class="p">(</span><span class="s">&quot;yy年M月d日&quot;</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">ex</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="n">YtRuntime</span><span class="p">.</span><span class="n">WriteLog</span><span class="p">(</span><span class="n">ex</span><span class="p">.</span><span class="n">ToString</span><span class="p">());</span>
+</span><span class='line'>        <span class="n">strResult</span> <span class="p">=</span> <span class="n">last</span><span class="p">.</span><span class="n">ToString</span><span class="p">(</span><span class="s">&quot;yy年M月d日&quot;</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">strResult</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">public</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">Since</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="n">DateTime</span> <span class="n">last</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nf">Since</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="n">DateTime</span><span class="p">.</span><span class="n">Now</span><span class="p">,</span> <span class="n">last</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2009-07-24 14:53:00 +0800" pubdate>2009-07-24</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/-net/'>.NET</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/aspnet-time-since-convert';
+	var disqus_url = 'http://huacnlee.github.com/blog/aspnet-time-since-convert';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

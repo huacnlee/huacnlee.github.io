@@ -1,0 +1,2129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[李华顺]]></title>
+  <link href="http://huacnlee.github.com/atom.xml" rel="self"/>
+  <link href="http://huacnlee.github.com/"/>
+  <updated>2019-12-29T19:54:22+08:00</updated>
+  <id>http://huacnlee.github.com/</id>
+  <author>
+    <name><![CDATA[Jason Lee]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby China 里面我是如何设计缓存的]]></title>
+    <link href="http://huacnlee.github.com/blog/cache-design-in-ruby-china"/>
+    <updated>2014-05-21T11:11:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/cache-design-in-ruby-china</id>
+    <content type="html"><![CDATA[<p>看最近 @quakewang 分享的 《<a href="http://ruby-china.org/topics/19389">总结 web 应用中常用的各种 cache</a>》，我也搭车分享一下在 Ruby China 里面，我们是如何做 Cache 的。</p>
+
+<h2>首先给大家看一下 NewRelic 的报表</h2>
+
+<p>最近 24h 的平均响应时间</p>
+
+<p><img src="http://l.ruby-china.org/photo/2014/6a3a30c14222f8002114a253d4483018.png" alt="" /></p>
+
+<h3>流量高的那些页面 (Action)</h3>
+
+<p><img src="http://l.ruby-china.org/photo/2014/67cc2b577ab886eb4c66a54b5e9ce0b9.png" alt="" /></p>
+
+<h3>访问量搞的几个 Action 的情况：</h3>
+
+<h4>TopicsController#show</h4>
+
+<p><img src="http://l.ruby-china.org/photo/2014/8aa11ae13c2b0732aa11e6b27dc463e9.png" alt="" /></p>
+
+<h4>UsersController#show (比较惨，主要是 GitHub API 请求拖慢)</h4>
+
+<p><img src="http://l.ruby-china.org/photo/2014/771c1d75b08c01b268eb0e5223739d3e.png" alt="" /></p>
+
+<p>PS: 在发布这篇文章之前我有稍加修改了一下，GitHub 请求放到后台队列处理，新的结果是这样:</p>
+
+<p><img src="http://l.ruby-china.org/photo/2014/f05fab2bc39506da10c5a5ebb7172d79.png" alt="" /></p>
+
+<h4>TopicsController#index</h4>
+
+<p><img src="http://l.ruby-china.org/photo/2014/ed43a50fb2177a800c26bd9d80f97334.png" alt="" /></p>
+
+<h4>HomeController#index</h4>
+
+<p><img src="http://l.ruby-china.org/photo/2014/32519b34fc02877b893c5c3e4f370d6c.png" alt="" /></p>
+
+<p>从上面的报表来看，目前 Ruby China 后端的请求，排除用户主页之外，响应时间都在 100ms 以内，甚至更低。</p>
+
+<h2>我们是如何做到的？</h2>
+
+<ul>
+<li>Markdown 缓存</li>
+<li>Fragment Cache</li>
+<li>数据缓存</li>
+<li>ETag</li>
+<li>静态资源缓存 (JS,CSS,图片)</li>
+</ul>
+
+
+<h3>Markdown 缓存</h3>
+
+<p>在内容修改的时候就算好 Markdown 的结果，存到数据库，避免浏览的时候反复计算。</p>
+
+<p>此外这个东西也特意不放到 Cache，而是放到数据库里面：</p>
+
+<ol>
+<li>为了持久化，避免 Memcached 停掉的时候，大量丢失；</li>
+<li>避免过多占用缓存内存；</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Topic</span>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:body</span> <span class="c1"># 存放原始内容，用于修改</span>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:body_html</span> <span class="c1"># 存放计算好的结果，用于显示</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">before_save</span> <span class="ss">:markdown_body</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">markdown_body</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">body_html</span> <span class="o">=</span> <span class="no">MarkdownTopicConverter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="n">body</span><span class="p">)</span> <span class="k">if</span> <span class="nb">self</span><span class="o">.</span><span class="n">body_changed?</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Fragment Cache</h3>
+
+<p>这个是 Ruby China 里面用得最多的缓存方案，也是速度提升的原因所在。</p>
+
+<p>app/views/topics/_topic.html.erb</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%</span> <span class="n">cache</span><span class="p">(</span><span class="o">[</span><span class="n">topic</span><span class="p">,</span> <span class="n">suggest</span><span class="o">]</span><span class="p">)</span> <span class="k">do</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">&lt;div class=&quot;topic topic_line topic_</span><span class="cp">&lt;%=</span> <span class="n">topic</span><span class="o">.</span><span class="n">id</span> <span class="cp">%&gt;</span><span class="x">&quot;&gt;</span>
+</span><span class='line'><span class="x">   </span><span class="cp">&lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="n">topic</span><span class="o">.</span><span class="n">replies_count</span><span class="p">,</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">topic_path</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span><span class="si">}</span><span class="s2">#reply</span><span class="si">#{</span><span class="n">topic</span><span class="o">.</span><span class="n">replies_count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span class='line'>          <span class="ss">:class</span> <span class="o">=&gt;</span> <span class="s2">&quot;count state_false&quot;</span><span class="p">)</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  ... 省略内容部分</span>
+</span><span class='line'><span class="x">  </span>
+</span><span class='line'><span class="x">&lt;/div&gt;</span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>用 topic 的 cache_key 作为缓存 cache
+ <code>views/topics/{编号}-#{更新时间}/{suggest 参数}/{文件内容 MD5}</code> ->
+<code>views/topics/19105-20140508153844/false/bc178d556ecaee49971b0e80b3566f12</code></li>
+<li>某些涉及到根据用户帐号，有不同状态显示的地方，直接把完整 HTML 准备好，通过 JS 控制状态，比如目前的“喜欢“功能。</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">readed_topic_ids</span> <span class="o">=</span> <span class="o">&lt;%=</span> <span class="nx">current_user</span><span class="p">.</span><span class="nx">filter_readed_topics</span><span class="p">(</span><span class="err">@</span><span class="nx">topics</span><span class="p">)</span> <span class="o">%&gt;</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">readed_topic_ids</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">topic_id</span> <span class="o">=</span> <span class="nx">readed_topic_ids</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;.topic_&quot;</span><span class="o">+</span> <span class="nx">topic_id</span> <span class="o">+</span> <span class="s2">&quot; .right_info .count&quot;</span><span class="p">).</span><span class="nx">addClass</span><span class="p">(</span><span class="s2">&quot;state_true&quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="nt">&lt;/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>再比如 <a href="https://github.com/ruby-china/ruby-china/blob/47b6ba0e2495484e273de1324e69bf27fec53f48/app/views/replies/_reply.html.erb">app/views/topics/_reply.html.erb
+</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%</span> <span class="n">cache</span><span class="p">(</span><span class="o">[</span><span class="n">reply</span><span class="p">,</span><span class="s2">&quot;raw:</span><span class="si">#{</span><span class="vi">@show_raw</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">]</span><span class="p">)</span> <span class="k">do</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">&lt;div class=&quot;reply&quot;&gt;</span>
+</span><span class='line'><span class="x">  &lt;div class=&quot;pull-left face&quot;&gt;</span><span class="cp">&lt;%=</span> <span class="n">user_avatar_tag</span><span class="p">(</span><span class="n">reply</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="ss">:normal</span><span class="p">)</span> <span class="cp">%&gt;</span><span class="x">&lt;/div&gt;</span>
+</span><span class='line'><span class="x">  &lt;div class=&quot;infos&quot;&gt;</span>
+</span><span class='line'><span class="x">    &lt;div class=&quot;info&quot;&gt;</span>
+</span><span class='line'><span class="x">      &lt;span class=&quot;name&quot;&gt;</span>
+</span><span class='line'><span class="x">        </span><span class="cp">&lt;%=</span> <span class="n">user_name_tag</span><span class="p">(</span><span class="n">reply</span><span class="o">.</span><span class="n">user</span><span class="p">)</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">      &lt;/span&gt;</span>
+</span><span class='line'><span class="x">      &lt;span class=&quot;opts&quot;&gt;</span>
+</span><span class='line'><span class="x">        </span><span class="cp">&lt;%=</span> <span class="n">likeable_tag</span><span class="p">(</span><span class="n">reply</span><span class="p">,</span> <span class="ss">:cache</span> <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">)</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">        </span><span class="cp">&lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">edit_topic_reply_path</span><span class="p">(</span><span class="vi">@topic</span><span class="p">,</span><span class="n">reply</span><span class="p">),</span> <span class="ss">:class</span> <span class="o">=&gt;</span> <span class="s2">&quot;edit icon small_edit&quot;</span><span class="p">,</span> <span class="s1">&#39;data-uid&#39;</span> <span class="o">=&gt;</span> <span class="n">reply</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span> <span class="ss">:title</span> <span class="o">=&gt;</span> <span class="s2">&quot;修改回帖&quot;</span><span class="p">)</span><span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">        </span><span class="cp">&lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;#&quot;</span><span class="p">,</span> <span class="s1">&#39;data-floor&#39;</span> <span class="o">=&gt;</span> <span class="n">floor</span><span class="p">,</span> <span class="s1">&#39;data-login&#39;</span> <span class="o">=&gt;</span> <span class="n">reply</span><span class="o">.</span><span class="n">user_login</span><span class="p">,</span>
+</span><span class='line'>            <span class="ss">:title</span> <span class="o">=&gt;</span> <span class="n">t</span><span class="p">(</span><span class="s2">&quot;topics.reply_this_floor&quot;</span><span class="p">),</span> <span class="ss">:class</span> <span class="o">=&gt;</span> <span class="s2">&quot;icon small_reply&quot;</span> <span class="p">)</span>
+</span><span class='line'>        <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">      &lt;/span&gt;</span>
+</span><span class='line'><span class="x">    &lt;/div&gt;</span>
+</span><span class='line'><span class="x">    &lt;div class=&quot;body&quot;&gt;</span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">sanitize_reply</span> <span class="n">reply</span><span class="o">.</span><span class="n">body_html</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">    &lt;/div&gt;</span>
+</span><span class='line'><span class="x">  &lt;/div&gt;</span>
+</span><span class='line'><span class="x">&lt;/div&gt;</span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>同样也是通过 <code>reply</code> 的 cache_key 来缓存 <code>views/replies/202695-20140508081517/raw:false/d91dddbcb269f3e0172bf5d0d27e9088</code>
+同时这里还有复杂的用户权限控制，用 JS 实现；</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>    <span class="o">&lt;%</span> <span class="k">if</span> <span class="nx">admin</span><span class="o">?</span> <span class="o">%&gt;</span>
+</span><span class='line'>      <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#replies .reply a.edit&quot;</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;display&#39;</span><span class="p">,</span><span class="s1">&#39;inline-block&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="o">&lt;%</span> <span class="nx">elsif</span> <span class="nx">current_user</span> <span class="o">%&gt;</span>
+</span><span class='line'>      <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#replies .reply a.edit[data-uid=&#39;&lt;%= current_user.id %&gt;&#39;]&quot;</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;display&#39;</span><span class="p">,</span><span class="s1">&#39;inline-block&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="o">&lt;%</span> <span class="nx">end</span> <span class="o">%&gt;</span>
+</span><span class='line'>    <span class="o">&lt;%</span> <span class="k">if</span> <span class="nx">current_user</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="err">@</span><span class="nx">user_liked_reply_ids</span><span class="p">.</span><span class="nx">blank</span><span class="o">?</span> <span class="o">%&gt;</span>
+</span><span class='line'>      <span class="nx">Topics</span><span class="p">.</span><span class="nx">checkRepliesLikeStatus</span><span class="p">([</span><span class="o">&lt;%=</span> <span class="err">@</span><span class="nx">user_liked_reply_ids</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="o">%&gt;</span><span class="p">]);</span>
+</span><span class='line'>    <span class="o">&lt;%</span> <span class="nx">end</span> <span class="o">%&gt;</span>
+</span><span class='line'>  <span class="p">})</span>
+</span><span class='line'><span class="nt">&lt;/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>数据缓存</h3>
+
+<p>其实 Ruby China 的大多数 Model 查询都没有上 Cache 的，因为据实际状况来看，<a href="http://mongodb.org">MongoDB</a> 的查询响应时间都是很快的，大部分场景都是在 5ms 以内，甚至更低。</p>
+
+<p>我们会做一些比价负责的数据查询缓存，比如：GitHub Repos 获取</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">github_repos</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">cache_key</span> <span class="o">=</span> <span class="s2">&quot;user:</span><span class="si">#{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">:github_repos&quot;</span>
+</span><span class='line'>  <span class="n">items</span> <span class="o">=</span> <span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">if</span> <span class="n">items</span><span class="o">.</span><span class="n">blank?</span>
+</span><span class='line'>    <span class="n">items</span> <span class="o">=</span> <span class="n">real_fetch_from_github</span><span class="p">()</span>
+</span><span class='line'>    <span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">expires_in</span><span class="p">:</span> <span class="mi">15</span><span class="o">.</span><span class="n">days</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">items</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>ETag</h3>
+
+<p>ETag 是在 HTTP Request, Response 可以带上的一个参数，用于检测内容是否有更新过，以减少网络开销。</p>
+
+<p>过程大概是这样</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">第一次请求</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="o">[</span><span class="err">浏览器</span><span class="o">]</span>                   <span class="err">浏览器收到，并记录到本地</span> <span class="no">Cache</span>
+</span><span class='line'>         <span class="o">|</span>                         <span class="o">|</span>
+</span><span class='line'>         <span class="o">|</span>  <span class="o">[</span><span class="no">GET</span><span class="sr"> /index.html]      | [HTTP status 200]</span>
+</span><span class='line'><span class="sr">         |                         | [ETag: abc]</span>
+</span><span class='line'><span class="sr">         |                         |</span>
+</span><span class='line'><span class="sr">  [Rails Controller]               |</span>
+</span><span class='line'><span class="sr">         |                         |</span>
+</span><span class='line'><span class="sr">      [Views]                      |</span>
+</span><span class='line'><span class="sr">         |-------------------------|-</span>
+</span><span class='line'><span class="sr">                             </span>
+</span><span class='line'><span class="sr">第二次请求 /in</span><span class="n">dex</span><span class="o">.</span><span class="n">html</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="o">[</span><span class="err">浏览器</span><span class="o">]</span>                   <span class="err">浏览器收到，并记录到本地</span> <span class="no">Cache</span>
+</span><span class='line'>         <span class="o">|</span>                         <span class="o">|</span>                          <span class="o">|</span>
+</span><span class='line'>         <span class="o">|</span>  <span class="o">[</span><span class="no">GET</span><span class="sr"> /index.html]      | [HTTP status 304]        | [HTTP Status 200]</span>
+</span><span class='line'><span class="sr">         |  [ETag: abc]            | [ETag: abc]              | [ETag: efg]</span>
+</span><span class='line'><span class="sr">         |                         |                          |</span>
+</span><span class='line'><span class="sr">  [Rails Controller] --------------|                          |</span>
+</span><span class='line'><span class="sr">         |                      ETag 相同                      |</span>
+</span><span class='line'><span class="sr">         |                                                    |</span>
+</span><span class='line'><span class="sr">      [Views] ------------------------------------------------|-</span>
+</span><span class='line'><span class="sr">                                ETag 不同</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Rails 的 <a href="http://api.rubyonrails.org/classes/ActionController/ConditionalGet.html#method-i-fresh_when">fresh_when</a> 方法可以帮助将你的查询内容生成 ETag 信息</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>  <span class="vi">@topic</span> <span class="o">=</span> <span class="no">Topic</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">fresh_when</span><span class="p">(</span><span class="n">etag</span><span class="p">:</span> <span class="o">[</span><span class="vi">@topic</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>静态资源缓存</h3>
+
+<p>请不要小看这个东西，后端写得再快，也有可能被这些拖慢（浏览器上面的表现）!</p>
+
+<p>1、合理利用 Rails Assets Pipeline，一定要开启！</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># config/environments/production.rb</span>
+</span><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">assets</span><span class="o">.</span><span class="n">digest</span> <span class="o">=</span> <span class="kp">true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>2、在 Nginx 里面将 CSS, JS, Image 的缓存有效期设成 max；</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='nginx'><span class='line'><span class="k">location</span> <span class="p">~</span> <span class="sr">(/assets|/favicon.ico|/*.txt)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kn">access_log</span>        <span class="no">off</span><span class="p">;</span>
+</span><span class='line'>  <span class="kn">expires</span>           <span class="s">max</span><span class="p">;</span>
+</span><span class='line'>  <span class="kn">gzip_static</span> <span class="no">on</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>3、尽可能的减少一个页面 JS, CSS, Image 的数量，简单的方法是合并它们，减少 HTTP 请求开销；</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='nginx'><span class='line'><span class="k">&lt;head&gt;</span>
+</span><span class='line'>  <span class="s">...</span>
+</span><span class='line'>  <span class="s">只有两个</span>
+</span><span class='line'>  <span class="s">&lt;link</span> <span class="s">href=&quot;http://l.ruby-china.org/assets/front-1a909fc4f255c12c1b613b3fe373e527.css&quot;</span> <span class="s">rel=&quot;stylesheet&quot;</span> <span class="s">/&gt;</span>
+</span><span class='line'>  <span class="s">&lt;script</span> <span class="s">src=&quot;http://l.ruby-china.org/assets/app-24d4280cc6fda926e73419c126c71206.js&quot;&gt;&lt;/script&gt;</span>
+</span><span class='line'>  <span class="s">...</span>
+</span><span class='line'><span class="s">&lt;/head&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>一些 Tips</h2>
+
+<ol>
+<li>看统计日志，优先处理流量高的页面；</li>
+<li>updated_at 是一个非常有利于帮助你清理缓存的东西，善用它！修改数据的时候别忽略它！</li>
+<li>多关注你的 Rails Log 里面的查询时间，100ms 一下的页面响应时间是一个比较好的状态，超过 200ms 用户就会感觉到迟钝了。</li>
+</ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[如何实现类似 Rails Console 的东西]]></title>
+    <link href="http://huacnlee.github.com/blog/how-to-create-your-owner-rails-console"/>
+    <updated>2013-08-15T09:09:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/how-to-create-your-owner-rails-console</id>
+    <content type="html"><![CDATA[<p>Rails 提供了一个 <a href="http://guides.rubyonrails.org/command_line.html#rails-console">rails console</a>，可以让我们很方便的在 启动 Web Server 之外直接调用代码、调用 Model 查询/修改数据等。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>➜  ruby-china git:<span class="o">(</span>master<span class="o">)</span> rails c
+</span><span class='line'>Loading development environment <span class="o">(</span>Rails 4.0.0<span class="o">)</span>
+</span><span class='line'>irb<span class="o">(</span>main<span class="o">)</span>:001:0&gt; @post <span class="o">=</span> Post.last
+</span><span class='line'>irb<span class="o">(</span>main<span class="o">)</span>:001:0&gt; @post.update_attribute<span class="o">(</span>:title, <span class="s2">&quot;Foo bar&quot;</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>如何实现这个东西</h2>
+
+<p>Ruby 标准库里面带有一个叫 <a href="http://www.ruby-doc.org/stdlib-2.0/libdoc/irb/rdoc/IRB.html">IRB</a> 的库，实际上，你现在就可以直接执行 <code>irb</code> 进入 Ruby 的控制台，在里面可以进行任何 Ruby 的代码执行。</p>
+
+<p>想要实现一个类似 Rails console 的东西，就需要用到 <a href="http://www.ruby-doc.org/stdlib-2.0/libdoc/irb/rdoc/IRB.html">IRB</a> 来启动控制台。</p>
+
+<h3>来一个最简单的例子</h3>
+
+<p>创建下面这些文件：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>foo
+</span><span class='line'>  Rakefile
+</span><span class='line'>  post.rb
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>post.rb 来点简单的代码：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:title</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">[</span><span class="nb">self</span><span class="o">.</span><span class="n">title</span><span class="p">,</span><span class="n">a</span><span class="o">].</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot; = &quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Rakefile 创建一个 console 命令，并引用 <code>post.rb</code> （这里可以根据自己的情况，引入所有需要的项目文件），然后调用 <code>IRB.start</code> 启动控制台：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">desc</span> <span class="s2">&quot;Run Console&quot;</span>
+</span><span class='line'><span class="n">task</span> <span class="ss">:console</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="p">,</span> <span class="n">args</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">env</span> <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;APP_ENV&#39;</span><span class="o">]</span> <span class="o">||</span> <span class="s1">&#39;development&#39;</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;Loading </span><span class="si">#{</span><span class="n">env</span><span class="si">}</span><span class="s2"> environment&quot;</span>
+</span><span class='line'>  <span class="nb">require</span> <span class="s2">&quot;./post&quot;</span>
+</span><span class='line'>  <span class="nb">require</span> <span class="s2">&quot;irb&quot;</span>
+</span><span class='line'>  <span class="nb">require</span> <span class="s1">&#39;irb/completion&#39;</span>
+</span><span class='line'>  <span class="c1"># 必须执行 ARGV.clear，不然 rake 后面的参数会被带到 IRB 里面</span>
+</span><span class='line'>  <span class="no">ARGV</span><span class="o">.</span><span class="n">clear</span>
+</span><span class='line'>  <span class="no">IRB</span><span class="o">.</span><span class="n">start</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>现在就可以执行 <code>rake console</code> 进入你构建的 App 控制台了：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>rake console
+</span><span class='line'>Loading development environment
+</span><span class='line'>irb<span class="o">(</span>main<span class="o">)</span>:001:0&gt; @post <span class="o">=</span> Post.new
+</span><span class='line'><span class="o">=</span>&gt; <span class="c">#&lt;Post:0x007fe9e5a62b98&gt;</span>
+</span><span class='line'>irb<span class="o">(</span>main<span class="o">)</span>:002:0&gt; @post.title <span class="o">=</span> <span class="s2">&quot;aabbcc&quot;</span>
+</span><span class='line'><span class="o">=</span>&gt; <span class="s2">&quot;aabbcc&quot;</span>
+</span><span class='line'>irb<span class="o">(</span>main<span class="o">)</span>:004:0&gt; @post.test<span class="o">(</span><span class="s2">&quot;ccddee&quot;</span><span class="o">)</span>
+</span><span class='line'><span class="o">=</span>&gt; <span class="s2">&quot;aabbcc = ccddee&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[jquery.qeditor - 我设计的所见即所得编辑器介绍]]></title>
+    <link href="http://huacnlee.github.com/blog/jquery-qeditor-introduction"/>
+    <updated>2013-08-13T09:29:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/jquery-qeditor-introduction</id>
+    <content type="html"><![CDATA[<p>一直以来，我都被所见即所得 (<a href="http://en.wikipedia.org/wiki/WYSIWYG">WYSIWYG</a>) 编辑器困扰着，项目中总是会用到，但是他们又总是没那么好&#8230;</p>
+
+<p>实际上，目前市面上已经有太多这类开源的工具：(KindEditor, TinyMce, KissyEditor, NicEdit， CKEditor &#8230;)</p>
+
+<h3>下面是我在使用中发现他们普遍存在的问题：</h3>
+
+<ul>
+<li>太复杂，绝大多数功能我不需要；</li>
+<li>加载缓慢，调用复杂，有的甚至至少要传 10 多个参数&#8230;</li>
+<li>没有自动的格式清除功能，用户从别的地方粘贴过来提交后内容乱七八糟；</li>
+<li>预览与实际结果无法很好的统一；</li>
+<li>调用太复杂，文件众多，安装麻烦（比如  KissyEditor 就是典型）；</li>
+<li>换行普遍是插入 <code>&lt;br&gt;</code> 而不是 <code>&lt;/p&gt;</code>&#8230;；这点非常重要，他决定着未来的内容排版；</li>
+<li>编辑出来的内容总是会有一堆乱七八糟的 style 属性，甚至有 width, height 之类的，严重影响响应式布局；</li>
+<li>有的使用 iframe，导致后期控制很不方便；</li>
+<li>当你需要把你的内容放到移动客户端的时候，你傻眼了，太难处理了，样式都在属性里面&#8230;</li>
+<li>长得太丑，又不好修改样式&#8230;</li>
+</ul>
+
+
+<p>如果你也有上面这些困扰，尝试使用 <a href="https://github.com/huacnlee/jquery.qeditor">jquery.qeditor</a> 吧，是的，它优雅的解决了上面的问题！</p>
+
+<p><a href="http://huacnlee.com/jquery.qeditor" target="_blank"><img src="https://f.cloud.github.com/assets/5518/945320/a8f55670-0303-11e3-8cd5-a77e94a85dbf.png" style="width:626px"></a></p>
+
+<p>这是一个开源项目，源代码是用 CoffeeScript 和 Scss 编写的，编辑器只有两个文件，目前主要的 JS 文件的 CoffeeScript 代码 200 行不到。</p>
+
+<h3>jquery.qeditor 的功能与设计定位</h3>
+
+<ul>
+<li>编辑的结果保持纯净、标准的 HTML Tag，样式通过使用者自己用外部 CSS 统一控制，以便你的内容能很好的实现响应式布局，以及在 iOS, Android 的 Native 控件上面轻松展示；</li>
+<li>不会有字体样式，大小设置功能；</li>
+<li>不会有颜色设置功能；</li>
+<li>不再向下兼容 IE6,7；</li>
+<li>自动根据一个 <code>textarea</code> 绑定，让编辑器无缝的和 <code>form</code> 结合；</li>
+<li>使用 Font-awsome 作为 Toolbar 的按钮图标，使用简单，并且支持 Retina Display;</li>
+<li>无论你从哪里拷贝东西粘贴过来，jquery.qeditor 里面都能按照你的内容 CSS 定义来显示；</li>
+<li>沉浸式的全屏界面，让你在全屏界面找到真实预览的感觉；</li>
+</ul>
+
+
+<hr />
+
+<h3>相关地址</h3>
+
+<ul>
+<li>项目: <a href="https://github.com/huacnlee/jquery.qeditor">https://github.com/huacnlee/jquery.qeditor</a></li>
+<li>演示: <a href="http://huacnlee.com/jquery.qeditor">http://huacnlee.com/jquery.qeditor</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[在你的 Rails App 中开启 ETag 加速页面载入同时节省资源]]></title>
+    <link href="http://huacnlee.github.com/blog/use-etag-in-your-rails-app-to-speed-up-loading"/>
+    <updated>2012-12-17T11:29:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/use-etag-in-your-rails-app-to-speed-up-loading</id>
+    <content type="html"><![CDATA[<h2>什么是 ETag</h2>
+
+<p>网上关于 <a href="http://en.wikipedia.org/wiki/HTTP_ETag">ETag</a> 的解释有很多，我这里简单的说明一下我的理解：</p>
+
+<blockquote><p>ETag 是 HTTP 协议的标准参数，一般是这样的：&#8221;686897696a7c876b7e&#8221; 一段字符，它能通过一段字符来判断浏览器 cache 的内容是否和服务端返回的内容是否相同，从而来决定是否要重新从服务器下载东西 (HTTP 状态 200 - 重新下载 / 304 - 没有更新)。</p></blockquote>
+
+<h2>ETag 使用场景举例</h2>
+
+<p><strong>这个东西非常适合用于动态内容上面，以减少不必要的 HTML 下载，达到加速的目的。</strong></p>
+
+<p>比如下面这个场景的例子：</p>
+
+<ol>
+<li>用户访问 /topics/11 页面，<code>TopicsController#show</code> 加载 <code>@topic</code>，并通过 View 生成内容返回</li>
+<li>用户来回访问 10 次 /topics/11，可此页面内容无任何变化</li>
+<li>过了1天以后，<code>@topic</code> 有了新的回复，用户再次访问的时候，内容变了</li>
+</ol>
+
+
+<p>上面的场景用户一共访问了 12 次 /topics/11 这个页面，但只有第一次和最后一次才有实质性的内容需要下载的，可在没有 ETag 的情况下面，服务器执行和浏览器下载都是有 12 次，其中的 10 次是多余的。</p>
+
+<p>如果加上 ETag 以后，将会是这样：</p>
+
+<ol>
+<li>用户访问 /topics/11 页面，<code>TopicsController#show</code> 加载 <code>@topic</code>，并通过 View 生成内容返回，并给出目前内容的 <code>ETag: 89vbsn28716</code></li>
+<li>用户带着 <code>ETag: 89vbsn28716</code> 再次访问 /topics/11 ，服务器检查 ETag 与执行结果，发现无变化，返回 304，浏览器直接使用 Cache 的内容渲染页面</li>
+<li>过了一天以后，<code>@topic</code> 有了新回复，用户再次带着 <code>ETag: 89vbsn28716</code> /topics/11，服务器检查 ETag 发现不对了，生成新内容，并返回 200</li>
+</ol>
+
+
+<p>这个过程中，服务端执行了 12 次页面，而下载 HTML 内容到本地却只有两次。</p>
+
+<h2>Rails 里面开启 ETag</h2>
+
+<p>Rails 的 ActionController 里面已经为我们提供了 <a href="http://api.rubyonrails.org/classes/ActionController/ConditionalGet.html#method-i-fresh_when">fresh_when</a> 和  <a href="http://api.rubyonrails.org/classes/ActionController/ConditionalGet.html#method-i-stale-3F">stale?</a> 这两个方法用于处理 ETag，可以点击连接稍微看一下说明。</p>
+
+<p>我下面以 <a href="http://ruby-china.org">Ruby China</a> 的 <a href="http://ruby-china.org/wiki/install_ruby_guide">查看 Wiki 页面</a> 为例子演示如何在 Rails 里面合理的使用 ETag</p>
+
+<p>pages_controller.rb:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PagesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@page</span> <span class="o">=</span> <span class="no">Page</span><span class="o">.</span><span class="n">find_by_slug</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@comments</span> <span class="o">=</span> <span class="vi">@page</span><span class="o">.</span><span class="n">comments</span><span class="o">.</span><span class="n">paginate</span><span class="p">(</span><span class="ss">:page</span> <span class="o">=&gt;</span> <span class="n">params</span><span class="o">[</span><span class="ss">:page</span><span class="o">]</span><span class="p">,</span> <span class="ss">:per_page</span> <span class="o">=&gt;</span> <span class="mi">50</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">fresh_when</span><span class="p">(</span><span class="ss">:etag</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="vi">@page</span><span class="p">,</span> <span class="vi">@comments</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>加上 <code>fresh_when</code> 方法以后，Rails 将会用 <code>@page</code> 和 <code>@comments</code> 内容的组合的 MD5 hash 值作为 ETag 并与 HTTP Headers 里面的 ETag 进行比较来决定是否需要执行后面的 Views 渲染，并返回 <code>200</code> 或 <code>304</code>。</p>
+
+<p>在浏览器上面显示将会是这样：</p>
+
+<p>没有 ETag 的情况 (72 ms)：</p>
+
+<p><a href="http://www.flickr.com/photos/huacnlee/8280251122/" title="200 by 李华顺, on Flickr"><img src="http://farm9.staticflickr.com/8493/8280251122_b2bf1ee3fa_o.png" width="913" height="737" alt="200"></a></p>
+
+<p>有 ETag 的情况 (40 ms)：</p>
+
+<p><a href="http://www.flickr.com/photos/huacnlee/8280250976/" title="304 by 李华顺, on Flickr"><img src="http://farm9.staticflickr.com/8487/8280250976_5bdd0405bb_o.png" width="913" height="737" alt="304"></a></p>
+
+<p>OMG! 页面加载速度直接提升了 <strong>46%</strong>，并且 ETag 命中的情况下，Views 上面的一系列代码都不用执行了，节省了不少资源。</p>
+
+<h3>但是实际的场景，往往没有上面这个例子这么简单&#8230;&#8230;</h3>
+
+<p>比如，页面上有 <code>current_user</code> 的状态，页脚的 HTML 代码是通过 <code>Setting.footer_html</code> 出来的，Head 里面还有 <code>Setting.custom_heads</code> 出来的代码。</p>
+
+<p>以上这些东西都是需要影响页面更新的。</p>
+
+<p>实际上我们只需要将 <code>fresh_when</code> 方法在 <code>ApplicationController</code> 里面覆盖一下，把页面上需要调用而影响结果的东西加入到 <code>fresh_when</code> 的 <code>:etag</code> 参数里面就好了:</p>
+
+<p>application_controller.rb:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">fresh_when</span><span class="p">(</span><span class="n">opts</span> <span class="o">=</span> <span class="p">{})</span>
+</span><span class='line'>  <span class="n">opts</span><span class="o">[</span><span class="ss">:etag</span><span class="o">]</span> <span class="o">||=</span> <span class="o">[]</span>
+</span><span class='line'>  <span class="c1"># 保证 etag 参数是 Array 类型</span>
+</span><span class='line'>  <span class="n">opts</span><span class="o">[</span><span class="ss">:etag</span><span class="o">]</span> <span class="o">=</span> <span class="o">[</span><span class="n">opts</span><span class="o">[</span><span class="ss">:etag</span><span class="o">]]</span> <span class="k">if</span> <span class="o">!</span><span class="n">opts</span><span class="o">[</span><span class="ss">:etag</span><span class="o">].</span><span class="n">is_a?</span><span class="p">(</span><span class="nb">Array</span><span class="p">)</span>
+</span><span class='line'>  <span class="c1"># 加入页面上直接调用的信息用于组合 etag</span>
+</span><span class='line'>  <span class="n">opts</span><span class="o">[</span><span class="ss">:etag</span><span class="o">]</span> <span class="o">&lt;&lt;</span> <span class="n">current_user</span>
+</span><span class='line'>  <span class="c1"># Config 的某些信息</span>
+</span><span class='line'>  <span class="n">opts</span><span class="o">[</span><span class="ss">:etag</span><span class="o">]</span> <span class="o">&lt;&lt;</span> <span class="no">SiteConfig</span><span class="o">.</span><span class="n">app_name</span>
+</span><span class='line'>  <span class="n">opts</span><span class="o">[</span><span class="ss">:etag</span><span class="o">]</span> <span class="o">&lt;&lt;</span> <span class="no">SiteConfig</span><span class="o">.</span><span class="n">custom_head_html</span>
+</span><span class='line'>  <span class="n">opts</span><span class="o">[</span><span class="ss">:etag</span><span class="o">]</span> <span class="o">&lt;&lt;</span> <span class="no">SiteConfig</span><span class="o">.</span><span class="n">footer_html</span>
+</span><span class='line'>  <span class="n">opts</span><span class="o">[</span><span class="ss">:etag</span><span class="o">]</span> <span class="o">&lt;&lt;</span> <span class="no">SiteConfig</span><span class="o">.</span><span class="n">google_analytics_key</span>
+</span><span class='line'>  <span class="c1"># 所有 etag 保持一天</span>
+</span><span class='line'>  <span class="n">opts</span><span class="o">[</span><span class="ss">:etag</span><span class="o">]</span> <span class="o">&lt;&lt;</span> <span class="no">Date</span><span class="o">.</span><span class="n">current</span>
+</span><span class='line'>  <span class="k">super</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样一来，每个用户的 ETag 都是不同的，当用户登出和登录以后，页面的内容将会呈现不同的 ETag，同时当你修改 SiteConfig 的某些内容是，ETag 也会随着改变，这样一来 ETag 的引入就不会影响到页面更新了。</p>
+
+<p>实际上你可以大量的使用 <code>fresh_when</code> 方法在你的动态页面上面，来减少 Rails View 的执行与 HTML 下载，只要好好分析，将页面上需要的内容加入到 <code>:etag</code> 参数里面就好了。</p>
+
+<p>比如：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="vi">@hot_topics</span> <span class="o">=</span> <span class="no">Topic</span><span class="o">.</span><span class="n">hot</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</span><span class='line'>  <span class="vi">@hot_users</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">hot</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</span><span class='line'>  <span class="vi">@hot_nodes</span> <span class="o">=</span> <span class="no">Node</span><span class="o">.</span><span class="n">hot</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</span><span class='line'>  <span class="vi">@recent_topics</span> <span class="o">=</span> <span class="no">Topic</span><span class="o">.</span><span class="n">recent</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">fresh_when</span><span class="p">(</span><span class="ss">:etag</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="vi">@hot_topics</span><span class="p">,</span><span class="vi">@hot_users</span><span class="p">,</span><span class="vi">@hot_nodes</span><span class="p">,</span><span class="vi">@recent_topics</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[在 Rails 项目里面使用又拍云用于存储上传图片]]></title>
+    <link href="http://huacnlee.github.com/blog/rails-app-image-store-with-carrierwave-upyun"/>
+    <updated>2012-08-23T09:48:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/rails-app-image-store-with-carrierwave-upyun</id>
+    <content type="html"><![CDATA[<p><a href="https://www.upyun.com/?utm_source=ruby-china&amp;utm_medium=ad&amp;utm_campaign=upyun&amp;md=ruby-china">又拍云</a> 进过我的长期使用，确实非常不错，价格合理，速度给力。</p>
+
+<p>这里分享一下我在 Rails 项目里面使用又拍云管理文件的经验。</p>
+
+<ul>
+<li><a href="#use-carrierwave">让又拍云结合在 CarrierWave 里面使用</a>；</li>
+<li><a href="#use-upyun-image-space">合理利用又拍云的图片空间功能</a>；</li>
+<li><a href="#cdn-asset-files">使用又拍云作为 Assets 文件的 CDN 分发</a>；</li>
+</ul>
+
+
+<h2 id="use-carrierwave">让又拍云结合在 CarrierWave 里面使用</h2>
+
+
+<p>Ruby 社区的人都知道，用于文件上传的 Gem 就两个最出名（<a href="https://github.com/thoughtbot/paperclip">Paperclip</a>, <a href="https://github.com/jnicklas/carrierwave">CarrierWave</a>），而 CarrierWave 由于其有灵活性很好，现在受到了越来越多人的青睐。</p>
+
+<blockquote><p>Paperclip 暂时还没有人给它实现又拍云集成 <br />
+CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另外还有我实现的<a href="https://github.com/huacnlee/carrierwave-aliyun">阿里云存储的插件</a>。</p></blockquote>
+
+<p>如果你想在 CarrierWave 里面使用又拍云作为存储介质，那么你需要用:</p>
+
+<ul>
+<li><a href="https://github.com/nowa/carrierwave-upyun">https://github.com/nowa/carrierwave-upyun</a></li>
+</ul>
+
+
+<p>Gemfile</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s2">&quot;carrierwave&quot;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;carrierwave-upyun&quot;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;rest-client&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>只需要简单的配置就能很好的将他们结合起来:</p>
+
+<p>config/initializes/carrierwave.rb</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">CarrierWave</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="ss">:upyun</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">upyun_username</span> <span class="o">=</span> <span class="s2">&quot;账号&quot;</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">upyun_password</span> <span class="o">=</span> <span class="s1">&#39;密码&#39;</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">upyun_bucket</span> <span class="o">=</span> <span class="s2">&quot;空间名&quot;</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">upyun_bucket_domain</span> <span class="o">=</span> <span class="s2">&quot;空间名.b0.upaiyun.com 或 使用你独立配置的域名&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面这段是简单介绍一下使用又拍云需要的组件，具体使用步骤的细节由于 CarrierWave 和 carrierwave-upyun 的 Github 页面上都有介绍，我这里就不用细说了。</p>
+
+<h2 id="use-upyun-image-space">合理利用又拍云的图片空间功能</h2>
+
+
+<p>在以往我们使用 CarrierWave 或 Paperclip 的时候，我们习惯于在 Rails 里面直接使用 ImageMagick 将图片处理成不同的缩略图版本（尺寸，格式，水印，锐化，模糊&#8230;）以适应我们的业务需求。</p>
+
+<blockquote><p> 这个也是 Ruby 社区的一大优点!<br />CarrierWave 或 Paperclip 可以很容易的将图片自动化的处理掉，使得我们的代码干净利落！</p></blockquote>
+
+<p>不过如果你用了又拍云以后，CarrierWave 提供的 <a href="https://github.com/jnicklas/carrierwave#adding-versions">缩略图生成</a> 功能或许你就不该使用了，由于远程网络访问以及服务器带宽会带来上传速度的问题，我们需要尽可能的减少服务器到又拍云服务器的网络使用，具体看我在 Ruby China 上面发帖描述的情况: 《<a href="http://ruby-china.org/topics/5059">盛大云和又拍云配合起来使用的问题</a>》</p>
+
+<p>你有两个选择:</p>
+
+<ol>
+<li>使用又拍云的 Form API 来上传图片，你可以看看这个 <a href="https://gist.github.com/3414491">Gist</a> ,这个里面的代码只是将上传调通了，后面还有许多事情需要手工处理；</li>
+<li>使用又拍云的图片空间的功能是实现缩略图生成，它可以让你配置 30 种缩略图版本；</li>
+</ol>
+
+
+<p>如果你选择用图片空间，那你还可以继续使用 CarrierWave 和 carrierwave-upyun 来实现图片处理，以前那套思路都还可以继续使用，只是需要对 CarrierWave 进行一些 Hack 就可以和“图片空间”很好的搭配起来了。</p>
+
+<h3>以前我们的 CarrierWave 自定义 Uploader 可能是这样的:</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;carrierwave/processing/mini_magick&#39;</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">AvatarUploader</span> <span class="o">&lt;</span> <span class="no">CarrierWave</span><span class="o">::</span><span class="no">Uploader</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">CarrierWave</span><span class="o">::</span><span class="no">MiniMagick</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">store_dir</span>
+</span><span class='line'>    <span class="s2">&quot;</span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">underscore</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">mounted_as</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">extension_white_list</span>
+</span><span class='line'>    <span class="sx">%w(jpg jpeg gif png)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">default_url</span>
+</span><span class='line'>    <span class="s2">&quot;avatar/</span><span class="si">#{</span><span class="n">version_name</span><span class="si">}</span><span class="s2">.jpg&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">filename</span>
+</span><span class='line'>    <span class="k">if</span> <span class="k">super</span><span class="o">.</span><span class="n">present?</span>
+</span><span class='line'>      <span class="n">model</span><span class="o">.</span><span class="n">uploader_secure_token</span> <span class="o">||=</span> <span class="no">SecureRandom</span><span class="o">.</span><span class="n">uuid</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="no">Rails</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;(BaseUploader.filename) </span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">uploader_secure_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="s2">&quot;</span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">uploader_secure_token</span><span class="si">}</span><span class="s2">.</span><span class="si">#{</span><span class="n">file</span><span class="o">.</span><span class="n">extension</span><span class="o">.</span><span class="n">downcase</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">version</span> <span class="ss">:tiny</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">process</span> <span class="ss">:resize_to_fill</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">version</span> <span class="ss">:small</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">process</span> <span class="ss">:resize_to_fill</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">version</span> <span class="ss">:normal</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">process</span> <span class="ss">:resize_to_fill</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">version</span> <span class="ss">:large</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">process</span> <span class="ss">:resize_to_fill</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">240</span><span class="p">,</span> <span class="mi">240</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 你可以能还有 PhotoUploader, CoverUploader ... 用于处理 Photo 和 Cover 格式的图片</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">mount_uploader</span> <span class="ss">:avatar</span><span class="p">,</span> <span class="no">AvatarUploader</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Photo</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">mount_uploader</span> <span class="ss">:photo</span><span class="p">,</span> <span class="no">PhotoUploader</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 Views 里面你是这样:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">image_tag</span><span class="p">(</span><span class="vi">@user</span><span class="o">.</span><span class="n">avatar</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="ss">:small</span><span class="p">))</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>改用又拍云图片空间以后，你需要这样</h3>
+
+<p>先在又拍云的图片空间里面配置好你需要的“自定义缩略图尺寸”.</p>
+
+<blockquote><p>定义缩略图一定要提前想好!<br />因为版本一定义好，名称就不能修改了，也不能删除，并且最多有 30 种的限制。</p></blockquote>
+
+<p>接下来改造你的代码，将 AvatarUploader, PhotoUploader, CoverUploader 扔掉，改用一个 ImageUploader 代替:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># coding: utf-8</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;carrierwave/processing/mini_magick&#39;</span>
+</span><span class='line'><span class="c1"># 在图片空间里面定义好的“缩略图版本名称”，以防止调用错误</span>
+</span><span class='line'><span class="no">IMAGE_UPLOADER_ALLOW_IMAGE_VERSION_NAMES</span> <span class="o">=</span> <span class="sx">%(20x20 30x30 240x240 100x100 120x90 160x120 250x187 320 640 800)</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">ImageUploader</span> <span class="o">&lt;</span> <span class="no">CarrierWave</span><span class="o">::</span><span class="no">Uploader</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">store_dir</span>
+</span><span class='line'>    <span class="s2">&quot;</span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">underscore</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">mounted_as</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">default_url</span>
+</span><span class='line'>    <span class="c1"># 搞一个大一点的默认图片取名 blank.png 用 FTP 传入图片空间，用于作为默认图片</span>
+</span><span class='line'>    <span class="c1"># 由于有自动的缩略图处理，小图也不成问题</span>
+</span><span class='line'>    <span class="c1"># Setting.upload_url 这个是你的图片空间 URL</span>
+</span><span class='line'>    <span class="s2">&quot;</span><span class="si">#{</span><span class="no">Setting</span><span class="o">.</span><span class="n">upload_url</span><span class="si">}</span><span class="s2">/blank.png</span><span class="si">#{</span><span class="n">version_name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># 覆盖 url 方法以适应“图片空间”的缩略图命名</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">url</span><span class="p">(</span><span class="n">version_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@url</span> <span class="o">||=</span> <span class="k">super</span><span class="p">({})</span>
+</span><span class='line'>    <span class="n">version_name</span> <span class="o">=</span> <span class="n">version_name</span><span class="o">.</span><span class="n">to_s</span>
+</span><span class='line'>    <span class="k">return</span> <span class="vi">@url</span> <span class="k">if</span> <span class="n">version_name</span><span class="o">.</span><span class="n">blank?</span>
+</span><span class='line'>    <span class="k">if</span> <span class="ow">not</span> <span class="n">version_name</span><span class="o">.</span><span class="n">in?</span><span class="p">(</span><span class="no">IMAGE_UPLOADER_ALLOW_IMAGE_VERSION_NAMES</span><span class="p">)</span>
+</span><span class='line'>      <span class="c1"># 故意在调用了一个没有定义的“缩略图版本名称”的时候抛出异常，以便开发的时候能及时看到调错了</span>
+</span><span class='line'>      <span class="k">raise</span> <span class="s2">&quot;ImageUploader version_name:</span><span class="si">#{</span><span class="n">version_name</span><span class="si">}</span><span class="s2"> not allow.&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="o">[</span><span class="vi">@url</span><span class="p">,</span><span class="n">version_name</span><span class="o">].</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;!&quot;</span><span class="p">)</span> <span class="c1"># 我这里在图片空间里面选用 ! 作为“间隔标志符”</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">extension_white_list</span>
+</span><span class='line'>    <span class="sx">%w(jpg jpeg gif png)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">filename</span>
+</span><span class='line'>    <span class="k">if</span> <span class="k">super</span><span class="o">.</span><span class="n">present?</span>
+</span><span class='line'>      <span class="n">model</span><span class="o">.</span><span class="n">uploader_secure_token</span> <span class="o">||=</span> <span class="no">SecureRandom</span><span class="o">.</span><span class="n">uuid</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="no">Rails</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;(BaseUploader.filename) </span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">uploader_secure_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="s2">&quot;</span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">uploader_secure_token</span><span class="si">}</span><span class="s2">.</span><span class="si">#{</span><span class="n">file</span><span class="o">.</span><span class="n">extension</span><span class="o">.</span><span class="n">downcase</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">mount_uploader</span> <span class="ss">:avatar</span><span class="p">,</span> <span class="no">ImageUploader</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Photo</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">mount_uploader</span> <span class="ss">:image</span><span class="p">,</span> <span class="no">ImageUploader</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Category</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">mount_uploader</span> <span class="ss">:cover</span><span class="p">,</span> <span class="no">ImageUploader</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># ... 所有需要图片上传 Uploader 的地方都用 ImageUploader</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后 Views 里面调用的时候你就需要将以前的 :small, :large &#8230; 改成新的版本名称了</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">image_tag</span><span class="p">(</span><span class="vi">@user</span><span class="o">.</span><span class="n">avatar</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="s2">&quot;20x20&quot;</span><span class="p">))</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当然我不建议你直接这么写，你应该写个 <code>user_avatar_tag</code> 的 Helper 来做上面这段的事情:</p>
+
+<p>users_helper.rb</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">user_avatar_tag</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{})</span>
+</span><span class='line'>  <span class="n">options</span><span class="o">[</span><span class="ss">:style</span><span class="o">]</span> <span class="o">||=</span> <span class="ss">:small</span>
+</span><span class='line'>  <span class="n">style</span> <span class="o">=</span> <span class="k">case</span> <span class="n">options</span><span class="o">[</span><span class="ss">:style</span><span class="o">].</span><span class="n">to_s</span>
+</span><span class='line'>  <span class="k">when</span> <span class="s2">&quot;small&quot;</span> <span class="k">then</span> <span class="s2">&quot;30x30&quot;</span>
+</span><span class='line'>  <span class="k">when</span> <span class="s2">&quot;normal&quot;</span> <span class="k">then</span> <span class="s2">&quot;100x100&quot;</span>
+</span><span class='line'>  <span class="k">when</span> <span class="s2">&quot;large&quot;</span> <span class="k">then</span> <span class="s2">&quot;240x240&quot;</span>
+</span><span class='line'>  <span class="k">when</span> <span class="s2">&quot;tiny&quot;</span> <span class="k">then</span> <span class="s2">&quot;20x20&quot;</span>
+</span><span class='line'>  <span class="k">else</span> <span class="n">options</span><span class="o">[</span><span class="ss">:style</span><span class="o">].</span><span class="n">to_s</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="n">link_to</span> <span class="n">image_tag</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">avatar</span><span class="p">(</span><span class="n">style</span><span class="p">)),</span> <span class="n">user</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>View 里面用 helper</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">user_avatar_tag</span><span class="p">(</span><span class="vi">@user</span><span class="p">,</span> <span class="ss">:style</span> <span class="o">=&gt;</span> <span class="ss">:tiny</span><span class="p">)</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后一切都爽了，你都不需要装 ImageMagick (RMagick, mini_magick) 了，上传的时候只会有一张原图发往又拍云，然后通过不同的 URL 规则就能调用到缩略图。</p>
+
+<h2 id="cdn-asset-files">使用又拍云的 CDN 来部署你的 Assets 文件</h2>
+
+
+<p>由于又拍云的存储还带有 CDN 分发功能，我们可以直接用它来存储我们的 Javascripts, Stylesheets, Images 这些资源文件，这样可以让访客在国内的任意地方下载这些文件都可以尽可能的使用最近的 CDN 节点，页面加载速度就自然能快起来。</p>
+
+<p>参考一下 Ruby China 的这个 Commit 的代码：</p>
+
+<ul>
+<li><a href="https://github.com/ruby-china/ruby-china/commit/d050f7f8b7441fbd88671e0008205f4ccffca8b5">https://github.com/ruby-china/ruby-china/commit/d050f7f8b7441fbd88671e0008205f4ccffca8b5</a></li>
+</ul>
+
+
+<p>里面包含 4 个文件的改动:</p>
+
+<ul>
+<li><code>lib/ftp_sync.rb</code> - FTP 同步功能，此文件无需修改</li>
+<li><code>config/environments/production.rb</code> - 将 asset_host 改成你的又拍云域名</li>
+<li><code>lib/tasks/assets/cdn.rake</code> - 搞个 rake assets:cdn 命令用于执行同步功能，此文件你需要修改又拍云的配置信息</li>
+<li><code>config/deploy.rb</code> - 在 Capistrano 的部署过程加入调用 rake assets:cdn</li>
+</ul>
+
+
+<blockquote><p> 注意，如果你在用图片空间的话，要注意改写 <code>cdn.rake</code> 的时候 Bucket 一定要用一个“文件空间”!<br />
+因为图片空间是没法存放 js,css 文件的，你可以定义两个 Bucket, 一个用于存图片，一个用于存 Assets 文件。</p></blockquote>
+
+<p>当你在 <code>rake assets:precomplie</code> 编译出 Assets 文件以后，就可以执行 <code>rake assets:cdn</code> 将预编译好的 Assets 文件同步到又拍云里面了。 (Ruby China 里面那个脚本以经过反复尝试，靠谱！)</p>
+
+<hr />
+
+<p>后面没了，以后有时间再研究一下 又拍的 Form API 与 Rails 项目结合。</p>
+
+<h2>上面提及的资源的地址</h2>
+
+<ul>
+<li><a href="https://www.upyun.com/?utm_source=ruby-china&amp;utm_medium=ad&amp;utm_campaign=upyun&amp;md=ruby-china">又拍云存储</a></li>
+<li><a href="https://github.com/jnicklas/carrierwave">CarrierWave</a></li>
+<li><a href="https://github.com/nowa/carrierwave-upyun">carrierwave-upyun</a></li>
+<li><a href="https://gist.github.com/3414491">Rails 调用又拍云 Form API 的例子</a></li>
+<li><a href="https://github.com/ruby-china/ruby-china">Ruby China 的源代码</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Rails 项目开发支付宝付款调试过程的技巧]]></title>
+    <link href="http://huacnlee.github.com/blog/a-tip-app-payment-feature-development-like-alipay"/>
+    <updated>2012-08-22T09:48:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/a-tip-app-payment-feature-development-like-alipay</id>
+    <content type="html"><![CDATA[<p>最近做了两个带支付功能的项目，对于 Rails 项目来说，我们有 <a href="https://github.com/Shopify/active_merchant">active_merchant</a> 和 <a href="https://github.com/flyerhzm/activemerchant_patch_for_china">active_merchant_patch_china</a> 开发起来会简单很多。</p>
+
+<p>但是一个问题困扰我，就是本地开发支付网关回调通知的问题。</p>
+
+<h2>以支付宝为例：</h2>
+
+<p>每次对支付宝发起的动作完成以后，支付宝都会将执行结果的信息通过“Notify”的方式返回回来，而这个“Notify”是直接由支付宝的服务端发起的 POST 请求。</p>
+
+<p>但是你知道，Rails 项目开发我们习惯于在本地跑一个 http://127.0.0.1:3000 来开发，支付宝的“Notify”根本无法从他们的服务端访问到这么个地址。</p>
+
+<p>之前在一淘有个项目涉及到付款的功能我是直接走内部通道，拿到一个 Alipay 的 VPN，才能收到“Notify”信息的，并且这个方式也非常的麻烦，每次搞还得联系支付宝的人给 VPN 随机密钥，连上支付宝 VPN，然后再测试，并且某些环境下面开了 VPN 还会带来“副作用”&#8230;</p>
+
+<hr />
+
+<p>其实支付宝的通知回调无非要求这么一点： <strong>notify_url 必须是网络上可访问的地址</strong></p>
+
+<p>那我们将开发环境跑在 VPS 上面不就可以了么？</p>
+
+<h2>通过远程开发环境联调支付功能</h2>
+
+<p>解决方案就是:</p>
+
+<p>在远程服务器上面跑开发环境调试</p>
+
+<ol>
+<li>找个速度快一些的 VPS，并把开发环境安装好</li>
+<li>VPS 上面配置 Nginx 方向代理到 http://127.0.0.1:3000, 并绑定一个真实的域名，(如: dev.huacnlee.com)</li>
+<li>通过 SSH 连到 VPS 上面，并启动项目开发环境</li>
+<li>通过 SFTP/FTP 的方式远程编辑文件，通过一些工具自动同步（你可以把你的 ssh pub key 存放服务器上面，这样连接 SFTP 的时候就不需要繁琐的输入密码)</li>
+<li>访问 dev.huacnlee.com 来调试</li>
+</ol>
+
+
+<h3>你需要下面几个软件:</h3>
+
+<p>我这里只搞过 Mac 平台的，其他平台可以寻找类似的替代方案</p>
+
+<ul>
+<li><a href="https://github.com/osxfuse/osxfuse/downloads">FUSE for OS X</a> - 将 FTP, SFTP 的地址 mount 成一个本地磁盘来使用</li>
+<li><a href="http://macfusionapp.org">Macfusion</a> - 图形化的界面调用 FUSE</li>
+</ul>
+
+
+<p>用起来也很简单，先安装 <a href="https://github.com/osxfuse/osxfuse/downloads">FUSE for OS X</a>，下载以后有安装包的，这个装好了无需配置。
+然后下载 <a href="http://macfusionapp.org">Macfusion</a>，这个无需安装直接运行，界面上就几个按钮而已，如图:</p>
+
+<p><img src="http://macfusionapp.org/screenshots/mf2_main.png" alt="" /> <img src="http://macfusionapp.org/screenshots/mf2_editing.png" alt="" /></p>
+
+<p>用 Macfusion mount 以后会在 <code>/Volumes</code> 里面出现一个新的磁盘，可以通过任意工具修改这个里面的文件，达到随时更新到 VPS 上面的目的了。</p>
+
+<blockquote><p>注意，如果你用 TextMate，别忘了关掉 Git 这个 Bundle，不然它会随时刷新文件状态，而是的用起来很卡，其他编辑器也是类似的，你得关掉有关刷新文件的功能，因为现在你连的是远程目录，每一次文件检查动作都是一个网络请求。</p></blockquote>
+
+<p>接下来一边修改，一边访问 <code>dev.huacnlee.com</code> 这个域名来调试支付功能，由于用上了实际的域名，支付宝的“Notify”能够顺利发送过来了。等支付功能调好了以后再切回本地开发的方式。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[kissy-rals - 可以让你在 Rails 项目里面用 Kissy 代替 jQuery]]></title>
+    <link href="http://huacnlee.github.com/blog/kissy-for-rails-projects"/>
+    <updated>2012-08-18T23:05:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/kissy-for-rails-projects</id>
+    <content type="html"><![CDATA[<h2>前面闲扯</h2>
+
+<p>在淘宝系里面有个苦恼的事情，全公司的前端都主要使用 <a href="https://github.com/kissyteam/kissy">Kissy</a> 这个前端框架。我一直觉得这个东西使用起来过于复杂，不喜欢用。</p>
+
+<h3>据我了解:</h3>
+
+<blockquote><p>Kissy 实际上是从 jQuery (API or 源代码？我不确定) 衍生过来的，很多功能都非常相似，而 Kissy 在 jQuery 这种功能的基础上实现了很多正对淘宝项目情况的功能扩充。</p></blockquote>
+
+<p>但是我觉得 Kissy 没有把 jQuery 精简好用的优点保留下来，反而整出了非常奇怪的 API 命名和调用方式</p>
+
+<h3>比如下面这些方法:</h3>
+
+<ul>
+<li>KISSY - 全大写的类名;</li>
+<li>KISSY.one / KISSY.all 两个 DOM 选择器，命名非常奇怪，我不知道为何原因会有两个（一个是返回单个对象，一个是返回数组）jQuery 一个不也用了;</li>
+<li>文档例子里面常见的 KISSY.ready(function(S){}) 然后在这样的 block 里面用 S 这个别名，又是一个奇怪的大写字母;</li>
+</ul>
+
+
+<p>所以，目前为止我也一直坚持在公司的项目里面的 Rails 项目里面继续使用 jQuery，可最后发现遇到一些复杂功能需要专业前端支持的时候比较麻烦，另外也不能直接使用公司现有的前端资源…</p>
+
+<p>当然其中还有一个重要点是 Rails 没有 Kissy 的支持，<a href="http://guides.rubyonrails.org/ajax_on_rails.html">Rails 内置的 Ajax 功能</a> 就没法直接使用，会很不方便。</p>
+
+<p>最近我们部门那边又正在开发一套类似 <a href="http://getbootstrap.com">Bootstrap</a> 的前端组件库 <a href="http://github.com/etaoux/brix">Brix</a>，这个东西搞完以后，等于以后可以想用 Bootstrap 那样的组件来开发公司的项目了，多省事啊。</p>
+
+<p>所以，开始正题了…</p>
+
+<h2>关于 kissy-rails</h2>
+
+<p>于是，我花了点时间基于 <a href="https://github.com/rails/jquery-rails">jquery-rails</a> 实现了 <a href="https://github.com/huacnlee/kissy-rails">kissy-rails</a> ，让 Rails 项目可以直接用 Kissy 代替 jQuery。</p>
+
+<ul>
+<li><a href="https://github.com/huacnlee/kissy-rails">https://github.com/huacnlee/kissy-rails</a></li>
+</ul>
+
+
+<p>这个过程还好有使用 Kissy 很久的 <a href="http://github.com/cricy">同事</a> 帮忙解释 Kissy 的使用问题…(说到这里我又不得不吐槽 Kissy 文档太差，就是看不懂…)</p>
+
+<p>总归，到最后， kissy-rails 还是实现了，用起来和 jquery-rails 差不多，也就是把之前 jquery 的地方换成 kissy:</p>
+
+<p>Gemfile</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s2">&quot;kissy-rails&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>app/assets/javascripts/application.js</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="c1">//= require kissy</span>
+</span><span class='line'><span class="c1">//= require kissy_ujs</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后 Rails Helper 里面提供的 Ajax 支持就能用 Kissy 的 API 来实现了，比如:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">link_to</span> <span class="s2">&quot;Delete&quot;</span><span class="p">,</span> <span class="vi">@post</span><span class="p">,</span> <span class="ss">:remote</span> <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">:confirm</span> <span class="o">=&gt;</span> <span class="s2">&quot;Are you sure?&quot;</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">&lt;%=</span> <span class="n">form_for</span><span class="p">(</span><span class="vi">@post</span><span class="p">,</span> <span class="ss">:remote</span> <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">text_field</span> <span class="ss">:login</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">text_field</span> <span class="ss">:password</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">submit</span><span class="p">,</span> <span class="ss">:disabled_with</span> <span class="o">=&gt;</span> <span class="s2">&quot;Submiting...&quot;</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Rails 表单文本框或其他样式统一小技巧]]></title>
+    <link href="http://huacnlee.github.com/blog/a-tip-to-simple-control-rails-form-style"/>
+    <updated>2012-08-15T23:32:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/a-tip-to-simple-control-rails-form-style</id>
+    <content type="html"><![CDATA[<p>我时长会苦恼，表单生成的时候需要对某些字段的文本框设定不同的长度，比如 <code>Email，地址</code>什么的要很长很长，而 <code>姓名，邮编</code> 之类的需要设置短的，还有一些多行的文本框需要设定一定的高宽。</p>
+
+<p>以前我都是在 text_field 后面加 <code>:style =&gt; "width:100px"</code> 之类的参数，这样是可以设置，但是很土鳖！</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">simple_form_for</span><span class="p">(</span><span class="vi">@user</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">input</span> <span class="ss">:login</span><span class="p">,</span> <span class="ss">:input_html</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">:style</span> <span class="o">=&gt;</span> <span class="s2">&quot;width:100px&quot;</span> <span class="p">}</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">input</span> <span class="ss">:password</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">input</span> <span class="ss">:password_confirmation</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">input</span> <span class="ss">:email</span><span class="p">,</span> <span class="ss">:input_html</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">:style</span> <span class="o">=&gt;</span> <span class="s2">&quot;width:300px&quot;</span> <span class="p">}</span>  <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>大的问题还是有时候同样的一个表单有可能会出现在前台，后台，或者前台的好几个页面（某些页面需要的字段要少一些），这就得每个用到的地方都要设置 <code>:style</code> 及其土鳖，而且有时候还写出来不统一&#8230;</p>
+
+<hr />
+
+<h2>解决方法</h2>
+
+<p>我最近发现一个规律可以很好解决上面的难题&#8230;</p>
+
+<p>Rails 用 form_for (不管你是用 <a href="https://github.com/justinfrench/formtastic">Formtastic</a> 还是 <a href="https://github.com/plataformatec/simple_form">simple_form</a> 还是 Rails <a href="http://guides.rubyonrails.org/form_helpers.html">默认的</a> 生成表单以后每个表单会有一个固定的 class ，每个文本框会有固定的 id</p>
+
+<ul>
+<li>form 的 class 是根据 Model 名称转换而来的</li>
+<li>文本框的 id 是更具 Model + 字段名出来的</li>
+</ul>
+
+
+<p>比如这个例子</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">simple_form_for</span><span class="p">(</span><span class="vi">@user</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">inputs</span> <span class="ss">:login</span><span class="p">,</span> <span class="ss">:password</span><span class="p">,</span> <span class="ss">:password_confirmation</span><span class="p">,</span> <span class="ss">:email</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>会得到</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">&quot;/users&quot;</span> <span class="na">method=</span><span class="s">&quot;POST&quot;</span> <span class="na">class=</span><span class="s">&quot;user&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>   <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">name=</span><span class="s">&quot;user[login]&quot;</span> <span class="na">id=</span><span class="s">&quot;user_id&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>   <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">name=</span><span class="s">&quot;user[password]&quot;</span> <span class="na">id=</span><span class="s">&quot;user_password&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>   <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">name=</span><span class="s">&quot;user[password_confirmation]&quot;</span> <span class="na">id=</span><span class="s">&quot;user_password_confirmation&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>   <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">name=</span><span class="s">&quot;user[email]&quot;</span> <span class="na">id=</span><span class="s">&quot;user_email&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'><span class="nt">&lt;/form&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后，其实就只需要在 application.css 里面这么写，那么所有用到的表单都能正确的显示长度了（并且绝对靠谱！）</p>
+
+<p>application.scss</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">form</span><span class="nc">.user</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">input</span><span class="m">#user</span><span class="err">_</span><span class="n">login</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">input</span><span class="m">#user</span><span class="err">_</span><span class="n">password</span><span class="err">_</span><span class="n">confirmation</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">input</span><span class="m">#user</span><span class="err">_</span><span class="n">password</span> <span class="err">{</span> <span class="k">width</span><span class="o">:</span> <span class="m">100px</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>  <span class="nt">input</span><span class="nf">#user_email</span> <span class="p">{</span> <span class="k">width</span><span class="o">:</span><span class="m">200px</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'><span class="err">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>由于用了 form 打头，也就不用担心这么些会影响到其他地方的样式。
+以后再也不用把 simple_form 提供的 inputs 方法拆开来一个一个的写的，直接一个 <code>f.inputs :name, :login, :email</code> 搞定，一行多省事情啊！
+同时，这个方式你还可以写一个特别的样式，比如，让密码的 label 保持为红色等等。</p>
+
+<p>在 Ruby China 上面关于这个的讨论： <a href="http://ruby-china.org/topics/4972">http://ruby-china.org/topics/4972</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[redis-search 的使用例子 App]]></title>
+    <link href="http://huacnlee.github.com/blog/a-sample-to-show-you-how-to-use-redis-search"/>
+    <updated>2012-08-01T00:10:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/a-sample-to-show-you-how-to-use-redis-search</id>
+    <content type="html"><![CDATA[<p><a href="https://github.com/huacnlee/redis-search">redis-search</a> 是一个我基于 <a href="http://redis.io">Redis</a> 和 <a href="http://rubyonrails.org">Rails</a> ActiveModel 实现的全自动的搜索工具。</p>
+
+<h2>redis-search 它可帮你实现：</h2>
+
+<ul>
+<li>实时更新搜索索引</li>
+<li>高效</li>
+<li>分词搜索和逐字匹配搜索</li>
+<li>别名搜索</li>
+<li>支持 ActiveRecord 和 Mongoid</li>
+<li>暂时只能用一个字段做为排序条件</li>
+<li>中文同音词搜索</li>
+<li>中文拼音搜索支持</li>
+<li>中文拼音首字母搜索</li>
+<li>可以用一些简单的附加条件组合搜索</li>
+</ul>
+
+
+<p>我写了一个简单的例子例子项目</p>
+
+<p><a href="https://github.com/huacnlee/redis-search-example">https://github.com/huacnlee/redis-search-example</a></p>
+
+<p>如果你不知道如何用 redis-search 你可以先用这个简单的项目跑起来试试看，里面的功能很简单，就是从 Github 获取信息，然后可以通过 redis-search 来实现搜索。</p>
+
+<p>由于 Github 上面没有中文的项目名称，所以中文搜索这里就没法演示出来，稍后我再补充一下。</p>
+
+<p>这里面演示了如何用别名索引，附加字段到 Redis，如何用排序(rand 那个属性)</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[介绍我的 mongoid_taggable_on 这个 Gem - Mongoid Tag 的实现]]></title>
+    <link href="http://huacnlee.github.com/blog/new_gem_mongoid_taggable_on"/>
+    <updated>2012-05-21T10:58:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/new_gem_mongoid_taggable_on</id>
+    <content type="html"><![CDATA[<p>这个是基于 <a href="http://mongoid.org">Mongoid</a> 实现的 Tag 功能的 Ruby gem。</p>
+
+<p>老早就搞出来了。目前这个东西已经稳定的在 <a href="http://720p.so">720p.so</a> 上面跑了很长一段时间，今天公布一下。
+其实这类功能在我之前已经有几个，但是经过尝试以后发现他们的太复杂了，不满足我的需求，于是自己实现了一个，基于 Array 字段实现的 Tag 。</p>
+
+<h2>特点</h2>
+
+<ol>
+<li>基于 MongoDB Array 类型字段存储，没有独立的 Tag 表，所以如果想搞 Tag list 需要手工处理；</li>
+<li>可以定义任意的 Tag 字段，比如 国家，明星，类型 &#8230; 通通都可以用 Tag 来实现;</li>
+<li>自动产生 _list 属性，用于接受或返回字符串以逗号分隔的数据，并转换成数组，同时还支持 (<code>|，/</code>斜杠，中文逗号，竖线) 作为分割标记。</li>
+</ol>
+
+
+<!-- more -->
+
+
+<h2>用法</h2>
+
+<p>下面以一个 720p.so 上面的 <code>电影</code> Model 为例：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Movie</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Mongoid</span><span class="o">::</span><span class="no">Document</span>
+</span><span class='line'>  <span class="c1"># 引入 mongoid_taggable_on</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Mongoid</span><span class="o">::</span><span class="no">TaggableOn</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># 演员</span>
+</span><span class='line'>  <span class="n">taggable_on</span> <span class="ss">:actors</span><span class="p">,</span> <span class="ss">:index</span> <span class="o">=&gt;</span> <span class="kp">false</span>
+</span><span class='line'>  <span class="c1"># 电影类型</span>
+</span><span class='line'>  <span class="n">taggable_on</span> <span class="ss">:categories</span>
+</span><span class='line'>  <span class="c1"># 国家</span>
+</span><span class='line'>  <span class="n">taggable_on</span> <span class="ss">:countries</span>
+</span><span class='line'>  <span class="c1"># 语言</span>
+</span><span class='line'>  <span class="n">taggable_on</span> <span class="ss">:languages</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:title</span>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:summary</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>通过上面的定义 Movie model 就有了下面这些属性和方法</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>irb&gt; <span class="nv">m</span> <span class="o">=</span> Movie.new
+</span><span class='line'>irb&gt; m.actor_list <span class="o">=</span> <span class="s2">&quot;甄子丹,古天乐,徐静蕾&quot;</span>
+</span><span class='line'>irb&gt; m.actors
+</span><span class='line'><span class="o">[</span><span class="s2">&quot;甄子丹&quot;</span>, <span class="s2">&quot;古天乐&quot;</span>, <span class="s2">&quot;徐静蕾&quot;</span><span class="o">]</span>
+</span><span class='line'>irb&gt; m.country_list <span class="o">=</span> <span class="s2">&quot;美国|法国|俄罗斯&quot;</span>
+</span><span class='line'>irb&gt; m.countries
+</span><span class='line'><span class="o">[</span><span class="s2">&quot;美国&quot;</span>,<span class="s2">&quot;法国&quot;</span>,<span class="s2">&quot;俄罗斯&quot;</span><span class="o">]</span>
+</span><span class='line'>irb&gt; m.country_list <span class="o">=</span> <span class="s2">&quot;美国|法国|俄罗斯|中国&quot;</span>
+</span><span class='line'>irb&gt; m.country_list_changed?
+</span><span class='line'><span class="nb">true</span>
+</span><span class='line'>irb&gt; m.country_list_was
+</span><span class='line'><span class="s2">&quot;美国|法国|俄罗斯&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以用下面这些方法实现查询</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>irb&gt; Movie.tagged_with_on<span class="o">(</span>:actors, <span class="s2">&quot;成龙, 李连杰&quot;</span><span class="o">)</span> <span class="c"># 查找同时带有 “成龙” 和 “李连杰” 的电影</span>
+</span><span class='line'>irb&gt; Movie.tagged_with_on<span class="o">(</span>:actors, <span class="s2">&quot;古天乐, 杨紫琼&quot;</span>, :match <span class="o">=</span>&gt; :any<span class="o">)</span> <span class="c"># 查找 “古天乐” 或 “杨紫琼” 的电影</span>
+</span><span class='line'>irb&gt; Movie.tagged_with_on<span class="o">(</span>:actors, <span class="s2">&quot;周杰伦&quot;</span>, :match <span class="o">=</span>&gt; :not<span class="o">)</span> <span class="c"># 查找不是 “周杰伦” 的电影</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>项目地址</h2>
+
+<p><a href="https://github.com/huacnlee/mongoid_taggable_on">https://github.com/huacnlee/mongoid_taggable_on</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[一个我开发过程的视频]]></title>
+    <link href="http://huacnlee.github.com/blog/live-show-of-my-coding"/>
+    <updated>2012-05-17T11:29:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/live-show-of-my-coding</id>
+    <content type="html"><![CDATA[<p>这个视频是 <a href="http://twitter.com/poshboytl">Terry</a> 来我家录制的我写程序的整个过程，过程中我在开发 <a href="http://ruby-china.org">Ruby China</a> 的一个关注功能。其中你可以看到我开发习惯，使用的工具，以及过程中解决问题的思路。</p>
+
+<h2>视频地址</h2>
+
+<p><a href="http://railscasts-china.com/episodes/live-show-with-huacnlee">http://railscasts-china.com/episodes/10-live-show-with-huacnlee</a></p>
+
+<p><a href="http://railscasts-china.com/episodes/live-show-with-huacnlee-2">http://railscasts-china.com/episodes/live-show-with-huacnlee-2</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Rails ActiveModel callback 那些会调用 callback 那些不会]]></title>
+    <link href="http://huacnlee.github.com/blog/active-model-callback-call-with-methods"/>
+    <updated>2012-02-28T14:12:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/active-model-callback-call-with-methods</id>
+    <content type="html"><![CDATA[<p>今天才关注到这个文档，以前只是有个大概的印象&#8230;</p>
+
+<p>Rails Model 有许多 callback 事件 (<code>before_save</code>, <code>after_save</code>, <code>before_create</code>, <code>after_create</code> &#8230;)，可以让我们在数据更新的前后定义一些动作.
+比如我们偶尔会这样：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
+</span><span class='line'>  <span class="n">before_create</span> <span class="k">do</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">slug</span> <span class="o">=</span> <span class="nb">self</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">safe_slug</span> <span class="k">if</span> <span class="nb">self</span><span class="o">.</span><span class="n">slug</span><span class="o">.</span><span class="n">blank?</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>但是有一些动作是不会执行 callback 事件的，如下面的列表</p>
+
+<!-- more -->
+
+
+<h2>会调用 callback</h2>
+
+<ul>
+<li>create</li>
+<li>create!</li>
+<li>decrement!</li>
+<li>destroy</li>
+<li>destroy_all</li>
+<li>increment!</li>
+<li>save</li>
+<li>save!</li>
+<li>save(:validate => false)</li>
+<li>toggle!</li>
+<li>update</li>
+<li>update_attribute</li>
+<li>update_attributes</li>
+<li>update_attributes!</li>
+<li>valid?</li>
+</ul>
+
+
+<h2>而下面这些是不会调用 callback 方法的</h2>
+
+<ul>
+<li>decrement</li>
+<li>decrement_counter</li>
+<li>delete</li>
+<li>delete_all</li>
+<li>find_by_sql</li>
+<li>increment</li>
+<li>increment_counter</li>
+<li>toggle</li>
+<li>touch</li>
+<li>update_column</li>
+<li>update_all</li>
+<li>update_counters</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Git 如何合并其他 remote 上面的更新]]></title>
+    <link href="http://huacnlee.github.com/blog/merge-other-remote-commits-to-current-fork-with-git"/>
+    <updated>2012-02-27T16:56:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/merge-other-remote-commits-to-current-fork-with-git</id>
+    <content type="html"><![CDATA[<p>在 Github 上面 Fork 别人的项目时，我们常常会遇到主项目有了更新，这个时候怎么把主项目的更新合并到自己 Fork 的版本里面来呢？
+今天突然有人问我这个问题，这里就写出来。
+下面以 <a href="https://github.com/huacnlee/ruby-china/">ruby-china</a> 这个项目为例，假设我是用户 @tualatrix, 并且我有一个 ruby-china 的 fork 版本在 <a href="https://github.com/tualatrix/ruby-china">这里</a> ，而这个时候我在本地的版本是 <code>tualatrix/ruby-china</code> 这个</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># 我先吧 tualatrix Fork 的版本获取到本地</span>
+</span><span class='line'>~/work <span class="nv">$ </span>git clone git://github.com/tualatrix/ruby-china.git
+</span><span class='line'>~/work <span class="nv">$ </span><span class="nb">cd </span>ruby-china
+</span><span class='line'>~/work/ruby-china &lt;master&gt; <span class="nv">$ </span>git remote
+</span><span class='line'>origin
+</span><span class='line'><span class="c"># 添加 huacnlee (也就是主项目的 remote 地址)</span>
+</span><span class='line'>~/work/ruby-china &lt;master&gt; <span class="nv">$ </span>git remote add huacnlee git://github.com/huacnlee/ruby-china.git
+</span><span class='line'><span class="c"># 用 fetch 命令获取 huacnlee 的所有分支</span>
+</span><span class='line'>~/work/ruby-china &lt;master&gt; <span class="nv">$ </span>git fetch huacnlee
+</span><span class='line'>remote: Counting objects: 499, <span class="k">done</span>.
+</span><span class='line'>remote: Compressing objects: 100% <span class="o">(</span>143/143<span class="o">)</span>, <span class="k">done</span>.
+</span><span class='line'>remote: Total 315 <span class="o">(</span>delta 211<span class="o">)</span>, reused 253 <span class="o">(</span>delta 172<span class="o">)</span>
+</span><span class='line'>Receiving objects: 100% <span class="o">(</span>315/315<span class="o">)</span>, 190.17 KiB | 92 KiB/s, <span class="k">done</span>.
+</span><span class='line'>Resolving deltas: 100% <span class="o">(</span>211/211<span class="o">)</span>, completed with 72 <span class="nb">local </span>objects.
+</span><span class='line'>From git://github.com/huacnlee/ruby-china
+</span><span class='line'> * <span class="o">[</span>new branch<span class="o">]</span>      master -&gt; huacnlee/master
+</span><span class='line'><span class="c"># 将 huacnlee 的 master 分支的改动合并过来,目前是处与 master 分支</span>
+</span><span class='line'>~/work/ruby-china &lt;master&gt; <span class="nv">$ </span>git merge huacnlee/master
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Mongoid 没有性能问题]]></title>
+    <link href="http://huacnlee.github.com/blog/ahout-mongoid-performance"/>
+    <updated>2012-02-22T10:15:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/ahout-mongoid-performance</id>
+    <content type="html"><![CDATA[<p>昨天台湾的朋友发布了一篇将 <a href="http://github.com/huacnlee/ruby-china">ruby-china</a> 代码迁移成从 <a href="http://blog.yorkxin.org/2012/02/21/migrate-from-mongoid-to-activerecord/">Mongoid 迁移成 ActiveRecord</a> 的文章，其中有提到 Mongoid 效率的问题。我认为多少有些对于 Mongoid 的误解，所以在此撰写这篇文章做一些解释，以免大家误解 Mongoid 效率不好。</p>
+
+<h2>对比两个不同版本的差距</h2>
+
+<p>我昨晚特意下载了他们重构成 MySQL 版本的 <a href="http://github.com/rubytaiwan/ruby-taiwan">ruby-taiwan</a> 的代码与目前 <a href="http://github.com/huacnlee/ruby-china">ruby-china</a> 的代码在开发环境下面模拟数据做了一下对比.</p>
+
+<h3>数据场景</h3>
+
+<ul>
+<li>MongoDb 的数据基本和目前 <a href="http://ruby-china.org">Ruby China</a> 上面类似，而 MySQL 的测试数据只是简单的添加了足够的条数。</li>
+<li>开发环境下面，没有开启任何 cache</li>
+<li>ruby-1.9.3-p0-falcon</li>
+</ul>
+
+
+<h3>对比结果:</h3>
+
+<ul>
+<li>话题列表 /topics (15个话题)</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># ActiveRecord</span>
+</span><span class='line'>Completed 200 OK in 179ms <span class="o">(</span>Views: 169.0ms | ActiveRecord: 9.2ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 177ms <span class="o">(</span>Views: 167.4ms | ActiveRecord: 8.1ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 116ms <span class="o">(</span>Views: 105.5ms | ActiveRecord: 8.3ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 110ms <span class="o">(</span>Views: 99.2ms | ActiveRecord: 9.6ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 191ms <span class="o">(</span>Views: 181.5ms | ActiveRecord: 8.5ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 192ms <span class="o">(</span>Views: 180.7ms | ActiveRecord: 10.2ms<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Mongoid</span>
+</span><span class='line'>Completed 200 OK in 192ms <span class="o">(</span>Views: 117.4ms | Mongo: 73.8ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 378ms <span class="o">(</span>Views: 298.9ms | Mongo: 77.8ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 214ms <span class="o">(</span>Views: 138.7ms | Mongo: 73.9ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 185ms <span class="o">(</span>Views: 120.9ms | Mongo: 63.0ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 186ms <span class="o">(</span>Views: 122.2ms | Mongo: 63.0ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 207ms <span class="o">(</span>Views: 140.1ms | Mongo: 66.0ms | Solr: 0.0ms<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>话题查看页面 /topics/:id <em>27条回复的场景</em></li>
+</ul>
+
+
+<p>由于两边 Markdown 的算法不同，我把 Markdown 功能关闭了的，其他逻辑几乎相同</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># ActiveRecord</span>
+</span><span class='line'>Completed 200 OK in 283ms <span class="o">(</span>Views: 263.2ms | ActiveRecord: 5.5ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 282ms <span class="o">(</span>Views: 260.4ms | ActiveRecord: 5.8ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 284ms <span class="o">(</span>Views: 262.6ms | ActiveRecord: 5.3ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 283ms <span class="o">(</span>Views: 262.7ms | ActiveRecord: 5.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 191ms <span class="o">(</span>Views: 170.3ms | ActiveRecord: 5.1ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 195ms <span class="o">(</span>Views: 174.5ms | ActiveRecord: 5.3ms<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Mongoid</span>
+</span><span class='line'>Completed 200 OK in 119ms <span class="o">(</span>Views: 93.6ms | Mongo: 5.5ms | Solr: 3.2ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 176ms <span class="o">(</span>Views: 150.8ms | Mongo: 6.0ms | Solr: 3.3ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 115ms <span class="o">(</span>Views: 90.9ms | Mongo: 6.6ms | Solr: 3.4ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 115ms <span class="o">(</span>Views: 91.9ms | Mongo: 6.4ms | Solr: 3.7ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 119ms <span class="o">(</span>Views: 93.4ms | Mongo: 5.0ms | Solr: 6.1ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 121ms <span class="o">(</span>Views: 97.9ms | Mongo: 5.6ms | Solr: 3.3ms<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上两个页面的测试数据表示，ActiveRecord 并没有 <a href="http://twitter.com/xdite">@xdite</a> 声称的从 400ms 减少到 90ms 这么大的差距，虽然 Mongoid 确实是有一些慢，但是差距实际上是不大的。</p>
+
+<h2>实际 ruby-china.org 产品环境的运行数据 (有 cache)</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>Started GET <span class="s2">&quot;/topics/777&quot;</span> <span class="o">(</span>58条回复<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 107ms <span class="o">(</span>Views: 82.9ms | Mongo: 23.3ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 121ms <span class="o">(</span>Views: 33.7ms | Mongo: 27.5ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 135ms <span class="o">(</span>Views: 48.4ms | Mongo: 26.8ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>Started GET <span class="s2">&quot;/topics&quot;</span>
+</span><span class='line'>Completed 200 OK in 104ms <span class="o">(</span>Views: 80.5ms | Mongo: 22.1ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 108ms <span class="o">(</span>Views: 83.9ms | Mongo: 22.7ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 107ms <span class="o">(</span>Views: 82.9ms | Mongo: 22.5ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 143ms <span class="o">(</span>Views: 92.2ms | Mongo: 49.1ms | Solr: 0.0ms<span class="o">)</span>
+</span><span class='line'>Completed 200 OK in 108ms <span class="o">(</span>Views: 84.5ms | Mongo: 22.3ms | Solr: 0.0ms<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>之前慢的原因解释</h2>
+
+<p>之前 ruby-china 某个时期在开发环境下面确实非常慢，但那个原因是下面几个</p>
+
+<ol>
+<li><a href="https://github.com/mislav/will_paginate">will_paginate</a> 由于不支持 MongoDb 的分页方式，所以每次分页都是 <code>Model.all</code> 以后，以 Array 来分页的，所以这个是之前性能的罪魁祸首,<a href="https://github.com/lucasas/will_paginate_mongoid">参见</a>；</li>
+<li>Mongoid 的 eager loading 需要手动配置 <code>identity_map_enabled: true</code> 才会有效果；</li>
+<li>之前 Rails 3.1 环境确实比较慢，已进入 Rails 3.2 已经感觉是非常明显的。</li>
+</ol>
+
+
+<h2>总结</h2>
+
+<p>总的来说，MongoDb 是非常不错的，而 Mongoid 长远来看也是值得使用的 Gem，虽然目前阶段它还不够完美，但是也不至于我们将他抛弃。
+我目前对于 MongoDb 的 <code>schema-less</code> 特性目前也是我比较困扰的地方，数据结构变化需要非常小心，这个需要经验。
+请不要误解 Mongoid 有性能问题。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Hello Otcopress]]></title>
+    <link href="http://huacnlee.github.com/blog/hello-otcopress"/>
+    <updated>2012-02-21T09:53:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/hello-otcopress</id>
+    <content type="html"><![CDATA[<p>一直都听说 <a href="http://octopress.org">Otcopress</a> 非常不错，于是试试将之前泡在 Heroku 上面的博客迁移过来。之前在 Heroku 上面由于GFW的原因，访问速度无比慢了。</p>
+
+<p>话说我的博客托管程序历史：</p>
+
+<p><a href="http://www.2s-space.com">2s-space</a> -> <a href="http://www.cnblogs.com">博客园</a> -> <a href="http://blogbus.com">BlogBus</a> -> <a href="http://github.com/huacnlee/personlab">Personlab</a> -> <a href="http://octopress.org">Otcopress</a></p>
+
+<p>哦，如果你之前也是用 Personlab 的话，可以用我最新提交的 Rakefile 里面那个 <code>rake markdown:export</code> 命令来导出，将会生成 <code>_posts</code> 目录，把它放到 Octopress 的 <code>source</code> 目录就可以了。
+这个命令将会平滑的导出可以可 Octopress 兼容的文章数据，不过自定义页面和菜单的内容需要手动改了（不多的问题不大）</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Carrierwave 如何配置合理的上传文件名]]></title>
+    <link href="http://huacnlee.github.com/blog/carrierwave-upload-store-file-name-config"/>
+    <updated>2011-12-28T14:33:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/carrierwave-upload-store-file-name-config</id>
+    <content type="html"><![CDATA[<p>一直在寻找一个好的 Carrierwave 上传文件命名结构（GridFS），今天终于找到了，这个方式比较靠谱。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># coding: utf-8</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;digest/md5&quot;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;carrierwave/processing/mini_magick&#39;</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">BaseUploader</span> <span class="o">&lt;</span> <span class="no">CarrierWave</span><span class="o">::</span><span class="no">Uploader</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">CarrierWave</span><span class="o">::</span><span class="no">MiniMagick</span>
+</span><span class='line'>  <span class="n">storage</span> <span class="ss">:grid_fs</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">store_dir</span>
+</span><span class='line'>    <span class="s2">&quot;</span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">underscore</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># 调整临时文件的存放路径，默认是再 public 下面</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">cache_dir</span>
+</span><span class='line'>    <span class="s2">&quot;</span><span class="si">#{</span><span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="si">}</span><span class="s2">/tmp/uploads&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># TODO: 此处要想办法，开启了 open-uri 下载的因为文件名的问题无法通过验证</span>
+</span><span class='line'>  <span class="c1"># Allow image file extensions</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">extension_white_list</span>
+</span><span class='line'>    <span class="sx">%w(jpg jpeg gif png)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># Override the filename of the uploaded files:</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">filename</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">original_filename</span>
+</span><span class='line'>      <span class="c1"># current_path 是 Carrierwave 上传过程临时创建的一个文件，有时间标记</span>
+</span><span class='line'>      <span class="c1"># 例如: /Users/jason/work/ruby-china/public/uploads/tmp/20131105-1057-46664-5614/_____2013-11-05___10.37.50.png</span>
+</span><span class='line'>      <span class="vi">@name</span> <span class="o">||=</span> <span class="no">Digest</span><span class="o">::</span><span class="no">MD5</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="n">current_path</span><span class="p">)</span>
+</span><span class='line'>      <span class="s2">&quot;</span><span class="si">#{</span><span class="vi">@name</span><span class="si">}</span><span class="s2">.</span><span class="si">#{</span><span class="n">file</span><span class="o">.</span><span class="n">extension</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>这么做的原因:</h2>
+
+<ul>
+<li>carrent_path 的算法 <code>Time.now.utc.to_i.to_s + '-' + Process.pid.to_s + '-' + ("%04d" % rand(9999)) + 原始文件名</code>，所以理论上重复的概率非常低，外加上一般上传并不会有那种瞬间并发出现的场景，<a href="https://github.com/carrierwaveuploader/carrierwave/blob/0d6864a84dbed16ef0ed149f332fa3b9f9bd35eb/lib/carrierwave/uploader/cache.rb#L18">来源</a></li>
+<li>所有版本的缩略图的 MD5 都是相同的</li>
+<li>简洁</li>
+<li>注意！此处在某些高并发上传的情况下，可能有微妙的概率会导致 @name 重复，比如在批量导入的时候</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>以前曾经试过这些方式（都不靠谱）:</h2>
+
+<ul>
+<li>原始文件名 + model.class_name + model.id</li>
+<li>用 model.updated_at + model.class_name</li>
+<li>用文件 MD5，原始文件无法取到，结果每个缩略图的文件名都不同</li>
+<li>用 model.class_name + model.id</li>
+</ul>
+
+
+<p>如果你用过 Carrierwave 上面我所的应该能理解，具体我就不解释了。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Rubygems 国内镜像服务器]]></title>
+    <link href="http://huacnlee.github.com/blog/rubygems-mirrors"/>
+    <updated>2011-12-23T17:34:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/rubygems-mirrors</id>
+    <content type="html"><![CDATA[<p>今年下半年开始， rubygems.org 就开始因为 GFW 的原因倒是时常无法安装，再到后面根本就无法安装，之前我还有写过一篇《<a href="http://huacnlee.com/blog/using-nginx-proxy-to-mirror-rubygem-org" target="_blank" title="搭建 nginx 反向代理，提高 gem 的安装速度">搭建 nginx 反向代理，提高 gem 的安装速度</a>》，但是这样的作法无法保持长久，那些反向代理服务器都是个人VPS搭建，而且由于依然会访问 rubygems.org ，gem 的安装过程依然会很慢&#8230;</p>
+
+
+<p>半个月前就在 Ruby China 里面<a href="http://ruby-china.org/search?q=Gem+镜像" target="_blank">讨论</a>说要搞些国内的镜像服务器，结果因为中途遇到种种困难，一直到现在在解决，过程曲折啊，15W+ 的 gem 包还是 @<a href="http://twitter.com/zhuangbiaowei" target="_blank">zhuangbiaowei</a>&nbsp;帮忙下载，然后同步过来的。</p>
+
+
+<p>现在，它已经搞好了</p>
+
+
+<!-- more -->
+
+
+<p>地址: <a href="http://ruby.taobao.org" target="_blank">http://ruby.taobao.org</a></p>
+
+
+<p>以后这个服务将会一直有淘宝的人来维护下去（至少我还在的时候它一定能保持稳定）</p>
+
+
+<p>&nbsp;</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[分享 attr_accessor 的使用技巧]]></title>
+    <link href="http://huacnlee.github.com/blog/rails-attr-accessor-technique"/>
+    <updated>2011-12-08T21:49:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/rails-attr-accessor-technique</id>
+    <content type="html"><![CDATA[<p>这个是这<a href="http://ruby-china.org/topics/376" target="_blank">周二杭州 Ruby Tuesday</a> 扯出来的&nbsp;<br />比如这样的场景，你又个 Post ，它有 tags 的熟悉，里面用 Array 存放多个 tag，但是页面上编辑的时候我们可能会要用户输入以逗号隔开的方式提交多个 tag （比如： ruby, rails, python ）然后保存的是将这个数据分割为数组保存。&nbsp;<br />代码就像这样，只是我以前的写法。</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Mongoid</span><span class="o">::</span><span class="no">Document</span>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:title</span>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:body</span>
+</span><span class='line'>  <span class="n">filed</span> <span class="ss">:tags</span><span class="p">,</span> <span class="ss">:as</span> <span class="o">=&gt;</span> <span class="nb">Array</span><span class="p">,</span> <span class="ss">:default</span> <span class="o">=&gt;</span> <span class="o">[]</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:tag_list</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">before_save</span> <span class="ss">:split_tags</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">split_tags</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">!</span><span class="nb">self</span><span class="o">.</span><span class="n">tag_list</span><span class="o">.</span><span class="n">blank?</span>
+</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="nb">self</span><span class="o">.</span><span class="n">tag_list</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<!-- more -->
+
+
+<p>而且我还需要在 Controller 里面修改的时候将 tags 转换为逗号分隔的 tag_list</p>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">edit</span>
+</span><span class='line'>    <span class="vi">@post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@post</span><span class="o">.</span><span class="n">tag_list</span> <span class="o">=</span> <span class="vi">@post</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%</span> <span class="n">form_form</span><span class="p">(</span><span class="vi">@post</span><span class="p">)</span> <span class="k">do</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">input</span> <span class="ss">:tag_list</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>但是实际使用的时候却又很多麻烦，因为 before_save 会又很多动作都会经过，而且如果很多类似这种场景的都写 before_save 或者 after_save 里面的话，这里的逻辑会越来越乱，而导致后面看起来很累，而且容易出问题。</p>
+
+
+<p>于是，我们聊出了新的做法，覆盖 attr_accessor 的 get set 方法来实现分割为数组的动作。</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
+</span><span class='line'>  <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">tag_list</span><span class="o">=</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="o">!</span><span class="n">value</span><span class="o">.</span><span class="n">blank?</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">tag_list</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样一来， Controller 里面就不用写了，直接调用 tag_list，它的改变将会和 tags 息息相关</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[用 mail_view 测试你的 Rails ActionMailer]]></title>
+    <link href="http://huacnlee.github.com/blog/use-mail-view-gem-to-test-your-rails-mailer"/>
+    <updated>2011-11-04T22:04:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/use-mail-view-gem-to-test-your-rails-mailer</id>
+    <content type="html"><![CDATA[<p>Rails 为我们提供了 ActionMailer 可以很简单的实现邮件发送功能，但是这个东西测试起来却非常的麻烦，以前我总会这样做：</p>
+
+
+<ol>
+<li>创建一个 Mailer ；</li>
+<li>编辑邮件 HTML 模板；</li>
+<li>在功能上面点击模拟发送邮件的过程，或是从 Rails console 直接调用 Mailer 发送测试邮件；</li>
+<li>打开信箱查看邮件内容，格式，样式，文字是否有误；</li>
+<li>发现有问题，回到第二步继续修改循环 N 此，直到有了正确的结果。</li>
+</ol>
+
+
+<div>这个过程很麻烦，而且尤其是模拟发邮件的场景，最终导致没有耐心反复测试，而在邮件中留下了一些未测试到的 Bug，或者样式调的不够完美。</div>
+
+
+<div>如果有个简单的方式可以帮助我们测试邮件结果就好了。</div>
+
+
+<div><br /></div>
+
+
+<!-- more -->
+
+
+<div>最近发现了来自&nbsp;37Signals 的&nbsp;<a href="https://github.com/37signals/mail_view" target="_blank">mail_view</a> 这个 Gem，正好能够满足我的这中需求。（看来苦恼的不只是我一个人啊)</div>
+
+
+<div><br /></div>
+
+
+<div><span>mail_view 可将邮件结果以 HTML 的方式暂时，配置好以后，</span>你可以给每个的 Mailer 定义一个 URL 如：</div>
+
+
+<div>
+<ul>
+<li>http://127.0.0.1:3000/mails/reply_mailer</li>
+<li>http://127.0.0.1:3000/mails/user_mailer</li>
+</ul>
+</div>
+
+
+<div><span>访问后可以看到 action 列表，点击就可以看到结果了，就像这样：</span></div>
+
+
+<div><br /></div>
+
+
+<p><img src="https://a248.e.akamai.net/assets.github.com/img/3e05f590c5d0b11b18dcc12ce87cc80e881fff58/687474703a2f2f696d673236392e696d616765736861636b2e75732f696d673236392f323934342f68746d6c7a2e706e67" border="0" width="640" height="476" /></p>
+
+
+<p>&nbsp;</p>
+
+
+<p>mail_view 地址:&nbsp;<a href="https://github.com/37signals/mail_view" target="_blank">https://github.com/37signals/mail_view</a></p>
+
+
+<p>&nbsp;</p>
+
+
+<p>&nbsp;</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[将评论功能改用 Disqus]]></title>
+    <link href="http://huacnlee.github.com/blog/change-comments-to-disqus"/>
+    <updated>2011-10-25T13:50:00+08:00</updated>
+    <id>http://huacnlee.github.com/blog/change-comments-to-disqus</id>
+    <content type="html"><![CDATA[<p>关注了 <a href="http://disqus.com" target="_blank">Disqus</a> 很久，一直想把这里的评论功能迁移到哪儿去，这样这边博客的维护工作将会少了很多，而且 Disqus 提供的附加功能又很全面。</p>
+
+
+<p>
+<ul>
+<li>多层级的回复功能支持；</li>
+<li>完善的 Email 提醒；</li>
+<li>Twitter, Facebook 等三方帐号登陆支持；</li>
+<li>@ 回复</li>
+<li>通知我 Twitter 等&nbsp;</li>
+</ul>
+</p>
+
+
+<p>这些功能都不需要我再去实现就有了。</p>
+
+
+<p>数据导出还是很简单的，直接用 Wordpress 那种格式。</p>
+
+
+<p>同时 <a href="http://github.com/huacnlee/personlab" target="_blank">Personlab</a> 的代码也跟着更新了，新版本将会去掉之前的评论，验证码，等相关的功能，同时 Comments 表的数据也会同时删除掉。一下子干净了很多。</p>
+
+
+<p>也顺便将独立页面编辑的格式化换成了 Markdown， Textile 写起来有点别扭，还是 Markdown 的好记些。</p>
+
+
+<p>&nbsp;</p>
+
+]]></content>
+  </entry>
+  
+</feed>

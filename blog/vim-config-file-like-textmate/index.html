@@ -1,0 +1,303 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>分享我的 Vim 配置文件，模仿 Textmate 功能 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="分享我的 Vim 配置文件，模仿 Textmate 功能 我现在已经用 Vim 正常工作一个月了，现在习惯了 Vim 的操作感觉真的很不错，很多地方有大大超于 Textmate，如 BufferExplorer 相比之前传统的 Tab 切换来的方便，按照我定义的快捷键 [F8] &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/vim-config-file-like-textmate">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">分享我的 Vim 配置文件，模仿 Textmate 功能</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>我现在已经用 <strong><a href="http://vim.org" target="_blank">Vim</a> </strong>正常工作一个月了，现在习惯了 Vim 的操作感觉真的很不错，很多地方有大大超于 <a href="http://macromates.com/" target="_blank">Textmate</a>，如 <strong>BufferExplorer</strong> 相比之前传统的 Tab 切换来的方便，按照我定义的快捷键 [F8] 就可以再编辑区域显示出当前打开的文件列表，并且还能完整的显示文件名，因为这个列表显示有很大的区域，所以就算是同时打开了 20 多个文件，找出来也是很快速的！</p>
+
+
+<p>我在 Google Code 上面建立了一个项目较 <a href="http://code.google.com/p/vimmate/" target="_blank">Vimmate</a> 。</p>
+
+
+<h3>Vimmate 功能列表<br /></h3>
+
+
+<ol>
+<li>简化 UI，默认隐藏菜单栏、工具栏、滚动条；</li>
+<li>Ruby on Rails 支持；</li>
+<li>类似 Textmate Bundle 的 Snippets 插件，不过没有 Textmate Bundles 那么强大；</li>
+<li>NERD tree 做为项目文件列表栏，可使用 F7 开关，支持收藏目录；</li>
+<li>智能提示，自动提示编辑区、已打开文件、NERD tree 里面相关的词语，支持 Ruby 语法提示；</li>
+<li>使用 BufferExplorer 做为多文件切换工具，快捷键 F8；</li>
+<li>配置 类似 Textmate 的快捷键，具体看 <strong>快捷键配置</strong>。</li>
+</ol>
+
+
+<!-- more -->
+
+
+<h2>Vimmate 快捷键配置：</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[F7]           开关 NERD tree (文件目录树)
+</span><span class='line'>[F8]            开关 BufExplorer (用于切换已经打开的文件，Tab的替代品)
+</span><span class='line'>[Ctrl+F12]    显示/隐藏 主菜单 (默认隐藏)
+</span><span class='line'>[Ctrl+w 然后 上下左右]    来回切换光标到 NERD tree、编辑区...
+</span><span class='line'>[Ctrl+n,s,c,x,v,z,y,a]  新建、保存、复制、剪切、粘贴、撤销、重做、全选... 类似 Notepad 的快捷键
+</span><span class='line'>[Alt+/]   注释、注释
+</span><span class='line'>[Alt+j]   类似 Textmate 输出 session[:]
+</span><span class='line'>[Alt+p]   类似 Textmate 输出 params[:]
+</span><span class='line'>[Alt+l]   类似 Textmate 输出 =&gt;
+</span><span class='line'>[Shift+Alt+k] 删除行
+</span><span class='line'>[Shift+Alt+l] 选择行
+</span><span class='line'>[v]   进入键盘选择模式
+</span><span class='line'>[V]   进入键盘行选择模式
+</span><span class='line'>  
+</span><span class='line'>== NERD tree
+</span><span class='line'>
+</span><span class='line'>  [b] 开/关 收藏夹显示
+</span><span class='line'>  [D] 删除 选中的 收藏
+</span><span class='line'>  [?] 显示帮助
+</span><span class='line'>  [Enter] 选择/展开关闭目录
+</span><span class='line'>  [m] 显示文件操作菜单，用它来创建/移动/删除 目录或文件
+</span><span class='line'>  [u] 跳到上一个文件夹
+</span><span class='line'>  [C] 将跟节点转入当前选中的目录
+</span><span class='line'>  [r] 刷新选中的目录
+</span><span class='line'>  [R] 刷新根节点的目录
+</span><span class='line'>  [cd] 将vim的运行时目录改为选中的目录
+</span><span class='line'>  -- 命令 ---------------------------------------------------------
+</span><span class='line'>  Bookmark 别名收藏 NERD tree 里面当前选择的目录
+</span><span class='line'>
+</span><span class='line'>== BufExplorer
+</span><span class='line'>
+</span><span class='line'>  [D] 关闭选中的文件
+</span><span class='line'>  [d] 清楚选中的文件
+</span><span class='line'>  [Enter] 切换到选中的文件
+</span><span class='line'>  [p] 显示隐藏&lt;文件名列&gt;
+</span><span class='line'>  [R] 显示隐藏&lt;文件目录列&gt;
+</span><span class='line'>  [u] 显示异常未列出的 Buffers
+</span><span class='line'>  [s] 改变排序方式 ["编号(打开的顺序)","文件名","目录名","mru","扩展名"]
+</span><span class='line'>  [r] 倒序排列</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Vimmate 截图</h2>
+
+<h3>BufferExplorer</h3>
+
+<p><a href="http://www.flickr.com/photos/huacnlee/4028143746/sizes/o/" target="_blank"><img src="http://farm3.static.flickr.com/2527/4028143724_2e401490ea.jpg" border="0" width="500" height="368" /></a></p>
+
+<h3>acp.vim</h3>
+
+<p><a href="http://www.flickr.com/photos/huacnlee/4028143746/sizes/o/" target="_blank"><img src="http://farm3.static.flickr.com/2545/4028143746_48db4cfac2.jpg" border="0" width="500" height="368" /></a></p>
+
+<h2>Vimmate 下载地址</h2>
+
+<p><a href="http://code.google.com/p/vimmate/downloads/list">http://code.google.com/p/vimmate/downloads/list</a></p>
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2009-11-11 07:20:00 +0800" pubdate>2009-11-11</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/texteditor/'>TextEditor</a>, <a class='category' href='/blog/category/textmate/'>Textmate</a>, <a class='category' href='/blog/category/vim/'>Vim</a>, <a class='category' href='/blog/category/开发工具/'>开发工具</a>, <a class='category' href='/blog/category/配置文件/'>配置文件</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/vim-config-file-like-textmate';
+	var disqus_url = 'http://huacnlee.github.com/blog/vim-config-file-like-textmate';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

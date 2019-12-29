@@ -1,0 +1,435 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Python 将类的对象转换成 JSON 详解 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Python 将类的对象转换成 JSON 详解 JSON这个东西相信现在大家都已经不再陌生，第一次接触它时我便对它爱不释手！记得在发现JSON之间，一直使用XML结构来传递数据，但XML这个东西太麻烦了，不管是在服务端或是JS里面，写入与读入都是哪么的麻烦。而JSON实在是太方便了， &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/convert-python-object-to-jason">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Python 将类的对象转换成 JSON 详解</h1>
+    
+  </header>
+
+  <div class="entry_content"><p><a href="http://www.json.org" target="_blank">JSON</a>这个东西相信现在大家都已经不再陌生，第一次接触它时我便对它爱不释手！记得在发现JSON之间，一直使用XML结构来传递数据，但XML这个东西太麻烦了，不管是在服务端或是JS里面，写入与读入都是哪么的麻烦。而JSON实在是太方便了，通过一些开源的<a href="http://www.json.org" target="_blank">JSON类库</a>可以很方便的将一个对象转换成字符串的形式来传递。 <br />网上也有很多讲<a href="http://www.python.org" target="_blank">Python</a> + <a href="http://www.json.org" target="_blank">JSON</a> 的文章，但我这里要讲的是它们都没有提到的一种常用的方式。 <br />&nbsp;<br />昨晚在用<a href="http://www.python.org" target="_blank">Python</a> + <a href="http://www.djangoproject.com" target="_blank">Django</a> 做AJAX的东西，我自定义了一个返回值对象(<strong><span style="color: #ff0000;">ExecuteState</span></strong>)的类，再用JSON的方式返回到页面前端。 <br />以前在.NET里面做类似的操作一直是在用一个叫 <a href="http://james.newtonking.com/projects/json-net.aspx" target="_blank">Json.NET</a> 的开源类库，很方便。于是在 Python 里面我继续用这种方式，而 Django 里面也有自带一个叫 <a href="http://pypi.python.org/pypi/simplejson" target="_blank">simplejson</a> 的类。 <br />开始想想实现这东西应该很简单，可没想到后面因为一个很小的细节让我绕了一大圈&#8230;在此写出来与大家分享，以免再次走弯路。</p>
+
+
+<p><strong><span style="font-size: large;">例子</span>：</strong></p>
+
+
+<h3>Python 代码:</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">simplejson</span>
+</span><span class='line'><span class="c"># 其它django的引用这里省略</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">ExecuteState</span><span class="p">():</span>
+</span><span class='line'>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span class='line'><span class="sd">    summary:</span>
+</span><span class='line'><span class="sd">        返回值对象,用于返回执行状态</span>
+</span><span class='line'><span class="sd">    &quot;&quot;&quot;</span>
+</span><span class='line'>    <span class="c"># 是否执行成功,默认是 True 成功，因为经过长期使用发现 True 用得较多</span>
+</span><span class='line'>    <span class="n">success</span> <span class="o">=</span> <span class="bp">True</span>
+</span><span class='line'>    <span class="c"># 提示消息</span>
+</span><span class='line'>    <span class="n">message</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+</span><span class='line'>    <span class="c"># 导致不成功的标志，错误是由谁引起的</span>
+</span><span class='line'>    <span class="n">mark</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+</span><span class='line'>    <span class="c"># 导致不成功的对象 [object 类型]</span>
+</span><span class='line'>    <span class="n">owner</span> <span class="o">=</span> <span class="bp">None</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span class='line'><span class="sd">        summary:</span>
+</span><span class='line'><span class="sd">            得到本对象的JSON格式的字符串</span>
+</span><span class='line'><span class="sd">        &quot;&quot;&quot;</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">simplejson</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">obj2dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">obj2dict</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+</span><span class='line'>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span class='line'><span class="sd">    summary:</span>
+</span><span class='line'><span class="sd">        将object转换成dict类型</span>
+</span><span class='line'><span class="sd">    &quot;&quot;&quot;</span>
+</span><span class='line'>    <span class="n">memberlist</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">obj</span><span class="p">)]</span>
+</span><span class='line'>    <span class="n">_dict</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span class='line'>    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">memberlist</span><span class="p">:</span>
+</span><span class='line'>        <span class="k">if</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&quot;_&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+</span><span class='line'>            <span class="n">_dict</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">m</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">_dict</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">signup</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span><span class='line'>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span class='line'><span class="sd">    summary:</span>
+</span><span class='line'><span class="sd">        signup 视图,URLs里面的定义这里省略</span>
+</span><span class='line'><span class="sd">    &quot;&quot;&quot;</span>
+</span><span class='line'>    <span class="n">state</span> <span class="o">=</span> <span class="n">ExecuteState</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="n">reuqest</span><span class="o">.</span><span class="n">POST</span><span class="p">:</span>
+</span><span class='line'>        <span class="c"># 提交视图处理</span>
+</span><span class='line'>        <span class="n">username</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">[</span><span class="s">&quot;username&quot;</span><span class="p">]</span>
+</span><span class='line'>        <span class="n">realname</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">[</span><span class="s">&quot;realname&quot;</span><span class="p">]</span>
+</span><span class='line'>        <span class="n">password</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">[</span><span class="s">&quot;password&quot;</span><span class="p">]</span>
+</span><span class='line'>        <span class="n">password_confirm</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">[</span><span class="s">&quot;password_confirm&quot;</span><span class="p">]</span>
+</span><span class='line'>        <span class="n">email</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">[</span><span class="s">&quot;email&quot;</span><span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># 重点！验证输入的内容是否符合要求</span>
+</span><span class='line'>        <span class="n">state</span><span class="o">.</span><span class="n">success</span> <span class="o">=</span> <span class="bp">False</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">username</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">username</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">16</span><span class="p">:</span>
+</span><span class='line'>            <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s">&quot;用户名太短，要求4-16个字符。&quot;</span>
+</span><span class='line'>            <span class="n">state</span><span class="o">.</span><span class="n">mark</span> <span class="o">=</span> <span class="s">&quot;username&quot;</span>
+</span><span class='line'>            <span class="c"># 不符合要求了，在这直接用 return 中断并返回 state 用 simplejson.encode 将 state 转换成 JSON</span>
+</span><span class='line'>            <span class="c"># 注意！这里有用 dir(state) 这个就是我要讲的一个细节</span>
+</span><span class='line'>            <span class="c">#</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">state</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="ow">not</span> <span class="n">regex_check_chinese</span><span class="p">(</span><span class="n">realname</span><span class="p">):</span>
+</span><span class='line'>            <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s">&quot;姓名要求必须是中文。&quot;</span>
+</span><span class='line'>            <span class="n">state</span><span class="o">.</span><span class="n">mark</span> <span class="o">=</span> <span class="s">&quot;realname&quot;</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">state</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># 后面的提交数据库省略...</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># 成功消息</span>
+</span><span class='line'>        <span class="n">state</span><span class="o">.</span><span class="n">success</span> <span class="o">=</span> <span class="bp">True</span>
+</span><span class='line'>        <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s">&quot;注册成功。&quot;</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">state</span>
+</span><span class='line'>    <span class="k">else</span><span class="p">:</span>
+</span><span class='line'>        <span class="c"># signup 地址普通打开的处理</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Javascript 代码:</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm">    这里以jQuery的Ajax实现为例</span>
+</span><span class='line'><span class="cm">    引用、调用提交事件 这里略...</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm"> * 注册页面JS类库</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">Signup</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>    <span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * Ajax提交事件</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="nx">post</span> <span class="o">:</span> <span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>        <span class="c1">// 读DOM的值略...</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">({</span>
+</span><span class='line'>            <span class="nx">url</span> <span class="o">:</span> <span class="s2">&quot;/signup&quot;</span><span class="p">,</span>
+</span><span class='line'>            <span class="nx">data</span><span class="o">:</span> <span class="s2">&quot;username=&quot;</span> <span class="o">+</span> <span class="nx">username</span> <span class="o">+</span> <span class="s2">&quot;&amp;password=&quot;</span> <span class="o">+</span> <span class="nx">password</span><span class="p">,</span>
+</span><span class='line'>            <span class="nx">dataType</span><span class="o">:</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span>
+</span><span class='line'>            <span class="nx">type</span> <span class="o">:</span> <span class="s2">&quot;post&quot;</span><span class="p">,</span>
+</span><span class='line'>            <span class="nx">success</span> <span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">state</span><span class="p">){</span>
+</span><span class='line'>                <span class="cm">/*</span>
+</span><span class='line'><span class="cm">                    在JS里面接收state,jQuery的AJAX会自动将它用JSON反序列化成对象</span>
+</span><span class='line'><span class="cm">                    于是我们就可以像在Python里面一样使用了 如 state.message</span>
+</span><span class='line'><span class="cm">                */</span>
+</span><span class='line'>                <span class="k">if</span><span class="p">(</span><span class="o">!</span> <span class="nx">state</span><span class="p">.</span><span class="nx">success</span><span class="p">){</span>
+</span><span class='line'>                    <span class="err">#</span> <span class="err">错误处理</span>
+</span><span class='line'>                    <span class="nx">alert</span><span class="p">(</span><span class="nx">state</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>                <span class="k">else</span><span class="p">{</span>
+</span><span class='line'>                    <span class="nx">alert</span><span class="p">(</span><span class="s2">&quot;注册成功。&quot;</span><span class="p">);</span>
+</span><span class='line'>                    <span class="nx">location</span><span class="p">.</span><span class="nx">href</span> <span class="o">=</span> <span class="s2">&quot;/success.html&quot;</span><span class="p">;</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">})</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>现在整个就完成了，里面一些不重要代码的实现没有写，这个别拿去运行哦，不能通过的。 <br />我这里只是写出实现的方式，当然里面的 <span style="color: #ff0000;"><strong>ExecuteState</strong> </span>和 <span style="color: #ff0000;"><strong>obj2dict</strong></span> 这两个东西是完整的，可以直接拿来使用。</p>
+
+
+<p>附注：本文中的代码着色来自于 <a href="http://pastie.org/" target="_blank">http://pastie.org/</a></p>
+
+
+<p><span style="color: #cc6633;">另外，Blogbus发文章怎么有字数限制呀?像我经常会发格式化后的HTML代码，这样贴出来的代码有高亮着色，我看了一下HTML，居然是 20000 个限制。晕！第一次遇到有字数限制的博客&#8230;不让发那么多我偏要发，限制&#8230;破解之！</span></p>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2008-10-05 08:00:00 +0800" pubdate>2008-10-05</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/json/'>JSON</a>, <a class='category' href='/blog/category/python/'>Python</a>, <a class='category' href='/blog/category/技巧/'>技巧</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/convert-python-object-to-jason';
+	var disqus_url = 'http://huacnlee.github.com/blog/convert-python-object-to-jason';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

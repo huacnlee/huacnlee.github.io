@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Windows 下开发 Ruby on Rails 慢？用虚拟机来运行它吧！ - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Windows 下开发 Ruby on Rails 慢？用虚拟机来运行它吧！ 因为工作需要，公司里面必须使用 Windows，但是 Rails 在 Windows 下面很慢！简单的启动一个 ruby script/console 最少都要等待 14s ，这样的龟速怎么能忍受呢！ &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/speed-up-windows-development-ruby-on-rails">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Windows 下开发 Ruby on Rails 慢？用虚拟机来运行它吧！</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>因为工作需要，公司里面必须使用 Windows，但是 <strong>Rails 在 Windows 下面很慢</strong>！简单的启动一个 ruby script/console 最少都要等待 14s ，这样的龟速怎么能忍受呢！尤其咱们还是用动态语言，向往自由高效的程序员！
+可能很多人都有想过在虚拟机(如 <a href="http://www.virtualbox.org" target="_blank">Virtualbox</a> 、 <a href="http://www.vmware.com" target="_blank">Vmwave</a> )下面安装个 Linux，然后需要开发 Rails 项目的时候到虚拟机上面去开发。但是同样的问题会存在，在虚拟机下面 使用图形化界面 操作会显得非常迟钝，简直比等待那 14s 还难受。
+今天在试用 <a href="http://www.andlinux.org" target="_blank">AndLinux</a> 的时候发现了另外一种方式，在虚拟机里面加载一个共享，共享连接到 Windows 系统的项目目录，通过 ssh 连接 Linux 在命令行下面执行 script/server、rake 等等。这样一来文件同样是存放在 Windows 系统中的，你可以一边在&nbsp; Windows 下面开发，一边在 虚拟机的 Linux 下面运行开发服务器，访问页面的时候连接 虚拟机的IP地址。</p>
+
+<!-- more -->
+
+
+<h2>安装步骤:</h2>
+
+<h3>下载安装 Virtualbox</h3>
+
+<ul>
+<li>在 Virtualbox 里面安装一个 Linux 系统，我这里使用的是 Ubuntu Desktop 8.04，建议使用 Server 版的，因为我们不需要图形界面！</li>
+<li>配置虚拟机，让里面的 Linux 可以上网，这里我就略了。</li>
+<li>给虚拟系统分配数据空间： 添加一个固定数据空间并起名为 win_work ，连接的路径是你在 Windows 下面的开发目录 如下面的图：</li>
+</ul>
+
+
+<p><a href="http://www.flickr.com/photos/huacnlee/4055086870/sizes/o/" target="_blank"><img src="http://farm3.static.flickr.com/2540/4055086870_2fee1e4e6f.jpg" border="0" /></a></p>
+
+<h3>在虚拟系统里面加载数据空间到某个目录：</h3>
+
+<ul>
+<li>进入 虚拟机的系统</li>
+<li>安装 Virtualbox 增强功能包 <a href="http://www.dedoimedo.com/computers/virtualbox-guest-addons.html">Guest Additions</a></li>
+</ul>
+
+
+<h3>挂载数据空间到指定目录，在命令行下面输入：</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>sudo mkdir ~/work
+</span><span class='line'><span class="nv">$ </span>sudo mount -t vboxsf win_work ~/work
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>设置自动挂载：</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># 打开 /etc/fstab 文件在最后加入：</span>
+</span><span class='line'>win_work ~/work vboxsf rw,gid<span class="o">=</span>100,uid<span class="o">=</span>1000,auto 0 0
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>在虚拟机系统里面安装 openssh 并启动</li>
+<li>安装 Ruby、RubyGems、Rails&#8230;</li>
+<li>创建一个 Rails 项目</li>
+<li>运行 Rails web server</li>
+<li>在 Windows 下面访问虚拟机的 web server</li>
+</ul>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2009-10-29 08:59:00 +0800" pubdate>2009-10-29</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/rails/'>Rails</a>, <a class='category' href='/blog/category/virtualbox/'>Virtualbox</a>, <a class='category' href='/blog/category/windows/'>Windows</a>, <a class='category' href='/blog/category/教程/'>教程</a>, <a class='category' href='/blog/category/虚拟机/'>虚拟机</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/speed-up-windows-development-ruby-on-rails';
+	var disqus_url = 'http://huacnlee.github.com/blog/speed-up-windows-development-ruby-on-rails';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

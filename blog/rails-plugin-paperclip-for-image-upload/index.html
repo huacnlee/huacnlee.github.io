@@ -1,0 +1,351 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>推荐 Rails Paperclip 上传图片插件 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="推荐 Rails Paperclip 上传图片插件 Paperclip 是 Rails 的一个上传图片插件，它可以很方便的实现图片上传并切割指定大小的功能，使整个照片上传过程非常简化。一种图片只用在数据库里面创建三个字段，如，当我们要设置用户头像的时候，会有一个 face 字段，哪 &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/rails-plugin-paperclip-for-image-upload">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">推荐 Rails Paperclip 上传图片插件</h1>
+    
+  </header>
+
+  <div class="entry_content"><p><a href="http://github.com/thoughtbot/paperclip/tree/master" target="_blank">Paperclip</a> 是 Rails 的一个上传图片插件，它可以很方便的实现图片上传并切割指定大小的功能，使整个照片上传过程非常简化。一种图片只用在数据库里面创建三个字段，如，当我们要设置用户头像的时候，会有一个 face 字段，哪 paperclip 的字段就需要在数据库里面建立：face_file_name、face_content_type、face_file_size&nbsp; 几个字段，然后你可以通过设置 Model 来为 face 定义无限个大小的图片规格，paperclip 会自动通过文件目录的方式来处理。</p>
+
+<!-- more -->
+
+
+<h3>Model：</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_attached_file</span> <span class="ss">:face</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:default_style</span> <span class="o">=&gt;</span> <span class="ss">:s120</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:styles</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span><span class='line'>      <span class="ss">:normal</span> <span class="o">=&gt;</span> <span class="s2">&quot;180x180#&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">:s120</span> <span class="o">=&gt;</span> <span class="s2">&quot;120x120#&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">:s48</span> <span class="o">=&gt;</span> <span class="s2">&quot;48x48#&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">:s32</span> <span class="o">=&gt;</span> <span class="s2">&quot;32x32#&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">:s16</span> <span class="o">=&gt;</span> <span class="s2">&quot;16x16#&quot;</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>    <span class="ss">:url</span> <span class="o">=&gt;</span> <span class="s2">&quot;/uploadfiles/:class/:attachment/:id/:basename/:style.:extension&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:path</span> <span class="o">=&gt;</span> <span class="s2">&quot;:rails_root/public/uploadfiles/:class/:attachment/:id/:basename/:style.:extension&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">validates_attachment_content_type</span> <span class="ss">:face</span><span class="p">,</span> <span class="ss">:content_type</span> <span class="o">=&gt;</span> <span class="s1">&#39;image/jpeg&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>前台调用图片的时候这样写 face(:style)：</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">image_tag</span><span class="p">(</span><span class="vi">@user</span><span class="o">.</span><span class="n">face</span><span class="p">(</span><span class="ss">:normal</span><span class="p">))</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="cp">&lt;%=</span> <span class="n">image_tag</span><span class="p">(</span><span class="vi">@user</span><span class="o">.</span><span class="n">face</span><span class="p">(</span><span class="ss">:s120</span><span class="p">))</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="cp">&lt;%=</span> <span class="n">image_tag</span><span class="p">(</span><span class="vi">@user</span><span class="o">.</span><span class="n">face</span><span class="p">(</span><span class="ss">:s48</span><span class="p">))</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="cp">&lt;%=</span> <span class="n">image_tag</span><span class="p">(</span><span class="vi">@user</span><span class="o">.</span><span class="n">face</span><span class="p">(</span><span class="ss">:s32</span><span class="p">))</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>另外它的上传过程基本不用写代码，直接加入 &lt;%= f.file_field :face %&gt;&nbsp; 的类似的上传框，并把 form 设为 :html =&gt; { :multipart =&gt; true } 直接保存就好了，其它的上传过程由 Paperclip 内部处理了。
+详细的 Paperclip 教程请参见：《<a href="http://jimneath.org/2008/04/17/paperclip-attaching-files-in-rails/" target="_blank">Paperclip: Attaching Files in Rails</a>》
+另外你在使用过程中可能会遇到：[paperclip] An error was received while processing: #
+这个问题的原因是你没有安装 <a href="http://www.imagemagick.org/script/binary-releases.php" target="_blank">ImageMagick</a> 或 没有设置好 ImageMagick 的应用路径，Paperclip 上传的时候会调用 ImageMagick 的程序来进行图像处理。</p>
+
+<p>关于 Windows 下面 Paperclip::NotIdentifiedByImageMagickError 错误的解决办法：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 1.先安装 ImageMagick: http://www.imagemagick.org/script/binary-releases.php#windows</span>
+</span><span class='line'><span class="c1"># 2.创建 initializers 文件：config/initializers/paperclip.rb 存入下面的代码</span>
+</span><span class='line'><span class="c1"># 3.重启 webserver</span>
+</span><span class='line'><span class="c1"># 设置 command_path ，请将 c:/program files/imagemagick-6.5.5-Q16 改为你的 ImageMagick 的安装目录</span>
+</span><span class='line'><span class="no">Paperclip</span><span class="o">.</span><span class="n">options</span><span class="o">[</span><span class="ss">:command_path</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;c:/program files/imagemagick-6.5.5-Q16&quot;</span>
+</span><span class='line'><span class="no">Paperclip</span><span class="o">.</span><span class="n">options</span><span class="o">[</span><span class="ss">:swallow_stderr</span><span class="o">]</span> <span class="o">=</span> <span class="kp">false</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">run</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">params</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">expected_outcodes</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'>  <span class="n">command</span> <span class="o">=</span> <span class="sx">%Q&lt;</span><span class="si">#{</span><span class="sx">%Q[</span><span class="si">#{</span><span class="n">path_for_command</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span><span class="si">}</span><span class="sx"> </span><span class="si">#{</span><span class="n">params</span><span class="si">}</span><span class="sx">]</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/\s+/</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="si">}</span><span class="sx">&gt;</span>
+</span><span class='line'>  <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">command</span><span class="si">}</span><span class="s2"> 2&gt;</span><span class="si">#{</span><span class="n">bit_bucket</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="no">Paperclip</span><span class="o">.</span><span class="n">options</span><span class="o">[</span><span class="ss">:swallow_stderr</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">output</span> <span class="o">=</span> <span class="sb">`</span><span class="si">#{</span><span class="n">command</span><span class="si">}</span><span class="sb">`</span>
+</span><span class='line'>  <span class="k">unless</span> <span class="o">[</span><span class="n">expected_outcodes</span><span class="o">].</span><span class="n">flatten</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="vg">$?</span><span class="o">.</span><span class="n">exitstatus</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">raise</span> <span class="no">PaperclipCommandLineError</span><span class="p">,</span> <span class="s2">&quot;Error while running </span><span class="si">#{</span><span class="n">cmd</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="n">output</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>扩展改进，加入 Hash 目录一应对大数量级的文件：</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 扩展 Paperclip 加入hash目录参数 :hashed_path</span>
+</span><span class='line'><span class="c1"># 建立 config/initializers/paperclip_extensions.rb</span>
+</span><span class='line'><span class="no">Paperclip</span><span class="o">::</span><span class="no">Attachment</span><span class="o">.</span><span class="n">interpolations</span><span class="o">[</span><span class="ss">:hashed_path</span><span class="o">]</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="k">do</span> <span class="o">|</span><span class="n">attachment</span><span class="p">,</span> <span class="n">style</span><span class="o">|</span>
+</span><span class='line'>  <span class="nb">hash</span> <span class="o">=</span> <span class="no">Digest</span><span class="o">::</span><span class="no">MD5</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="n">attachment</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">to_s</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">hash_path</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+</span><span class='line'>  <span class="mi">3</span><span class="o">.</span><span class="n">times</span> <span class="p">{</span> <span class="n">hash_path</span> <span class="o">+=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">hash</span><span class="o">.</span><span class="n">slice!</span><span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="mi">2</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">hash_path</span><span class="o">[</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">12</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Model 里面使用的例子</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="n">base</span>
+</span><span class='line'>  <span class="c1"># 封面图</span>
+</span><span class='line'>  <span class="n">has_attached_file</span> <span class="ss">:face</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:default_style</span> <span class="o">=&gt;</span> <span class="ss">:s140</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:styles</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span><span class='line'>      <span class="ss">:default</span> <span class="o">=&gt;</span> <span class="s2">&quot;140x150#&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">:s140</span> <span class="o">=&gt;</span> <span class="s2">&quot;140x140#&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">:s128</span> <span class="o">=&gt;</span> <span class="s2">&quot;128x128#&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">:s80</span> <span class="o">=&gt;</span> <span class="s2">&quot;80x80#&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">:s64</span> <span class="o">=&gt;</span> <span class="s2">&quot;64x64#&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">:s48</span> <span class="o">=&gt;</span> <span class="s2">&quot;48x48#&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">:s32</span> <span class="o">=&gt;</span> <span class="s2">&quot;32x32#&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">:s16</span> <span class="o">=&gt;</span> <span class="s2">&quot;16x16#&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>    <span class="ss">:url</span> <span class="o">=&gt;</span> <span class="s2">&quot;upload/:class/:attachment/:hashed_path/:id_:style.:extension&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:path</span> <span class="o">=&gt;</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="no">RAILS_ROOT</span><span class="si">}</span><span class="s2">/public/upload/:class/:attachment/:hashed_path/:id_:style.:extension&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:default_url</span> <span class="o">=&gt;</span> <span class="s2">&quot;images/default_faces/:style.jpg&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>相关文章：</h3>
+
+<ul>
+<li><a href="http://www.xuli.info/2009/09/01/paperclip%E8%AF%BB%E5%8F%96%E9%BB%98%E8%AE%A4%E5%9B%BE%E7%89%87/" target="_blank">Paperclip读取默认图片</a></li>
+<li><a href="http://www.xuli.info/2009/09/01/%E8%A7%A3%E5%86%B3%E7%94%A8paperclip%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6%E6%97%B6%E5%87%BA%E7%8E%B0%E7%9A%84%E9%97%AE%E9%A2%98/" target="_blank">解决用Paperclip上传文件时出现的问题</a></li>
+<li><a href="http://www.xuli.info/2009/08/29/%E7%94%A8paperclip%E7%BC%A9%E7%95%A5%E8%BF%9C%E7%A8%8B%E5%9B%BE%E7%89%87/" target="_blank">用Paperclip缩略远程图片</a></li>
+</ul>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2009-09-02 11:35:00 +0800" pubdate>2009-09-02</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/paperclip/'>Paperclip</a>, <a class='category' href='/blog/category/rails/'>Rails</a>, <a class='category' href='/blog/category/ruby/'>Ruby</a>, <a class='category' href='/blog/category/插件/'>插件</a>, <a class='category' href='/blog/category/教程/'>教程</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/rails-plugin-paperclip-for-image-upload';
+	var disqus_url = 'http://huacnlee.github.com/blog/rails-plugin-paperclip-for-image-upload';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

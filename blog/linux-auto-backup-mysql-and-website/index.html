@@ -1,0 +1,322 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>Linux 定时自动备份MySQL与网站并发送邮件 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="Linux 定时自动备份MySQL与网站并发送邮件 网站备份是一件很重要的事情，如何做到每日自动备份并自动通过邮件附件的方式发送到自已的邮箱呢？
+今天研究了一下终于实现了，并加上 Cron 任务，每天自动备份 这里需要用到 Linux SendMail ，如果没有请先安装，Ubuntu 安装方式 &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/linux-auto-backup-mysql-and-website">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">Linux 定时自动备份MySQL与网站并发送邮件</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>网站备份是一件很重要的事情，如何做到每日自动备份并自动通过邮件附件的方式发送到自已的邮箱呢？
+今天研究了一下终于实现了，并加上 Cron 任务，每天自动备份</p>
+
+<ul>
+<li>这里需要用到 Linux <span style="color: #ff6600;">SendMail </span>，如果没有请先安装，Ubuntu 安装方式：</strong></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>sudo apt-get install sendmail
+</span></code></pre></td></tr></table></div></figure>
+
+
+<!-- more -->
+
+
+<ul>
+<li>使用 <em>mysqldump</em> 完整备份数据库：</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># -uroot(root是用户名 -u与root之间没空格) -p123123 (123123是密码 -p与123123之间没空格)</span>
+</span><span class='line'><span class="nv">$ </span>mysqldump -uroot -p123123 --databases pasite &gt; <span class="nv">$BACKUP_PATH</span>/pasite.sql
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>打包压缩网站和数据库的SQL文件：</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># 1.将刚才到处的MySQL文件压缩，以节省邮箱空间</span>
+</span><span class='line'>tar zcf <span class="nv">$BACKUP_PATH</span>/pasite_db_<span class="nv">$DATE_NAME</span>.tar.gz <span class="nv">$backup_path</span>/pasite.sql
+</span><span class='line'>tar zcf <span class="nv">$BACKUP_PATH</span>/personlab_db_<span class="nv">$DATE_NAME</span>.tar.gz <span class="nv">$backup_path</span>/personlab.sql
+</span><span class='line'><span class="c"># 2.打包压缩网站</span>
+</span><span class='line'>tar zcf <span class="nv">$BACKUP_PATH</span>/pasite_src_<span class="nv">$DATE_NAME</span>.tar.gz ~home/huacnlee/wwwroot/pasite/
+</span><span class='line'>tar zcf <span class="nv">$BACKUP_PATH</span>/personlab_src_<span class="nv">$DATE_NAME</span>.tar.gz ~home/huacnlee/wwwroot/personlab/
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>将打包好的文件用 <em>mutt</em> 命令 <em>SendMail</em> 以附件的方式发送到自己的邮箱：</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># 发送邮件</span>
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;pasite.org db backup&quot;</span> | mutt -a <span class="nv">$BACKUP_PATH</span>/pasite_db_<span class="nv">$DATE_NAME</span>.tar.gz -s <span class="s2">&quot;pasite.org db backup&quot;</span> huacnlee@gmail.com
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;huacnlee.com db backup&quot;</span> | mutt -a <span class="nv">$BACKUP_PATH</span>/personlab_db_<span class="nv">$DATE_NAME</span>.tar.gz -s <span class="s2">&quot;huacnlee.com db backup&quot;</span> huacnlee@gmail.com
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;pasite.org source backup&quot;</span> | mutt -a <span class="nv">$BACKUP_PATH</span>/pasite_src_<span class="nv">$DATE_NAME</span>.tar.gz -s <span class="s2">&quot;pasite.org source backup&quot;</span> huacnlee@gmail.com
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;huacnlee.com source backup&quot;</span> | mutt -a <span class="nv">$BACKUP_PATH</span>/personlab_src_<span class="nv">$DATE_NAME</span>.tar.gz -s <span class="s2">&quot;huacnlee.com source backup&quot;</span> huacnlee@gmail.com
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>完整的Shell脚本：</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/bin/sh</span>
+</span><span class='line'><span class="c"># Linux 自动备份 MySQL与网站并发邮件到自已邮箱</span>
+</span><span class='line'><span class="c"># 定义临时目录</span>
+</span><span class='line'><span class="nv">BACKUP_PATH</span><span class="o">=</span>/tmp/autobackups
+</span><span class='line'><span class="c"># 定义日期字符串</span>
+</span><span class='line'><span class="nv">DATE_NAME</span><span class="o">=</span><span class="sb">`</span>date +%y%m%d<span class="sb">`</span>
+</span><span class='line'><span class="c"># 创建临时目录</span>
+</span><span class='line'>mkdir <span class="nv">$BACKUP_PATH</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># 打包文件</span>
+</span><span class='line'><span class="c"># 1.完整备份 MySQL -uroot(root是用户名 -u与root之间没空格) -p123123 (123123是密码 -p与123123之间没空格)</span>
+</span><span class='line'>mysqldump -uroot -p123123 --databases pasite &gt; <span class="nv">$BACKUP_PATH</span>/pasite.sql
+</span><span class='line'>mysqldump -uroot -p123123 --databases personlab_production &gt; <span class="nv">$BACKUP_PATH</span>/personlab.sql
+</span><span class='line'><span class="c"># 2.将刚才到处的MySQL文件压缩，以节省邮箱空间</span>
+</span><span class='line'>tar zcf <span class="nv">$BACKUP_PATH</span>/pasite_db_<span class="nv">$DATE_NAME</span>.tar.gz <span class="nv">$backup_path</span>/pasite.sql
+</span><span class='line'>tar zcf <span class="nv">$BACKUP_PATH</span>/personlab_db_<span class="nv">$DATE_NAME</span>.tar.gz <span class="nv">$backup_path</span>/personlab.sql
+</span><span class='line'><span class="c"># 3.打包压缩网站</span>
+</span><span class='line'>tar zcf <span class="nv">$BACKUP_PATH</span>/pasite_src_<span class="nv">$DATE_NAME</span>.tar.gz ~home/huacnlee/wwwroot/pasite/
+</span><span class='line'>tar zcf <span class="nv">$BACKUP_PATH</span>/personlab_src_<span class="nv">$DATE_NAME</span>.tar.gz ~home/huacnlee/wwwroot/personlab/
+</span><span class='line'>
+</span><span class='line'><span class="c"># 发送邮件</span>
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;pasite.org db backup&quot;</span> | mutt -a <span class="nv">$BACKUP_PATH</span>/pasite_db_<span class="nv">$DATE_NAME</span>.tar.gz -s <span class="s2">&quot;pasite.org db backup&quot;</span> huacnlee@gmail.com
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;huacnlee.com db backup&quot;</span> | mutt -a <span class="nv">$BACKUP_PATH</span>/personlab_db_<span class="nv">$DATE_NAME</span>.tar.gz -s <span class="s2">&quot;huacnlee.com db backup&quot;</span> huacnlee@gmail.com
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;pasite.org source backup&quot;</span> | mutt -a <span class="nv">$BACKUP_PATH</span>/pasite_src_<span class="nv">$DATE_NAME</span>.tar.gz -s <span class="s2">&quot;pasite.org source backup&quot;</span> huacnlee@gmail.com
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;huacnlee.com source backup&quot;</span> | mutt -a <span class="nv">$BACKUP_PATH</span>/personlab_src_<span class="nv">$DATE_NAME</span>.tar.gz -s <span class="s2">&quot;huacnlee.com source backup&quot;</span> huacnlee@gmail.com
+</span><span class='line'>
+</span><span class='line'><span class="c"># 删除临时文件</span>
+</span><span class='line'>rm -R <span class="nv">$BACKUP_PATH</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接下来创建 Linux Cron 任务，让系统定时执行上面这个 shell 脚本：
+使用命令 <code>sudo crontab -e</code> 并加入下面的代码:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>32 3 * * * <span class="nb">cd</span> /home/huacnlee/wwwroot/ &amp;amp;&amp;amp; sh auto_backup.sh
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>关于 crontab 的介绍请移步看《<a href="http://huacnlee.com/blog/create-rails-task-scheduler-by-rake-and-cronjob" target="_blank">Rails 使用Rake + cronjob 创建计划任务 </a>》里面的介绍，我这里设置的是每天凌成3点32分开始执行，当然上面的shell脚本是保存在 <code>/home/huacnlee/wwwroot/auto_backup.sh</code> 这儿的。</p>
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2009-08-25 21:26:00 +0800" pubdate>2009-08-25</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/backup/'>Backup</a>, <a class='category' href='/blog/category/linux/'>Linux</a>, <a class='category' href='/blog/category/mysql/'>MySQL</a>, <a class='category' href='/blog/category/shell/'>Shell</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/linux-auto-backup-mysql-and-website';
+	var disqus_url = 'http://huacnlee.github.com/blog/linux-auto-backup-mysql-and-website';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

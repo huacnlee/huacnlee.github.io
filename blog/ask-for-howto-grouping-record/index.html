@@ -1,0 +1,263 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>跪求 分组相同且连续的记录 ，并取Min Max的SQL查询的方法 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="跪求 分组相同且连续的记录 ，并取Min Max的SQL查询的方法 今天在公司做IP数据库转换功能，目的是将网上很容易找到的IP数据库整理出来，与公司的地区数据库相关联。网上流传得最多的就是QQ纯真版的 QQWry.dat 这个数据库。但是它数据库里面地区我们拿来没法用，如： &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/ask-for-howto-grouping-record">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">跪求 分组相同且连续的记录 ，并取Min Max的SQL查询的方法</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>今天在公司做IP数据库转换功能，目的是将网上很容易找到的IP数据库整理出来，与公司的地区数据库相关联。网上流传得最多的就是QQ纯真版的 <a href="http://www.google.com/search?q=QQWry.dat&amp;ie=utf-8&amp;oe=utf-8&amp;aq=t&amp;rls=org.mozilla:zh-CN:official&amp;client=firefox-a" target="_blank">QQWry.dat</a> 这个数据库。但是它数据库里面地区我们拿来没法用，如：四川省成都市某某某网吧、四川省某某医院、北京某某街某某号 等等，省、市、具体位置是连在一起的，无法找出规律把省、市分离出来（因为我要做的功能只用具到城市就可以了，类似 <a href="http://www.koubei.com" target="_blank">口碑</a>、<a href="http://www.chinahr.com" target="_blank">中华英才网</a> 哪种自动取得访问者所在城市并进入城市的网站的功能）。</p>
+
+
+<p>后面另外找到了一个mdb的数据库忘了哪儿下载的了，总之我把它导出成 <a href="http://python-snippets.googlecode.com/svn/trunk/project/ipdata2sqlite/ipdata.txt" target="_blank">文本格式</a> 了，然后用python分析字符串，并跟自已的地区数据库做关联，最终再存入数据库。可没想到这玩意儿既然有<span style="color: #ff0000;">23万多条</span>记录，妈呀，这怎么能拿来查找。而且我功能是首页，最起码要求查询速度要在<span style="color: #008000;"><strong>100ms</strong></span>以内。而这23万多条，就算我全放内存里面也没法找得哪么快。</p>
+
+
+<p>结构是这样：</p>
+
+
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>id       start        end          name        area_id          area_type
+</span><span class='line'>1        1            4            Chengdu     8                2
+</span><span class='line'>2        5            6            Chengdu     8                2
+</span><span class='line'>3        7            16           Luzhou      9                2
+</span><span class='line'>4        17           17           Luzhou      9                2
+</span><span class='line'>5        18           22           Chengdu     8                2
+</span><span class='line'>6        23           23           Shanghai    17               1
+</span><span class='line'>7        24           29           Shanghai    17               1</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p><strong>start</strong> 与 <strong>end </strong>字符串IP转成整形的值，<span style="color: #008000;"><strong>1-2、3-4、5、6-7</strong></span>其实是可以分别组合起来的，只用留下<span style="color: #ff0000;">最小的 start </span>与<span style="color: #ff0000;">最大的end</span>就可以了。</p>
+
+
+<p>正确的结果应是：</p>
+
+
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>id       start        end          name        area_id          area_type
+</span><span class='line'>1        1            6            Chengdu     8                2
+</span><span class='line'>3        7            17           Luzhou      9                2
+</span><span class='line'>5        18           22           Chengdu     8                2
+</span><span class='line'>6        23           29           Shanghai    17               1</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>我开始时候试着用 <span style="color: #000080;">Group by name</span> 查询再 <span style="color: #000080;">min(start) max(end)</span> 但最终发现这样做法数据有错，它把 <span style="color: #ff0000;">所有成都的记录</span>都组合到了一起。</p>
+
+
+<p>错误的结果：</p>
+
+
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>id       start        end          name        area_id          area_type
+</span><span class='line'>1        1            22           Chengdu     8                2
+</span><span class='line'>3        7            17           Luzhou      9                2
+</span><span class='line'>6        23           29           Shanghai    17               1</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>&nbsp;</p>
+
+
+<p>我想了很久都没想出访怎么写SQL，最后只好还是用python写循环，判断前一行与当前行，再做处理，最终还是弄出来了。不过很想知道有没有好的方法可以直接用SQL里面类似group by的方式弄出来。</p>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2009-02-27 04:16:00 +0800" pubdate>2009-02-27</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/sql/'>SQL</a>, <a class='category' href='/blog/category/数据库/'>数据库</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/ask-for-howto-grouping-record';
+	var disqus_url = 'http://huacnlee.github.com/blog/ask-for-howto-grouping-record';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

@@ -1,0 +1,263 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>DSS 搭建手机流媒体服务器 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="DSS 搭建手机流媒体服务器 最近研究了一下手机流媒体服务器的搭建，目的是实现通过3G手机看在线视频。 开始的时候研究了一下 Tudou手机版 ，可它哪并没有实现在线播放，因为视频地址是 http 协议的。参看了许多文章，终于了解到要用 RTSP 、MMS 这类。 RTSP 有一个来自 &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/deploy-mobile-streaming-server-by-dss">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">DSS 搭建手机流媒体服务器</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>最近研究了一下手机流媒体服务器的搭建，目的是实现通过3G手机看在线视频。</p>
+
+<p>开始的时候研究了一下 <a href="http://m.tudou.com" target="_blank">Tudou手机版</a> ，可它哪并没有实现在线播放，因为视频地址是 http 协议的。参看了许多文章，终于了解到要用 RTSP 、MMS 这类。</p>
+
+<p>RTSP 有一个来自 Apple 的开源项目：<a href="http://dss.macosforge.org/" target="_blank">Darwin Streaming Server (DSS)</a></p>
+
+<p>DSS 是跨平台的软件，可以在Linux、Mac OSX 或 Windows 等上面部署。</p>
+
+<h2>一、DSS Windows 安装教程</h2>
+
+<ul>
+<li>从：<a href="http://dss.macosforge.org/downloads/DarwinStreamingSrvr5.5.5-Windows.exe" target="_blank">http://dss.macosforge.org/downloads/DarwinStreamingSrvr5.5.5-Windows.exe</a> (只有5.5的) 这里下载 DSS for Windows</li>
+<li>下载后解压，会看到一个 Install.bat 的文件，直接运行它就会安装到 <code>C:\Program Files\Darwin Streaming Server</code> 并还会在 系统服务里面加一个号 <code>Darwin Streaming Server</code> 的服务程序，这个就是 DSS 的 RTSP 服务器。</li>
+<li>接下来你要安装 Perl 解释器，可以从 <a href="http://www.perl.org/get.html" target="_blank">http://www.perl.org/get.html</a> 这里下载到，然后安装</li>
+<li>装好 Perl 后就可以在 CMD 下面使用 perl **.pl 来运行程序了</li>
+<li>接下来在CMD下面做如下操作：</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># 根据提示创建 WebAdmin 的账号和密码</span>
+</span><span class='line'>C:<span class="se">\P</span>rogram Files<span class="se">\D</span>arwin Streaming Server&gt; perl WinPasswdAssistant.pl
+</span><span class='line'><span class="c"># 运行 WebAdmin 管理器</span>
+</span><span class='line'>C:<span class="se">\P</span>rogram Files<span class="se">\D</span>arwin Streaming Server&gt; perl streamingadminserver.pl
+</span><span class='line'><span class="c"># 现在可以打开 http://127.0.0.1:1220/ 来对 DSS 服务器进行管理了</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>在 DSS WebAdmin 里面修改 General Settings -> Media Directory ，将它改为你的 Media 目录，当然也可以使用默认的，把自已的视频文件放到 <code>C:\Program Files\Darwin Streaming Server\Movies</code> 里面</li>
+<li>现在你可以使用 <a href="http://www.apple.com/quicktime/download/" target="_blank">QuickTime</a> 或 <a href="http://www.videolan.org/vlc" target="_blank">VLC</a> 打开 <span style="color: #339966;">rtsp://127.0.0.1:554/sample_100kbit.mp4</span><strong> </strong>来测试视频了，<span style="color: #808080;">（注 sample_100kbit.mp4 是 DSS 5.5.5 自带的视频）</span></li>
+</ul>
+
+
+<h2>二、如何将自己的视频转换为流媒体格式？</h2>
+
+<p>研究这个东西费了我好大的劲，一开始不知道视频还有专门针对流媒体的，以为只要用 MediaCoder 将视频转换成合适的格式，如：MPEG4 + AAC + MP4 / MPEG4 + AAC + 3GP 就可以放了，反复放到服务器上面去测试，VLC 和 QuickTime 都没法打开。于是又用工具打开 DSS 自带的几个示例视频看它们的格式，反复转换试不同的视频和音频编码和外壳，还是不行&#8230;郁闷死我了</p>
+
+<p>在 DSS 的邮件列表里面找了找相关的文章，发现有讲好像要用特别的工具对视频 <code>hint</code> 一下，然后就可以在 RTSP 上面用了，说可以用 QuickTime Pro 或 VLC 来转换，我用 VLC 试了一下，文件菜单一个叫&ldquo;流(<span style="text-decoration: underline;">s</span>)&rdquo;的功能，但试了还是不行，没看到文件有变动过。</p>
+
+<p>于是再沿着 Hint 关键词在 Google 上面找文章，找到了 Nokia 论坛里面，看到这篇文章：<a href="http://discussion.forum.nokia.com/forum/showthread.php?t=125540" target="_blank">http://discussion.forum.nokia.com/forum/showthread.php?t=125540</a> 里面有说可以使用 <a href="http://www.videohelp.com/tools/mp4box " target="_blank">Mp4box</a> 对视频进行 hint</p>
+
+<p>于是我在 <a href="http://www.videohelp.com/tools/mp4box" target="_blank">http://www.videohelp.com/tools/mp4box</a> 这里下载到了mp4box （不用下载GUI的，直接用命令行操作就好了，只用一条命名）</p>
+
+<p>下载到到解压出后会有个叫 <code>mp4box.exe</code> ，用它在命令行下面运行</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>C:<span class="se">\P</span>rogram Files<span class="se">\D</span>arwin Streaming Server<span class="se">\M</span>ovies&gt; mp4box mymovie.mp4 -hint
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>出现结果：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>Hinting file with Path-MTU 1450 Bytes
+</span><span class='line'>Hinting track ID 201 - Type “mp4v:mp4v” <span class="o">(</span>MP4V-ES<span class="o">)</span> - BW 33 kbps
+</span><span class='line'>Hinting track ID 101 - Type “mp4a:mp4a” <span class="o">(</span>mpeg4-generic<span class="o">)</span> - BW 64 kbps
+</span><span class='line'>Saving mymovie.mp4: 0.500 secs Interleaving
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>流媒体视频就转换好了，现在文件大小就会有变动，变大了一些。</p>
+
+<p>然后，再用 VLC 或&nbsp; QuickTime 打开 <span style="color: #339966;">rtsp://127.0.0.1:554/mymovie.mp4</span> 试试能否播放吧！如果你有3G手机，可以直接用手机打开这个地址试一下。</p>
+
+<h2>三、附加资源</h2>
+
+<ul>
+<li><a href="http://howtoforge.org/apples-darwin-streaming-server-on-centos-5.2" target="_blank">Apple&rsquo;s Darwin Streaming Server On Centos 5.2</a> (如何在 CentOS 5.2 下面安装DSS)</li>
+</ul>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2009-08-04 15:25:00 +0800" pubdate>2009-08-04</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/darwin-streaming-server/'>Darwin Streaming Server</a>, <a class='category' href='/blog/category/rtsp/'>RTSP</a>, <a class='category' href='/blog/category/流媒体/'>流媒体</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/deploy-mobile-streaming-server-by-dss';
+	var disqus_url = 'http://huacnlee.github.com/blog/deploy-mobile-streaming-server-by-dss';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>

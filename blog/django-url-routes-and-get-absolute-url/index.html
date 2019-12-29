@@ -1,0 +1,371 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+  <head>
+    <!-- include head -->
+    
+
+<meta charset="utf-8">
+<title>关于 Django 的 URL 配置与 get_absolute_url 方法 - 李华顺</title>
+<meta name="author" content="Jason Lee">
+<meta name="description"
+      content="关于 Django 的 URL 配置与 get_absolute_url 方法 今天白天的时候看了一篇文章 《DJANGO&rsquo;S URL TEMPLATE TAG SUCKS》，英文不是很好，大概的理解了一下，好像是讲，Django Url 的设计不够好的地方。 &hellip;">
+
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="no">
+<meta content='True' name='HandheldFriendly' />
+<link rel="canonical" href="http://huacnlee.github.com/blog/django-url-routes-and-get-absolute-url">
+<link href="/favicon.ico" rel="icon">
+<link href="/stylesheets/screen.css"
+      media="screen, projection"
+      rel="stylesheet"
+      type="text/css">
+
+<script src="/javascripts/modernizr-2.0.js" type="text/javascript"></script>
+<script src="/javascripts/ender.js" type="text/javascript"></script>
+<script src="/javascripts/octopress.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9745660-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+      '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+    <!-- /include -->
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <header role="banner" class="site_metas">
+	<!-- include header -->
+	
+<hgroup>
+  <h1><a href="/">李华顺</a></h1>
+  
+  <div class="nav">
+    <a href="/">About</a> /
+    <a href="/work">Work</a> /
+    <a href="/blog/archives">Blog</a> /
+    <a href="https://github.com/huacnlee">GitHub</a>
+  </div>
+</hgroup>
+
+	<!-- /include -->
+        <!-- include social_service_links -->
+	
+        <!-- /include -->
+      </header>
+
+      <div id="content">
+	<!-- content -->
+	
+
+
+<article class="entry" role="article">
+
+  <header>
+    <h1 class="entry_title">关于 Django 的 URL 配置与 get_absolute_url 方法</h1>
+    
+  </header>
+
+  <div class="entry_content"><p>今天白天的时候看了一篇文章 《<a href="http://jeffcroft.com/blog/2008/nov/10/djangos-url-template-tag-sucks/" target="_blank">DJANGO&rsquo;S URL TEMPLATE TAG SUCKS</a>》，英文不是很好，大概的理解了一下，好像是讲，<a href="http://www.djangoproject.com" target="_blank">Django</a> Url 的设计不够好的地方。另外这篇文章向我们推荐了一下更好的URL写法。</p>
+
+
+<p>&lt;之前我在 Templates 里面调用URL地址都是用 <code>{% url apps.views.post post.user.slug,post.id %}</code> 这种方式来调用 <code>urls.py</code> 里面配置的URL地址，但是Template里面会用到很多，如果当参数有变动的时候，重构将会是很麻烦的事情。所以我需要调用一个固定的地方。</p>
+
+<p>Django 的 Model 里面有一个 <code>get_absolute_url()</code>的方法，这个东西是定义Model的对象的查看地址，主要是用在RSS与后台查看页面的，以前看RSS的文档里面的写法是直接组合URL地址，如：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">class</span> <span class="nc">Post</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">title</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharFiled</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">slug</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">body</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">get_absolute_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="k">return</span> <span class="s">&#39;post/</span><span class="si">%s</span><span class="s">.html&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slug</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>但urls.py我们又定义了url的格式，这样在项目中就出现了两处关于这个页面的url配置，这样的以后做修改的时候就会有可能出现遗漏。</p>
+
+
+<p>所以我们需要想办法当url的配置终一化，<span style="color: #008000;">urls.py</span> 是被 Django 定义为url定义的，理所当然关于 url 的配置就应当写在这里，哪么 models 里面的 <span style="color: #ff6600;"><em>get_absolute_url()</em></span> 怎么得到 <span style="color: #008000;">urls.py</span> 里面的定义呢？</p>
+
+
+<p>查了一下官方文档：</p>
+
+
+<ul>
+<li><a href="http://docs.djangoproject.com/en/dev/ref/models/instances/?from=olddocs#get-absolute-url" target="_blank">http://docs.djangoproject.com/en/dev/ref/models/instances/?from=olddocs#get-absolute-url</a></li>
+<li><a href="http://docs.djangoproject.com/en/dev/topics/http/urls/#topics-http-urls" target="_blank">http://docs.djangoproject.com/en/dev/topics/http/urls/#topics-http-urls</a> </li>
+</ul>
+
+
+<p>这两篇里面有讲到关于我这种需求的实现，按着它的方式试，但一直没有成功，在 template 里面始终不出值，也没有错误（这个比较让我郁闷，大哥，再怎么来个提示哇，不然杂调试呀！）。</p>
+
+
+<p>后面 Google 了一下，看到这篇文章 《<a href="/2007/12/10/django-models-get_absolute_url/" target="_blank">Django中models中get_absolute_url方法在管理端链接错误的解决方法</a>》,终于把问题解决了，结合它的，总结一下：</p>
+
+
+<h3>urls.py</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># -*- coding: utf-8 -*-</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.conf.urls.defaults</span> <span class="kn">import</span> <span class="o">*</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">admin</span><span class="o">.</span><span class="n">autodiscover</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">urlpatterns</span> <span class="o">=</span> <span class="n">patterns</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="c"># Home:</span>
+</span><span class='line'>    <span class="p">(</span><span class="s">r&#39;^$&#39;</span><span class="p">,</span><span class="s">&#39;apps.views.home&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="n">url</span><span class="p">(</span><span class="s">r&#39;^post/(?P&lt;slug&gt;[a-zA-Z0-9_\-]+)[/]{0,1}$&#39;</span><span class="p">,</span><span class="s">&#39;apps.views.post&#39;</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;post_view&#39;</span><span class="p">),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Admin:</span>
+</span><span class='line'>    <span class="p">(</span><span class="s">r&#39;^admin/r/&#39;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="s">&#39;django.conf.urls.shortcut&#39;</span><span class="p">)),</span>
+</span><span class='line'>    <span class="p">(</span><span class="s">r&#39;^admin/(.*)&#39;</span><span class="p">,</span><span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">root</span><span class="p">),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Other:</span>
+</span><span class='line'>    <span class="p">(</span><span class="s">r&#39;^static/(.*)&#39;</span><span class="p">,</span><span class="s">&#39;django.views.static.serve&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;document_root&#39;</span><span class="p">:</span> <span class="s">&#39;./static/&#39;</span><span class="p">}),</span>
+</span><span class='line'><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>models.py</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># -*- coding: utf-8 -*-</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span><span class="p">,</span><span class="n">connection</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.core.urlresolvers</span> <span class="kn">import</span> <span class="n">reverse</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Post</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">title</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="s">&#39;标题&#39;</span><span class="p">,</span><span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">slug</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="s">&#39;slug&#39;</span><span class="p">,</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span><span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">summary</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="s">&#39;摘要&#39;</span><span class="p">,</span><span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">body</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="s">&#39;正文&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">get_absolute_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>       <span class="k">return</span> <span class="n">reverse</span><span class="p">(</span><span class="s">&#39;post_view&#39;</span><span class="p">,</span><span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">slug</span><span class="p">])</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>views.py:</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># -*- coding: utf-8 -*-</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponse</span><span class="p">,</span><span class="n">Http404</span><span class="p">,</span> <span class="n">HttpResponseRedirect</span><span class="p">,</span> <span class="n">HttpResponseServerError</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">Context</span><span class="p">,</span> <span class="n">loader</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">get_object_or_404</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="n">request</span><span class="p">,</span><span class="n">slug</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">post</span> <span class="o">=</span> <span class="bp">None</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">try</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">slug</span> <span class="o">=</span> <span class="n">slug</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">except</span><span class="p">:</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">Http404</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&#39;post&#39;</span> <span class="p">:</span> <span class="n">post</span><span class="p">,</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">template</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s">&#39;post.html&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">context</span> <span class="o">=</span> <span class="n">Context</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">output</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>templates/post.html</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;post&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;h1&gt;</span>{{ post.title }}<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;url&quot;</span><span class="nt">&gt;</span>URL:{{ post.get_absolute_url }}<span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;summary&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  {{ post.summary }}
+</span><span class='line'>  <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'><span class="nt">&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+  <footer>
+    <p class="meta">
+
+      
+
+      
+      <time datetime="2008-11-12 07:36:00 +0800" pubdate>2008-11-12</time>
+      
+
+      
+      <span class="categories">
+	<a class='category' href='/blog/category/django/'>Django</a>, <a class='category' href='/blog/category/python/'>Python</a>, <a class='category' href='/blog/category/教程/'>教程</a>
+      </span>
+      
+
+    </p>
+
+    
+    <div class="sharing">
+
+      
+
+      
+
+      
+    </div>
+    
+
+    
+    <section>
+      <h3 id="comments">Comments</h3>
+      <div id="disqus_thread" aria-live="polite">
+	<noscript>
+	  Javascript not support.
+	  (<a href="http://disqus.com/?ref_noscript">Disqus</a>)
+	</noscript>
+      </div>
+    </section>
+    
+
+  </footer>
+
+</div>
+
+	<!-- /content -->
+      </div>
+
+      <footer role="contentinfo">
+	<!-- include footer -->
+	<p>
+  Copyright &copy; 2019 - Jason Lee
+</p>
+
+	<!-- /include -->
+      </footer>
+
+      <!-- include after_footer -->
+      
+
+<script type="text/javascript">
+      var disqus_shortname = 'huacnlee';
+      
+	
+	// var disqus_developer = 1;
+	var disqus_identifier = 'http://huacnlee.github.com/blog/django-url-routes-and-get-absolute-url';
+	var disqus_url = 'http://huacnlee.github.com/blog/django-url-routes-and-get-absolute-url';
+	var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+      <!-- /include -->
+
+    </div>
+  </body>
+</html>
