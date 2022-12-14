@@ -84,9 +84,9 @@
 
   <div class="entry_content"><p>看了本文的标题，可能很多人不太明白，其实这里讲的只是一个简单的处理办法。</p>
 
-<p>以前做的上传文件也是分离的，上传后的文件存在一个文件服务器上面，这个应该很多人都会。 今天我这里提的是分离上传功能，因为上传过程也是一个占用服务器资源的大问题，如果能够把它和网站分开，哪效果应该会有很大的提升。</p>
+<p>以前做的上传文件也是分离的，上传后的文件存在一个文件服务器上面，这个应该很多人都会。今天我这里提的是分离上传功能，因为上传过程也是一个占用服务器资源的大问题，如果能够把它和网站分开，哪效果应该会有很大的提升。</p>
 
-<p>先看这个图:</p>
+<p>先看这个图：</p>
 
 <p><img src="http://www.cnblogs.com/images/cnblogs_com/huacn/fileserver_mode1.png" border="0" /></p>
 
@@ -94,15 +94,15 @@
 B 层也是一个网站，它是一个上传功能。
 C 层是存放文件的服务器</p>
 
-<p>B网站可以是一台独立的网站服务器，它做的事情就只是上传，并处理文件，如：切割图片、锐化图片等功能。当A网站需要上传功能时，就可以通过一个iframe去调用B网站的上传页面，两者之间通过JS的Parent来传递数据(具体做法请看我以前写的《<a href="../archive/2007/07/16/819196.html" target="_blank">Javascript与asp.net多文件无刷新上传</a>》)。</p>
+<p>B 网站可以是一台独立的网站服务器，它做的事情就只是上传，并处理文件，如：切割图片、锐化图片等功能。当 A 网站需要上传功能时，就可以通过一个 iframe 去调用 B 网站的上传页面，两者之间通过 JS 的 Parent 来传递数据 (具体做法请看我以前写的《<a href="../archive/2007/07/16/819196.html" target="_blank">Javascript 与 asp.net 多文件无刷新上传</a>》)。</p>
 
-<p>但今天有个功能却不能用这种方式做，不能使用iframe，所以一直想了好几个办法，最终做了一个通过WebClient来将文件数据POST到B服务器，B服务器再处理，并保存。这种做法虽然效果没有达到完全的分离(上传时A网站还是要将文件信息从用户的本地读到A网站的服务器)，不过处理文件的资源已经分开了，速度上面应该会有些好的(看具体情况了，我这里会将文件缩小并切割成好几种不同大小的格式，再将切割完成的图进行锐化处理)。</p>
+<p>但今天有个功能却不能用这种方式做，不能使用 iframe，所以一直想了好几个办法，最终做了一个通过 WebClient 来将文件数据 POST 到 B 服务器，B 服务器再处理，并保存。这种做法虽然效果没有达到完全的分离 (上传时 A 网站还是要将文件信息从用户的本地读到 A 网站的服务器)，不过处理文件的资源已经分开了，速度上面应该会有些好的 (看具体情况了，我这里会将文件缩小并切割成好几种不同大小的格式，再将切割完成的图进行锐化处理)。</p>
 
-<p>我一直在想，怎么才能将Ajax一样，直接把信息POST到B网站的一个页面上，终于找到WebClient，我先把文件读成Byte数组，再用WebClient提交到B服务器的页面上，B服务接收此信息并转成一个Image，然后处理文件并保存，最后返回结果。</p>
+<p>我一直在想，怎么才能将 Ajax 一样，直接把信息 POST 到 B 网站的一个页面上，终于找到 WebClient，我先把文件读成 Byte 数组，再用 WebClient 提交到 B 服务器的页面上，B 服务接收此信息并转成一个 Image，然后处理文件并保存，最后返回结果。</p>
 
 <p>再看一下具体的代码：</p>
 
-<p>A层页面代码的Default.aspx：</p>
+<p>A 层页面代码的 Default.aspx：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -131,7 +131,7 @@ C 层是存放文件的服务器</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>A层服务端代码 Default.aspx.cs</p>
+<p>A 层服务端代码 Default.aspx.cs</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -265,14 +265,14 @@ C 层是存放文件的服务器</p>
 </span><span class='line'>            <span class="kt">byte</span><span class="p">[]</span> <span class="n">fileByte</span> <span class="p">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="p">[</span><span class="n">myFile</span><span class="p">.</span><span class="n">InputStream</span><span class="p">.</span><span class="n">Length</span><span class="p">];</span>
 </span><span class='line'>            <span class="n">myFile</span><span class="p">.</span><span class="n">InputStream</span><span class="p">.</span><span class="n">Read</span><span class="p">(</span><span class="n">fileByte</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="n">fileByte</span><span class="p">.</span><span class="n">Length</span><span class="p">);</span>
 </span><span class='line'>
-</span><span class='line'>            <span class="c1">//通过WebClient类来提交文件数据</span>
+</span><span class='line'>            <span class="c1">//通过 WebClient 类来提交文件数据</span>
 </span><span class='line'>
-</span><span class='line'>            <span class="c1">//定义提交URL地址,它会接收文件的字节数据，并保存，再返回相应的结果[此处具体用的时候要修改]</span>
+</span><span class='line'>            <span class="c1">//定义提交 URL 地址，它会接收文件的字节数据，并保存，再返回相应的结果 [此处具体用的时候要修改]</span>
 </span><span class='line'>            <span class="kt">string</span> <span class="n">postUrl</span> <span class="p">=</span> <span class="s">&quot;http://localhost:2956/Upload/uploadpic.aspx?oldfilename=&quot;</span> <span class="p">+</span> <span class="n">myFile</span><span class="p">.</span><span class="n">FileName</span><span class="p">;</span>
 </span><span class='line'>            <span class="n">System</span><span class="p">.</span><span class="n">Net</span><span class="p">.</span><span class="n">WebClient</span> <span class="n">webClient</span> <span class="p">=</span> <span class="k">new</span> <span class="n">System</span><span class="p">.</span><span class="n">Net</span><span class="p">.</span><span class="n">WebClient</span><span class="p">();</span>
 </span><span class='line'>            <span class="kt">byte</span><span class="p">[]</span> <span class="n">responseArray</span> <span class="p">=</span> <span class="n">webClient</span><span class="p">.</span><span class="n">UploadData</span><span class="p">(</span><span class="n">postUrl</span><span class="p">,</span> <span class="s">&quot;POST&quot;</span><span class="p">,</span> <span class="n">fileByte</span><span class="p">);</span>
 </span><span class='line'>
-</span><span class='line'>            <span class="c1">//将返回的字节数据转成字符串（也就是uploadpic.aspx里面的页面输出内容）</span>
+</span><span class='line'>            <span class="c1">//将返回的字节数据转成字符串（也就是 uploadpic.aspx 里面的页面输出内容）</span>
 </span><span class='line'>            <span class="n">result</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">Text</span><span class="p">.</span><span class="n">Encoding</span><span class="p">.</span><span class="n">Default</span><span class="p">.</span><span class="n">GetString</span><span class="p">(</span><span class="n">responseArray</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="n">responseArray</span><span class="p">.</span><span class="n">Length</span><span class="p">);</span>
 </span><span class='line'>
 </span><span class='line'>            <span class="c1">//返回结果的处理</span>
@@ -295,12 +295,12 @@ C 层是存放文件的服务器</p>
 </span><span class='line'>        <span class="n">Alert</span><span class="p">(</span><span class="s">&quot;上传成功!\r\n结果是：&quot;</span> <span class="p">+</span> <span class="n">result</span><span class="p">);</span>
 </span><span class='line'>    <span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="cp">#region 在客户端发出Alert提示窗口</span>
+</span><span class='line'>    <span class="cp">#region 在客户端发出 Alert 提示窗口</span>
 </span><span class='line'>    <span class="c1">///</span>
 </span><span class='line'>    <span class="c1">/// sumary:弹出一个提示窗口</span>
 </span><span class='line'>    <span class="c1">///</span>
 </span><span class='line'>    <span class="c1">/// 提示信息</span>
-</span><span class='line'>    <span class="c1">/// 要专向的地址,不转请传空字符串</span>
+</span><span class='line'>    <span class="c1">/// 要专向的地址，不转请传空字符串</span>
 </span><span class='line'>    <span class="k">public</span> <span class="k">void</span> <span class="nf">Alert</span><span class="p">(</span><span class="kt">string</span> <span class="n">msg</span><span class="p">,</span> <span class="kt">string</span> <span class="n">url</span><span class="p">)</span>
 </span><span class='line'>    <span class="p">{</span>
 </span><span class='line'>
@@ -315,7 +315,7 @@ C 层是存放文件的服务器</p>
 </span><span class='line'>    <span class="c1">///</span>
 </span><span class='line'>    <span class="c1">/// 弹出错误提示</span>
 </span><span class='line'>    <span class="c1">///</span>
-</span><span class='line'>    <span class="c1">/// 提示信息，支持HTML</span>
+</span><span class='line'>    <span class="c1">/// 提示信息，支持 HTML</span>
 </span><span class='line'>    <span class="k">public</span> <span class="k">void</span> <span class="nf">Alert</span><span class="p">(</span><span class="kt">string</span> <span class="n">msg</span><span class="p">)</span>
 </span><span class='line'>    <span class="p">{</span>
 </span><span class='line'>        <span class="n">Alert</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">);</span>
@@ -326,7 +326,7 @@ C 层是存放文件的服务器</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>B层的服务端代码　UploadPic.aspx.cs：</p>
+<p>B 层的服务端代码 UploadPic.aspx.cs：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -561,14 +561,14 @@ C 层是存放文件的服务器</p>
 </span><span class='line'>        <span class="k">return</span> <span class="n">nowTime</span><span class="p">;</span>
 </span><span class='line'>    <span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="cp">#region 获取QueryString的值</span>
+</span><span class='line'>    <span class="cp">#region 获取 QueryString 的值</span>
 </span><span class='line'>    <span class="c1">///</span>
-</span><span class='line'>    <span class="c1">/// sumary:获取QueryString的值</span>
+</span><span class='line'>    <span class="c1">/// sumary:获取 QueryString 的值</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="c1">///</span>
-</span><span class='line'>    <span class="c1">/// QueryString中字段的名称</span>
+</span><span class='line'>    <span class="c1">/// QueryString 中字段的名称</span>
 </span><span class='line'>    <span class="c1">///</span>
-</span><span class='line'>    <span class="c1">/// 如果存在则返回QueryString中字段对应的值 如果不存在或异常，则返回空字符串</span>
+</span><span class='line'>    <span class="c1">/// 如果存在则返回 QueryString 中字段对应的值 如果不存在或异常，则返回空字符串</span>
 </span><span class='line'>    <span class="c1">///</span>
 </span><span class='line'>    <span class="k">public</span> <span class="kt">string</span> <span class="nf">GetQueryString</span><span class="p">(</span><span class="kt">string</span> <span class="n">key</span><span class="p">)</span>
 </span><span class='line'>    <span class="p">{</span>

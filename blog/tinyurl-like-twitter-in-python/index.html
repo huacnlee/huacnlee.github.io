@@ -78,11 +78,11 @@
 <article class="entry" role="article">
 
   <header>
-    <h1 class="entry_title">Python将内容中的Url地址转换成Tinyurl地址</h1>
+    <h1 class="entry_title">Python 将内容中的 Url 地址转换成 Tinyurl 地址</h1>
     
   </header>
 
-  <div class="entry_content"><p>你用过 <a href="http://fanfou.com" target="_blank">饭否</a> 或 <a href="http://www.twitter.com" target="_blank">Twitter</a> 吗？当发布信息的时候，如果内容中带有过长的url地址，程序就会自动将这些地址转换成为更短的url，使用的是 <a href="Tinyurl" target="_blank">Tinyurl</a> 的地址转向服务。</p>
+  <div class="entry_content"><p>你用过 <a href="http://fanfou.com" target="_blank">饭否</a> 或 <a href="http://www.twitter.com" target="_blank">Twitter</a> 吗？当发布信息的时候，如果内容中带有过长的 url 地址，程序就会自动将这些地址转换成为更短的 url，使用的是 <a href="Tinyurl" target="_blank">Tinyurl</a> 的地址转向服务。</p>
 
 
 <p>如：<a href="http://huacn.blogbus.com/logs/25832349.html" target="_blank">http://huacn.blogbus.com/logs/25832349.html</a> 转换后就成了&nbsp; <a href="http://tinyurl.com/6ameh5" target="_blank">http://tinyurl.com/6ameh5</a></p>
@@ -91,7 +91,7 @@
 <p>这样的就跟迷你博客的初衷更加贴切了，也可以在短小的消息中带上连接地址。</p>
 
 
-<p>因为我在做我的Python的第一个项目 <a href="http://code.google.com/p/tmitter/" target="_blank">Tmitter</a> 因为此项目是模仿 <a href="http://fanfou.com" target="_blank">饭否</a> 与 <a href="http://www.twitter.com" target="_blank">Twitter</a> 自然shorturl的功能是必不可少的，刚学Python的我很多都不熟悉，慢慢的查 <a href="http://tinyurl.com/api-create.php" target="_blank">Tinyurl的API</a>，再不停的调试与修改，这个功能终于实现了。</p>
+<p>因为我在做我的 Python 的第一个项目 <a href="http://code.google.com/p/tmitter/" target="_blank">Tmitter</a> 因为此项目是模仿 <a href="http://fanfou.com" target="_blank">饭否</a> 与 <a href="http://www.twitter.com" target="_blank">Twitter</a> 自然 shorturl 的功能是必不可少的，刚学 Python 的我很多都不熟悉，慢慢的查 <a href="http://tinyurl.com/api-create.php" target="_blank">Tinyurl 的 API</a>，再不停的调试与修改，这个功能终于实现了。</p>
 
 
 <h3>下面是代码，分享一下：</h3>
@@ -118,13 +118,13 @@
 </span><span class='line'><span class="kn">import</span> <span class="nn">re</span><span class="o">,</span><span class="nn">urllib</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">def</span> <span class="nf">tiny_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
-</span><span class='line'>    <span class="sd">&quot;&quot;&quot;将url转换成tinyurl&quot;&quot;&quot;</span>
+</span><span class='line'>    <span class="sd">&quot;&quot;&quot;将 url 转换成 tinyurl&quot;&quot;&quot;</span>
 </span><span class='line'>    <span class="n">apiurl</span> <span class="o">=</span> <span class="s">&quot;http://tinyurl.com/api-create.php?url=&quot;</span>
 </span><span class='line'>    <span class="n">tinyurl</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">apiurl</span> <span class="o">+</span> <span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 </span><span class='line'>    <span class="k">return</span> <span class="n">tinyurl</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">def</span> <span class="nf">content_tiny_url</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
-</span><span class='line'>    <span class="sd">&quot;&quot;&quot;让消息里面的连接转换成更短的Tinyurl&quot;&quot;&quot;</span>
+</span><span class='line'>    <span class="sd">&quot;&quot;&quot;让消息里面的连接转换成更短的 Tinyurl&quot;&quot;&quot;</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="n">regex_url</span> <span class="o">=</span> <span class="s">r&#39;http:\/\/([\w.]+\/?)\S*&#39;</span>
 </span><span class='line'>    <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">regex_url</span><span class="p">,</span> <span class="n">content</span><span class="p">):</span>

@@ -103,7 +103,7 @@
 <blockquote><p>Paperclip 暂时还没有人给它实现又拍云集成 <br />
 CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另外还有我实现的<a href="https://github.com/huacnlee/carrierwave-aliyun">阿里云存储的插件</a>。</p></blockquote>
 
-<p>如果你想在 CarrierWave 里面使用又拍云作为存储介质，那么你需要用:</p>
+<p>如果你想在 CarrierWave 里面使用又拍云作为存储介质，那么你需要用：</p>
 
 <ul>
 <li><a href="https://github.com/nowa/carrierwave-upyun">https://github.com/nowa/carrierwave-upyun</a></li>
@@ -121,7 +121,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>只需要简单的配置就能很好的将他们结合起来:</p>
+<p>只需要简单的配置就能很好的将他们结合起来：</p>
 
 <p>config/initializes/carrierwave.rb</p>
 
@@ -149,11 +149,11 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 
 <p>在以往我们使用 CarrierWave 或 Paperclip 的时候，我们习惯于在 Rails 里面直接使用 ImageMagick 将图片处理成不同的缩略图版本（尺寸，格式，水印，锐化，模糊&#8230;）以适应我们的业务需求。</p>
 
-<blockquote><p> 这个也是 Ruby 社区的一大优点!<br />CarrierWave 或 Paperclip 可以很容易的将图片自动化的处理掉，使得我们的代码干净利落！</p></blockquote>
+<blockquote><p> 这个也是 Ruby 社区的一大优点！<br />CarrierWave 或 Paperclip 可以很容易的将图片自动化的处理掉，使得我们的代码干净利落！</p></blockquote>
 
-<p>不过如果你用了又拍云以后，CarrierWave 提供的 <a href="https://github.com/jnicklas/carrierwave#adding-versions">缩略图生成</a> 功能或许你就不该使用了，由于远程网络访问以及服务器带宽会带来上传速度的问题，我们需要尽可能的减少服务器到又拍云服务器的网络使用，具体看我在 Ruby China 上面发帖描述的情况: 《<a href="http://ruby-china.org/topics/5059">盛大云和又拍云配合起来使用的问题</a>》</p>
+<p>不过如果你用了又拍云以后，CarrierWave 提供的 <a href="https://github.com/jnicklas/carrierwave#adding-versions">缩略图生成</a> 功能或许你就不该使用了，由于远程网络访问以及服务器带宽会带来上传速度的问题，我们需要尽可能的减少服务器到又拍云服务器的网络使用，具体看我在 Ruby China 上面发帖描述的情况：《<a href="http://ruby-china.org/topics/5059">盛大云和又拍云配合起来使用的问题</a>》</p>
 
-<p>你有两个选择:</p>
+<p>你有两个选择：</p>
 
 <ol>
 <li>使用又拍云的 Form API 来上传图片，你可以看看这个 <a href="https://gist.github.com/3414491">Gist</a> ,这个里面的代码只是将上传调通了，后面还有许多事情需要手工处理；</li>
@@ -163,7 +163,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 
 <p>如果你选择用图片空间，那你还可以继续使用 CarrierWave 和 carrierwave-upyun 来实现图片处理，以前那套思路都还可以继续使用，只是需要对 CarrierWave 进行一些 Hack 就可以和“图片空间”很好的搭配起来了。</p>
 
-<h3>以前我们的 CarrierWave 自定义 Uploader 可能是这样的:</h3>
+<h3>以前我们的 CarrierWave 自定义 Uploader 可能是这样的：</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -268,7 +268,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>在 Views 里面你是这样:</p>
+<p>在 Views 里面你是这样：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">image_tag</span><span class="p">(</span><span class="vi">@user</span><span class="o">.</span><span class="n">avatar</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="ss">:small</span><span class="p">))</span> <span class="cp">%&gt;</span><span class="x"></span>
@@ -279,9 +279,9 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 
 <p>先在又拍云的图片空间里面配置好你需要的“自定义缩略图尺寸”.</p>
 
-<blockquote><p>定义缩略图一定要提前想好!<br />因为版本一定义好，名称就不能修改了，也不能删除，并且最多有 30 种的限制。</p></blockquote>
+<blockquote><p>定义缩略图一定要提前想好！<br />因为版本一定义好，名称就不能修改了，也不能删除，并且最多有 30 种的限制。</p></blockquote>
 
-<p>接下来改造你的代码，将 AvatarUploader, PhotoUploader, CoverUploader 扔掉，改用一个 ImageUploader 代替:</p>
+<p>接下来改造你的代码，将 AvatarUploader, PhotoUploader, CoverUploader 扔掉，改用一个 ImageUploader 代替：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -401,7 +401,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>当然我不建议你直接这么写，你应该写个 <code>user_avatar_tag</code> 的 Helper 来做上面这段的事情:</p>
+<p>当然我不建议你直接这么写，你应该写个 <code>user_avatar_tag</code> 的 Helper 来做上面这段的事情：</p>
 
 <p>users_helper.rb</p>
 
@@ -451,7 +451,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 </ul>
 
 
-<p>里面包含 4 个文件的改动:</p>
+<p>里面包含 4 个文件的改动：</p>
 
 <ul>
 <li><code>lib/ftp_sync.rb</code> - FTP 同步功能，此文件无需修改</li>

@@ -82,7 +82,7 @@
     
   </header>
 
-  <div class="entry_content"><p>刚接触 Rails 的人都会对 Rails form 实际特别喜爱，因为它让我们省时省力，就算遇到有100多个字段的表单，也能够几下就做出来了，因为在服务端不用再去对每个字段分别写文本框与字段的赋值。</p>
+  <div class="entry_content"><p>刚接触 Rails 的人都会对 Rails form 实际特别喜爱，因为它让我们省时省力，就算遇到有 100 多个字段的表单，也能够几下就做出来了，因为在服务端不用再去对每个字段分别写文本框与字段的赋值。</p>
 
 
 <p>但是如果没有注意保护，使用 Model.create(params[:model]) 的方式提交会有很大的安全漏洞。</p>
@@ -99,7 +99,7 @@
 <li>nick_name [昵称]</li>
 <li>email [Email]</li>
 <li>state [状态]</li>
-<li>group_id [组 [1 管理员, 2 编辑, 3 普通用户]]</li>
+<li>group_id [组 [1 管理员，2 编辑，3 普通用户]]</li>
 <li>exp [经验值]</li>
 <li>money [金币]</li>
 <li>level_id [等级]</li>
@@ -196,8 +196,8 @@
 
 <p></li>
 </ol>
-这是 Rails 里面很常见的写法,但是如果没有做相应的保护措施，那么使用 <code>@user = User.new(params[:user])</code> 然后 <code>@user.save</code> 这样的方式就会有很严重的问题，因为HTML表单是可以通过 <a href="http://www.getfirebug.com">Firebug</a> 这类前端调试工具修改的。
-比如，现在的注册表单上面有 <code>login,passwd,nick_name</code> 三个字段，我可以使用 Firebug 强制修改HTML，加上：</p>
+这是 Rails 里面很常见的写法，但是如果没有做相应的保护措施，那么使用 <code>@user = User.new(params[:user])</code> 然后 <code>@user.save</code> 这样的方式就会有很严重的问题，因为 HTML 表单是可以通过 <a href="http://www.getfirebug.com">Firebug</a> 这类前端调试工具修改的。
+比如，现在的注册表单上面有 <code>login,passwd,nick_name</code> 三个字段，我可以使用 Firebug 强制修改 HTML，加上：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -208,7 +208,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>然后提交保存&#8230; 接下来出现的结果大家应该都能猜到，这个用户的金币和经验值都被强制加上了，而且还注册成为了超级管理员！很恐怖把！ 看我在 <a href="http://pasite.is-programmer.com/posts/15200.html">is-programmer.com</a> 上面测试的这个例子
+<p>然后提交保存&#8230; 接下来出现的结果大家应该都能猜到，这个用户的金币和经验值都被强制加上了，而且还注册成为了超级管理员！很恐怖把！看我在 <a href="http://pasite.is-programmer.com/posts/15200.html">is-programmer.com</a> 上面测试的这个例子
 我把访问量修改到上亿次！当然 is-programmer.com 做过这方面的保护，这个地方的问题不大不小，我本想强制注册个超级管理员的&#8230;但后面发现有做保护的&#8230; 呵呵</p>
 
 <h2>如何保护？</h2>

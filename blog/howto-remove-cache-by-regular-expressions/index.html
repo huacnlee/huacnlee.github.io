@@ -82,9 +82,9 @@
     
   </header>
 
-  <div class="entry_content"><p>接上次的话题《<a href="/blog/group-caches-with-tag-or-namespace" target="_blank">缓存方式扩展，缓存Tag(命名空间)的实现</a>》，给 cache item打上了tag标签，这个方式是不错，今天再来一个更好的方法。<br />这个方式是模仿 <a href="http://www.rubyonrails.com" target="_blank">Ruby on Rails</a> 里面自带的功能</p>
+  <div class="entry_content"><p>接上次的话题《<a href="/blog/group-caches-with-tag-or-namespace" target="_blank">缓存方式扩展，缓存 Tag(命名空间) 的实现</a>》，给 cache item 打上了 tag 标签，这个方式是不错，今天再来一个更好的方法。<br />这个方式是模仿 <a href="http://www.rubyonrails.com" target="_blank">Ruby on Rails</a> 里面自带的功能</p>
 
-<h3>在 Ruby on Rails 里面，我们可以:</h3>
+<h3>在 Ruby on Rails 里面，我们可以：</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -94,7 +94,7 @@
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 写入将page1,page2的数据写入缓存</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 写入将 page1,page2 的数据写入缓存</span>
 </span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;posts/page/1&#39;</span><span class="p">,</span><span class="vi">@page1</span><span class="p">)</span>
 </span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;posts/page/2&#39;</span><span class="p">,</span><span class="vi">@page2</span><span class="p">)</span>
 </span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;posts/index&#39;</span><span class="p">,</span><span class="vi">@index</span><span class="p">)</span>
@@ -107,24 +107,24 @@
 
 
 
-<p>从上面的代码中看出这种删除实在是非常的实用，我们可以根据<strong>类别层次级</strong>为缓存起key的名称，如</p>
+<p>从上面的代码中看出这种删除实在是非常的实用，我们可以根据<strong>类别层次级</strong>为缓存起 key 的名称，如</p>
 
 
 <ul>
-<li><span style="color: #008080;"><strong>home/index</strong></span> - <span style="color: #808000;">首页的index视图</span></li>
-<li><strong><span style="color: #008080;">posts/show/1</span></strong> - <span style="color: #808000;">查看文章页面ID为1的文章</span></li>
+<li><span style="color: #008080;"><strong>home/index</strong></span> - <span style="color: #808000;">首页的 index 视图</span></li>
+<li><strong><span style="color: #008080;">posts/show/1</span></strong> - <span style="color: #808000;">查看文章页面 ID 为 1 的文章</span></li>
 </ul>
 
 
 <p>然后根据层次级来删除缓存。</p>
 
-<p>这种按 * 号匹配删除一组缓存的方式在实际的应用中需求非常频繁，如《<a href="http://huacn.blogbus.com/logs/39240733.html" target="_blank">缓存方式扩展，缓存Tag(命名空间)的实现</a>》里面提到的列表缓存清除，你不确定具体有多少页，但这些页面都得清除，哪就得用<span style="color: #ff0000;"><strong>Tag</strong></span>或<span style="color: #ff0000;"><strong>正则匹配</strong></span>的方式来清除了。</p>
+<p>这种按 * 号匹配删除一组缓存的方式在实际的应用中需求非常频繁，如《<a href="http://huacn.blogbus.com/logs/39240733.html" target="_blank">缓存方式扩展，缓存 Tag(命名空间) 的实现</a>》里面提到的列表缓存清除，你不确定具体有多少页，但这些页面都得清除，哪就得用<span style="color: #ff0000;"><strong>Tag</strong></span>或<span style="color: #ff0000;"><strong>正则匹配</strong></span>的方式来清除了。</p>
 
 <h3>如图：</h3>
 
 <p><img src="http://farm4.static.flickr.com/3367/3550693852_868742b518_o.png" border="0" width="516" height="390" /></p>
 
-<p>如上图所示，我们将所有的Cache Key存入 <span style="color: #333399;"><strong>CacheKeys</strong> </span>中，<span style="color: #333399;"><strong>CacheKeys </strong></span>以静态的方式存放于进程内存里面，当 <span style="color: #ff6600;">DeleteByMatch</span> 调用的时候，用正则的从 <span style="color: #333399;"><strong>CacheKeys</strong> </span>里面匹配出相关的 <span style="color: #008080;"><strong>Keys</strong> </span>列表，再通过循环删除 <a href="http://www.danga.com/memcached/" target="_blank"><strong><span style="color: #993300;">Memcached</span></strong></a> 中的缓存。</p>
+<p>如上图所示，我们将所有的 Cache Key 存入 <span style="color: #333399;"><strong>CacheKeys</strong> </span>中，<span style="color: #333399;"><strong>CacheKeys </strong></span>以静态的方式存放于进程内存里面，当 <span style="color: #ff6600;">DeleteByMatch</span> 调用的时候，用正则的从 <span style="color: #333399;"><strong>CacheKeys</strong> </span>里面匹配出相关的 <span style="color: #008080;"><strong>Keys</strong> </span>列表，再通过循环删除 <a href="http://www.danga.com/memcached/" target="_blank"><strong><span style="color: #993300;">Memcached</span></strong></a> 中的缓存。</p>
 
 <h3>.NET 里面实现代码：</h3>
 
@@ -199,8 +199,8 @@
 </span><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">Caches</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>    <span class="c1">///</span>
-</span><span class='line'>    <span class="c1">/// 用于存放所有cache keys，以便于用正则的方式删除缓存</span>
-</span><span class='line'>    <span class="c1">/// 如： place/home/page/1 ，以后用 place/home/page/* 来删除 place/home/page/1,place/home/page/2 ... place/home/page/n</span>
+</span><span class='line'>    <span class="c1">/// 用于存放所有 cache keys，以便于用正则的方式删除缓存</span>
+</span><span class='line'>    <span class="c1">/// 如：place/home/page/1，以后用 place/home/page/* 来删除 place/home/page/1,place/home/page/2 ... place/home/page/n</span>
 </span><span class='line'>    <span class="c1">///</span>
 </span><span class='line'>    <span class="k">private</span> <span class="k">static</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">cacheKeys</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;();</span>
 </span><span class='line'>    <span class="c1">///</span>
@@ -251,7 +251,7 @@
 
 <ul>
 <li>空间问题，当 Cache Key 过多时就需要考虑换地方存放这个列表了，不然 IIS 进程内存超支哪就要 crash 掉。</li>
-<li>多个网站同步问题，当有两个 Web 应用程序使用相同的缓存时，如：news.tmitter.com,share.tmitter.com，IIS两个网站之间内存不是共享的，这里就需要考虑缓存同步的问题了。</li>
+<li>多个网站同步问题，当有两个 Web 应用程序使用相同的缓存时，如：news.tmitter.com,share.tmitter.com，IIS 两个网站之间内存不是共享的，这里就需要考虑缓存同步的问题了。</li>
 </ul>
 
 

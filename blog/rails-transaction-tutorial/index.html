@@ -93,12 +93,12 @@
 
 
 <p>要解决这个问题哪就要上 <strong>事务</strong> 了！
-Rails ActiveRecord 对事务的处理实现的很方便，只用Model.transaction do &#8230; end 将对 Model 表的操作的代码包起来就可以了，这样一来，在 transaction do .. end 之间的数据更新动作并不会立刻改变表里面的数据，而是要等到完全执行完成后，过了 end 才更新。</p>
+Rails ActiveRecord 对事务的处理实现的很方便，只用 Model.transaction do &#8230; end 将对 Model 表的操作的代码包起来就可以了，这样一来，在 transaction do .. end 之间的数据更新动作并不会立刻改变表里面的数据，而是要等到完全执行完成后，过了 end 才更新。</p>
 
 <!-- more -->
 
 
-<h3>来看一下这一段例子:</h3>
+<h3>来看一下这一段例子：</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>

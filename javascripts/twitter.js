@@ -66,9 +66,9 @@ function showTwitterFeed(tweets, twitter_user) {
     content += '<li>';
     content += linkifyTweet(tweets[t].text.replace(/\n/g, '<br>'), tweets[t].entities.urls);
     content += ' <span class="pretty_date">';
-    content += '（<a href="http://twitter.com/'+twitter_user+'/status/'+tweets[t].id_str+'">';
+    content += '(<a href="http://twitter.com/'+twitter_user+'/status/'+tweets[t].id_str+'">';
     content += prettyDate(tweets[t].created_at);
-    content += '</a>）</span>';
+    content += '</a>)</span>';
     content += '</li>';
   }
   timeline.innerHTML = content;

@@ -86,7 +86,7 @@
 
 <h2>对比两个不同版本的差距</h2>
 
-<p>我昨晚特意下载了他们重构成 MySQL 版本的 <a href="http://github.com/rubytaiwan/ruby-taiwan">ruby-taiwan</a> 的代码与目前 <a href="http://github.com/huacnlee/ruby-china">ruby-china</a> 的代码在开发环境下面模拟数据做了一下对比.</p>
+<p>我昨晚特意下载了他们重构成 MySQL 版本的 <a href="http://github.com/rubytaiwan/ruby-taiwan">ruby-taiwan</a> 的代码与目前 <a href="http://github.com/huacnlee/ruby-china">ruby-china</a> 的代码在开发环境下面模拟数据做了一下对比。</p>
 
 <h3>数据场景</h3>
 
@@ -97,10 +97,10 @@
 </ul>
 
 
-<h3>对比结果:</h3>
+<h3>对比结果：</h3>
 
 <ul>
-<li>话题列表 /topics (15个话题)</li>
+<li>话题列表 /topics (15 个话题)</li>
 </ul>
 
 
@@ -138,7 +138,7 @@
 
 
 <ul>
-<li>话题查看页面 /topics/:id <em>27条回复的场景</em></li>
+<li>话题查看页面 /topics/:id <em>27 条回复的场景</em></li>
 </ul>
 
 
@@ -192,7 +192,7 @@
 <span class='line-number'>9</span>
 <span class='line-number'>10</span>
 <span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Started GET <span class="s2">&quot;/topics/777&quot;</span> <span class="o">(</span>58条回复<span class="o">)</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>Started GET <span class="s2">&quot;/topics/777&quot;</span> <span class="o">(</span>58 条回复<span class="o">)</span>
 </span><span class='line'>Completed 200 OK in 107ms <span class="o">(</span>Views: 82.9ms | Mongo: 23.3ms | Solr: 0.0ms<span class="o">)</span>
 </span><span class='line'>Completed 200 OK in 121ms <span class="o">(</span>Views: 33.7ms | Mongo: 27.5ms | Solr: 0.0ms<span class="o">)</span>
 </span><span class='line'>Completed 200 OK in 135ms <span class="o">(</span>Views: 48.4ms | Mongo: 26.8ms | Solr: 0.0ms<span class="o">)</span>
@@ -211,7 +211,7 @@
 <p>之前 ruby-china 某个时期在开发环境下面确实非常慢，但那个原因是下面几个</p>
 
 <ol>
-<li><a href="https://github.com/mislav/will_paginate">will_paginate</a> 由于不支持 MongoDb 的分页方式，所以每次分页都是 <code>Model.all</code> 以后，以 Array 来分页的，所以这个是之前性能的罪魁祸首,<a href="https://github.com/lucasas/will_paginate_mongoid">参见</a>；</li>
+<li><a href="https://github.com/mislav/will_paginate">will_paginate</a> 由于不支持 MongoDb 的分页方式，所以每次分页都是 <code>Model.all</code> 以后，以 Array 来分页的，所以这个是之前性能的罪魁祸首，<a href="https://github.com/lucasas/will_paginate_mongoid">参见</a>；</li>
 <li>Mongoid 的 eager loading 需要手动配置 <code>identity_map_enabled: true</code> 才会有效果；</li>
 <li>之前 Rails 3.1 环境确实比较慢，已进入 Rails 3.2 已经感觉是非常明显的。</li>
 </ol>

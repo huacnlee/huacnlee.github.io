@@ -85,7 +85,7 @@
   <div class="entry_content"><p>这个是基于 <a href="http://mongoid.org">Mongoid</a> 实现的 Tag 功能的 Ruby gem。</p>
 
 <p>老早就搞出来了。目前这个东西已经稳定的在 <a href="http://720p.so">720p.so</a> 上面跑了很长一段时间，今天公布一下。
-其实这类功能在我之前已经有几个，但是经过尝试以后发现他们的太复杂了，不满足我的需求，于是自己实现了一个，基于 Array 字段实现的 Tag 。</p>
+其实这类功能在我之前已经有几个，但是经过尝试以后发现他们的太复杂了，不满足我的需求，于是自己实现了一个，基于 Array 字段实现的 Tag。</p>
 
 <h2>特点</h2>
 
@@ -155,17 +155,17 @@
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
 </pre></td><td class='code'><pre><code class='bash'><span class='line'>irb&gt; <span class="nv">m</span> <span class="o">=</span> Movie.new
-</span><span class='line'>irb&gt; m.actor_list <span class="o">=</span> <span class="s2">&quot;甄子丹,古天乐,徐静蕾&quot;</span>
+</span><span class='line'>irb&gt; m.actor_list <span class="o">=</span> <span class="s2">&quot;甄子丹，古天乐，徐静蕾&quot;</span>
 </span><span class='line'>irb&gt; m.actors
 </span><span class='line'><span class="o">[</span><span class="s2">&quot;甄子丹&quot;</span>, <span class="s2">&quot;古天乐&quot;</span>, <span class="s2">&quot;徐静蕾&quot;</span><span class="o">]</span>
-</span><span class='line'>irb&gt; m.country_list <span class="o">=</span> <span class="s2">&quot;美国|法国|俄罗斯&quot;</span>
+</span><span class='line'>irb&gt; m.country_list <span class="o">=</span> <span class="s2">&quot;美国 | 法国 | 俄罗斯&quot;</span>
 </span><span class='line'>irb&gt; m.countries
 </span><span class='line'><span class="o">[</span><span class="s2">&quot;美国&quot;</span>,<span class="s2">&quot;法国&quot;</span>,<span class="s2">&quot;俄罗斯&quot;</span><span class="o">]</span>
-</span><span class='line'>irb&gt; m.country_list <span class="o">=</span> <span class="s2">&quot;美国|法国|俄罗斯|中国&quot;</span>
+</span><span class='line'>irb&gt; m.country_list <span class="o">=</span> <span class="s2">&quot;美国 | 法国 | 俄罗斯 | 中国&quot;</span>
 </span><span class='line'>irb&gt; m.country_list_changed?
 </span><span class='line'><span class="nb">true</span>
 </span><span class='line'>irb&gt; m.country_list_was
-</span><span class='line'><span class="s2">&quot;美国|法国|俄罗斯&quot;</span>
+</span><span class='line'><span class="s2">&quot;美国 | 法国 | 俄罗斯&quot;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -174,9 +174,9 @@
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>irb&gt; Movie.tagged_with_on<span class="o">(</span>:actors, <span class="s2">&quot;成龙, 李连杰&quot;</span><span class="o">)</span> <span class="c"># 查找同时带有 “成龙” 和 “李连杰” 的电影</span>
-</span><span class='line'>irb&gt; Movie.tagged_with_on<span class="o">(</span>:actors, <span class="s2">&quot;古天乐, 杨紫琼&quot;</span>, :match <span class="o">=</span>&gt; :any<span class="o">)</span> <span class="c"># 查找 “古天乐” 或 “杨紫琼” 的电影</span>
-</span><span class='line'>irb&gt; Movie.tagged_with_on<span class="o">(</span>:actors, <span class="s2">&quot;周杰伦&quot;</span>, :match <span class="o">=</span>&gt; :not<span class="o">)</span> <span class="c"># 查找不是 “周杰伦” 的电影</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>irb&gt; Movie.tagged_with_on<span class="o">(</span>:actors, <span class="s2">&quot;成龙，李连杰&quot;</span><span class="o">)</span> <span class="c"># 查找同时带有“成龙”和“李连杰”的电影</span>
+</span><span class='line'>irb&gt; Movie.tagged_with_on<span class="o">(</span>:actors, <span class="s2">&quot;古天乐，杨紫琼&quot;</span>, :match <span class="o">=</span>&gt; :any<span class="o">)</span> <span class="c"># 查找“古天乐”或“杨紫琼”的电影</span>
+</span><span class='line'>irb&gt; Movie.tagged_with_on<span class="o">(</span>:actors, <span class="s2">&quot;周杰伦&quot;</span>, :match <span class="o">=</span>&gt; :not<span class="o">)</span> <span class="c"># 查找不是“周杰伦”的电影</span>
 </span></code></pre></td></tr></table></div></figure>
 
 

@@ -78,13 +78,13 @@
 <article class="entry" role="article">
 
   <header>
-    <h1 class="entry_title">Rails 使用Rake + cronjob 创建计划任务</h1>
+    <h1 class="entry_title">Rails 使用 Rake + cronjob 创建计划任务</h1>
     
   </header>
 
   <div class="entry_content"><p>目前我在我的网站首页加上了 Twitter 消息引入功能，之前是饭否的，更新的方式是使用 Rails.cache.write(:expires_in =&gt; 15.<span class="blue12other">minutes</span>) ，但后面发现这个过期没有起作用。而且这个操作方式比较慢，因为是用户在刷新页面的时候如果缓存过期的话，就再次通过 API 去饭否或 Twitter 更新最新的消息。连接到国内的饭否 API 还没什么感觉，本来服务器网速快，但到了 Twitter 上面问题就来了，一个请求要好几秒，而且更新频率要求很高的
 于是想了想换成 计划任务的方案，让系统某某的在后台自动更新 Twitter 消息。
-看了 《<a href="http://railsenvy.com/2007/6/11/ruby-on-rails-rake-tutorial" target="_blank">Ruby on Rails Rake Tutorial (aka. How rake turned me into an alcoholic)</a>》，学习它使用 Rake + Linux 计划任务的方式来操作。</p>
+看了《<a href="http://railsenvy.com/2007/6/11/ruby-on-rails-rake-tutorial" target="_blank">Ruby on Rails Rake Tutorial (aka. How rake turned me into an alcoholic)</a>》，学习它使用 Rake + Linux 计划任务的方式来操作。</p>
 
 <!-- more -->
 
@@ -139,7 +139,7 @@
 
 
 <ul>
-<li>*/15 表示15分钟指行一下 <code>RAILS_ENV=production rake tweet:update</code> 这个任务。</li>
+<li>*/15 表示 15 分钟指行一下 <code>RAILS_ENV=production rake tweet:update</code> 这个任务。</li>
 <li>然后我把 <code>cronjobs</code> 这个文件加入到 Linux root 的 <a href="http://www.aota.net/Script_Installation_Tips/cronhelp.php3">cronjob</a> 里面去，运行：</li>
 </ul>
 
@@ -162,8 +162,8 @@
 
 <ul>
 <li><a href="http://railsenvy.com/2007/6/11/ruby-on-rails-rake-tutorial" target="_blank">Ruby on Rails Rake Tutorial (aka. How rake turned me into an alcoholic)</a></li>
-<li><a href="http://www.linuxfly.org/post/11/" target="_blank">Linux下实行计划任务</a></li>
-<li><a href="http://www.javaeye.com/topic/149342" target="_blank">Javaeye - 关于ROR的定时任务</a> </li>
+<li><a href="http://www.linuxfly.org/post/11/" target="_blank">Linux 下实行计划任务</a></li>
+<li><a href="http://www.javaeye.com/topic/149342" target="_blank">Javaeye - 关于 ROR 的定时任务</a> </li>
 </ul>
 
 </div>

@@ -78,15 +78,15 @@
 <article class="entry" role="article">
 
   <header>
-    <h1 class="entry_title">jQuery插件 jImageLink.js - 模拟yupoo的缩略图上的小图标效果</h1>
+    <h1 class="entry_title">jQuery 插件 jImageLink.js - 模拟 yupoo 的缩略图上的小图标效果</h1>
     
   </header>
 
-  <div class="entry_content"><p>不知道大家有没有见过<a href="http://huacn.yupoo.com/" target="_blank">Yupoo</a>照片列表里面的效果，当鼠标经过照片时会出现一个小图标，点击小图标时，就可以直接查看大图，它使用了<a href="http://www.stickmanlabs.com/lightwindow" target="_blank">Lightwindow</a>这个JS.</p>
+  <div class="entry_content"><p>不知道大家有没有见过<a href="http://huacn.yupoo.com/" target="_blank">Yupoo</a>照片列表里面的效果，当鼠标经过照片时会出现一个小图标，点击小图标时，就可以直接查看大图，它使用了<a href="http://www.stickmanlabs.com/lightwindow" target="_blank">Lightwindow</a>这个 JS.</p>
 
 <p>像这种方式的体现有一个很大的好处就是用户可以点击图片的其它区域进入详细页面，也可以点击小图标，直接查看完整的图片。用户体验有有很大的提高。因为很多情况下，列表中的图片可能会引起用户想看看完整图片，或者说大图片的欲望，如果有这样的一个功能，哪就可以不影响现有功能情况下满足用户的这个&ldquo;欲望&rdquo;。</p>
 
-<p>今天我也弄了一个类似的功能，实现方式基本跟<a href="http://huacn.yupoo.com/" target="_blank">Yupoo</a>的一样，再把它弄也了jQuery插件，方便使用。</p>
+<p>今天我也弄了一个类似的功能，实现方式基本跟<a href="http://huacn.yupoo.com/" target="_blank">Yupoo</a>的一样，再把它弄也了 jQuery 插件，方便使用。</p>
 
 <h2>Yupoo 的效果图：</h2>
 
@@ -115,7 +115,7 @@
 </span><span class='line'><span class="cm">   */</span>
 </span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;a.imgLink&quot;</span><span class="p">).</span><span class="nx">jImageLink</span><span class="p">({</span>
 </span><span class='line'>      <span class="nx">iconClassName</span> <span class="o">:</span> <span class="s2">&quot;linkIcon&quot;</span><span class="p">,</span>        <span class="cm">/* 在这里写“小图标&quot;的样式，包括图片 */</span>
-</span><span class='line'>      <span class="nx">iconRel</span> <span class="o">:</span> <span class="s2">&quot;shadowbox&quot;</span><span class="p">,</span>            <span class="cm">/* 这里是Shadownbox 或 Lightwindow 这类JS用的 rel 属性定义,用过的朋友一定知道 */</span>
+</span><span class='line'>      <span class="nx">iconRel</span> <span class="o">:</span> <span class="s2">&quot;shadowbox&quot;</span><span class="p">,</span>            <span class="cm">/* 这里是 Shadownbox 或 Lightwindow 这类 JS 用的 rel 属性定义，用过的朋友一定知道 */</span>
 </span><span class='line'>      <span class="nx">iconWidth</span> <span class="o">:</span> <span class="mi">14</span><span class="p">,</span>                    <span class="cm">/* 图标宽度 这里会影响小图标的位置，建议输入跟 iconClassName 这个样式里面的图标大小一样 */</span>
 </span><span class='line'>      <span class="nx">iconHeight</span> <span class="o">:</span> <span class="mi">14</span>                    <span class="cm">/* 图标高度 */</span>
 </span><span class='line'>  <span class="p">});</span>

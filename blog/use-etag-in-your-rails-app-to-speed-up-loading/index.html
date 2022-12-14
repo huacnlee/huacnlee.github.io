@@ -97,7 +97,7 @@
 <ol>
 <li>用户访问 /topics/11 页面，<code>TopicsController#show</code> 加载 <code>@topic</code>，并通过 View 生成内容返回</li>
 <li>用户来回访问 10 次 /topics/11，可此页面内容无任何变化</li>
-<li>过了1天以后，<code>@topic</code> 有了新的回复，用户再次访问的时候，内容变了</li>
+<li>过了 1 天以后，<code>@topic</code> 有了新的回复，用户再次访问的时候，内容变了</li>
 </ol>
 
 
@@ -107,7 +107,7 @@
 
 <ol>
 <li>用户访问 /topics/11 页面，<code>TopicsController#show</code> 加载 <code>@topic</code>，并通过 View 生成内容返回，并给出目前内容的 <code>ETag: 89vbsn28716</code></li>
-<li>用户带着 <code>ETag: 89vbsn28716</code> 再次访问 /topics/11 ，服务器检查 ETag 与执行结果，发现无变化，返回 304，浏览器直接使用 Cache 的内容渲染页面</li>
+<li>用户带着 <code>ETag: 89vbsn28716</code> 再次访问 /topics/11，服务器检查 ETag 与执行结果，发现无变化，返回 304，浏览器直接使用 Cache 的内容渲染页面</li>
 <li>过了一天以后，<code>@topic</code> 有了新回复，用户再次带着 <code>ETag: 89vbsn28716</code> /topics/11，服务器检查 ETag 发现不对了，生成新内容，并返回 200</li>
 </ol>
 
@@ -159,7 +159,7 @@
 
 <p>以上这些东西都是需要影响页面更新的。</p>
 
-<p>实际上我们只需要将 <code>fresh_when</code> 方法在 <code>ApplicationController</code> 里面覆盖一下，把页面上需要调用而影响结果的东西加入到 <code>fresh_when</code> 的 <code>:etag</code> 参数里面就好了:</p>
+<p>实际上我们只需要将 <code>fresh_when</code> 方法在 <code>ApplicationController</code> 里面覆盖一下，把页面上需要调用而影响结果的东西加入到 <code>fresh_when</code> 的 <code>:etag</code> 参数里面就好了：</p>
 
 <p>application_controller.rb:</p>
 

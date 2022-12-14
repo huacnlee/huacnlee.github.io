@@ -78,15 +78,15 @@
 <article class="entry" role="article">
 
   <header>
-    <h1 class="entry_title">完美兼容FF与IE的列表写法</h1>
+    <h1 class="entry_title">完美兼容 FF 与 IE 的列表写法</h1>
     
   </header>
 
-  <div class="entry_content"><p>前几天朋友一直在搞这个列表的样式与兼容问题,有序列表可能是初学者最烦的问题,做出来总是不哪么顺心,今天我这里发一个我的写法,以下这些在Firefox IE7 IE6这三种浏览器下都完美兼容,没有一点差距,可以看一下CSS的写法.<br />重点是CSS里面我标注红色哪一段,其实就是Display:block这个东西,只要应用好了,就很少出现兼容性的问题.</p>
+  <div class="entry_content"><p>前几天朋友一直在搞这个列表的样式与兼容问题，有序列表可能是初学者最烦的问题，做出来总是不哪么顺心，今天我这里发一个我的写法，以下这些在 Firefox IE7 IE6 这三种浏览器下都完美兼容，没有一点差距，可以看一下 CSS 的写法。<br />重点是 CSS 里面我标注红色哪一段，其实就是 Display:block 这个东西，只要应用好了，就很少出现兼容性的问题。</p>
 
-<p>还有一点很重要,FF的UL与IE下的ul的margin值是不同的,所以,如果你不给ul设定margin的值的话,哪两个浏览器就会有出入,所以最好的办法就是给ul的margin写上值就没有问题了.</p>
+<p>还有一点很重要，FF 的 UL 与 IE 下的 ul 的 margin 值是不同的，所以，如果你不给 ul 设定 margin 的值的话，哪两个浏览器就会有出入，所以最好的办法就是给 ul 的 margin 写上值就没有问题了。</p>
 
-<h3>HTML代码:</h3>
+<h3>HTML 代码：</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -103,19 +103,19 @@
 </pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;div&gt;</span>
 </span><span class='line'>  <span class="nt">&lt;ul&gt;</span>
 </span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>全美各媒体测试报告倾巢出动<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>非美国公民无缘iPhone<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>讨论:报纸还能活多久<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>[图]江民KV系列26日升级后出现系统崩溃问题<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>iPhone将能与微软Exchange Server互联<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>iPhone将能与微软Exchange Server互联<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>iPhone将能与微软Exchange Server互联<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>iPhone将能与微软Exchange Server互联<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>非美国公民无缘 iPhone<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>讨论：报纸还能活多久<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>[图] 江民 KV 系列 26 日升级后出现系统崩溃问题<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>iPhone 将能与微软 Exchange Server 互联<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>iPhone 将能与微软 Exchange Server 互联<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>iPhone 将能与微软 Exchange Server 互联<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">”#”</span><span class="nt">&gt;</span>iPhone 将能与微软 Exchange Server 互联<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
 </span><span class='line'>  <span class="nt">&lt;/ul&gt;</span>
 </span><span class='line'><span class="nt">&lt;/div&gt;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>CSS代码:</h3>
+<h3>CSS 代码：</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -204,7 +204,7 @@
 
 <p><img src="http://www.cnblogs.com/images/cnblogs_com/huacn/Ul_Li_listStyle_WebStand.PNG" border="0" /></p>
 
-<p>演示地址: <a href="http://www.wathon.com/opensource/xhtml/liststyle.html" target="_blank">http://www.wathon.com/opensource/xhtml/liststyle.html</a></p>
+<p>演示地址：<a href="http://www.wathon.com/opensource/xhtml/liststyle.html" target="_blank">http://www.wathon.com/opensource/xhtml/liststyle.html</a></p>
 </div>
 
   <footer>
@@ -218,7 +218,7 @@
 
       
       <span class="categories">
-	<a class='category' href='/blog/category/css/'>CSS</a>, <a class='category' href='/blog/category/web标准/'>Web标准</a>, <a class='category' href='/blog/category/前端/'>前端</a>
+	<a class='category' href='/blog/category/css/'>CSS</a>, <a class='category' href='/blog/category/web标准/'>Web 标准</a>, <a class='category' href='/blog/category/前端/'>前端</a>
       </span>
       
 

@@ -161,7 +161,7 @@
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 1.先安装 ImageMagick: http://www.imagemagick.org/script/binary-releases.php#windows</span>
 </span><span class='line'><span class="c1"># 2.创建 initializers 文件：config/initializers/paperclip.rb 存入下面的代码</span>
 </span><span class='line'><span class="c1"># 3.重启 webserver</span>
-</span><span class='line'><span class="c1"># 设置 command_path ，请将 c:/program files/imagemagick-6.5.5-Q16 改为你的 ImageMagick 的安装目录</span>
+</span><span class='line'><span class="c1"># 设置 command_path，请将 c:/program files/imagemagick-6.5.5-Q16 改为你的 ImageMagick 的安装目录</span>
 </span><span class='line'><span class="no">Paperclip</span><span class="o">.</span><span class="n">options</span><span class="o">[</span><span class="ss">:command_path</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;c:/program files/imagemagick-6.5.5-Q16&quot;</span>
 </span><span class='line'><span class="no">Paperclip</span><span class="o">.</span><span class="n">options</span><span class="o">[</span><span class="ss">:swallow_stderr</span><span class="o">]</span> <span class="o">=</span> <span class="kp">false</span>
 </span><span class='line'>
@@ -208,7 +208,7 @@
 <span class='line-number'>27</span>
 <span class='line-number'>28</span>
 <span class='line-number'>29</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 扩展 Paperclip 加入hash目录参数 :hashed_path</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 扩展 Paperclip 加入 hash 目录参数 :hashed_path</span>
 </span><span class='line'><span class="c1"># 建立 config/initializers/paperclip_extensions.rb</span>
 </span><span class='line'><span class="no">Paperclip</span><span class="o">::</span><span class="no">Attachment</span><span class="o">.</span><span class="n">interpolations</span><span class="o">[</span><span class="ss">:hashed_path</span><span class="o">]</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="k">do</span> <span class="o">|</span><span class="n">attachment</span><span class="p">,</span> <span class="n">style</span><span class="o">|</span>
 </span><span class='line'>  <span class="nb">hash</span> <span class="o">=</span> <span class="no">Digest</span><span class="o">::</span><span class="no">MD5</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="n">attachment</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">to_s</span><span class="p">)</span>
@@ -243,9 +243,9 @@
 <h3>相关文章：</h3>
 
 <ul>
-<li><a href="http://www.xuli.info/2009/09/01/paperclip%E8%AF%BB%E5%8F%96%E9%BB%98%E8%AE%A4%E5%9B%BE%E7%89%87/" target="_blank">Paperclip读取默认图片</a></li>
-<li><a href="http://www.xuli.info/2009/09/01/%E8%A7%A3%E5%86%B3%E7%94%A8paperclip%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6%E6%97%B6%E5%87%BA%E7%8E%B0%E7%9A%84%E9%97%AE%E9%A2%98/" target="_blank">解决用Paperclip上传文件时出现的问题</a></li>
-<li><a href="http://www.xuli.info/2009/08/29/%E7%94%A8paperclip%E7%BC%A9%E7%95%A5%E8%BF%9C%E7%A8%8B%E5%9B%BE%E7%89%87/" target="_blank">用Paperclip缩略远程图片</a></li>
+<li><a href="http://www.xuli.info/2009/09/01/paperclip%E8%AF%BB%E5%8F%96%E9%BB%98%E8%AE%A4%E5%9B%BE%E7%89%87/" target="_blank">Paperclip 读取默认图片</a></li>
+<li><a href="http://www.xuli.info/2009/09/01/%E8%A7%A3%E5%86%B3%E7%94%A8paperclip%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6%E6%97%B6%E5%87%BA%E7%8E%B0%E7%9A%84%E9%97%AE%E9%A2%98/" target="_blank">解决用 Paperclip 上传文件时出现的问题</a></li>
+<li><a href="http://www.xuli.info/2009/08/29/%E7%94%A8paperclip%E7%BC%A9%E7%95%A5%E8%BF%9C%E7%A8%8B%E5%9B%BE%E7%89%87/" target="_blank">用 Paperclip 缩略远程图片</a></li>
 </ul>
 
 </div>

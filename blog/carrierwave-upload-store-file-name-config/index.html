@@ -166,7 +166,7 @@
 </span><span class='line'>  <span class="k">def</span> <span class="nf">filename</span>
 </span><span class='line'>    <span class="k">if</span> <span class="n">original_filename</span>
 </span><span class='line'>      <span class="c1"># current_path 是 Carrierwave 上传过程临时创建的一个文件，有时间标记</span>
-</span><span class='line'>      <span class="c1"># 例如: /Users/jason/work/ruby-china/public/uploads/tmp/20131105-1057-46664-5614/_____2013-11-05___10.37.50.png</span>
+</span><span class='line'>      <span class="c1"># 例如：/Users/jason/work/ruby-china/public/uploads/tmp/20131105-1057-46664-5614/_____2013-11-05___10.37.50.png</span>
 </span><span class='line'>      <span class="vi">@name</span> <span class="o">||=</span> <span class="no">Digest</span><span class="o">::</span><span class="no">MD5</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="n">current_path</span><span class="p">)</span>
 </span><span class='line'>      <span class="s2">&quot;</span><span class="si">#{</span><span class="vi">@name</span><span class="si">}</span><span class="s2">.</span><span class="si">#{</span><span class="n">file</span><span class="o">.</span><span class="n">extension</span><span class="si">}</span><span class="s2">&quot;</span>
 </span><span class='line'>    <span class="k">end</span>
@@ -175,7 +175,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>这么做的原因:</h2>
+<h2>这么做的原因：</h2>
 
 <ul>
 <li>carrent_path 的算法 <code>Time.now.utc.to_i.to_s + '-' + Process.pid.to_s + '-' + ("%04d" % rand(9999)) + 原始文件名</code>，所以理论上重复的概率非常低，外加上一般上传并不会有那种瞬间并发出现的场景，<a href="https://github.com/carrierwaveuploader/carrierwave/blob/0d6864a84dbed16ef0ed149f332fa3b9f9bd35eb/lib/carrierwave/uploader/cache.rb#L18">来源</a></li>

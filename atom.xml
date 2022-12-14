@@ -2118,7 +2118,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 <p>同时 <a href="http://github.com/huacnlee/personlab" target="_blank">Personlab</a> 的代码也跟着更新了，新版本将会去掉之前的评论，验证码，等相关的功能，同时 Comments 表的数据也会同时删除掉。一下子干净了很多。</p>
 
 
-<p>也顺便将独立页面编辑的格式化换成了 Markdown， Textile 写起来有点别扭，还是 Markdown 的好记些。</p>
+<p>也顺便将独立页面编辑的格式化换成了 Markdown，Textile 写起来有点别扭，还是 Markdown 的好记些。</p>
 
 
 <p>&nbsp;</p>

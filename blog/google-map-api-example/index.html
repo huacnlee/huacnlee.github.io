@@ -78,15 +78,15 @@
 <article class="entry" role="article">
 
   <header>
-    <h1 class="entry_title">Google Map API应用例子源代码(已修正)</h1>
+    <h1 class="entry_title">Google Map API 应用例子源代码 (已修正)</h1>
     
   </header>
 
-  <div class="entry_content"><p>最近项目需要做一个地图的功能，上面要加上一些地标，以方便用户使用，所以今天花时间看了看Google API搞了好一会儿，终于做到满足自已的功能要求了，发布出来给需要的朋友看看。</p>
+  <div class="entry_content"><p>最近项目需要做一个地图的功能，上面要加上一些地标，以方便用户使用，所以今天花时间看了看 Google API 搞了好一会儿，终于做到满足自已的功能要求了，发布出来给需要的朋友看看。</p>
 
-<p>其实GoogleMap API还是比较好用的，慢慢看GoogleMap API的帮助都可以做出来，我这里主要介绍的是怎么将地标存放起来，再读出来。不然只是一个地图在哪儿没有什么意义。</p>
+<p>其实 GoogleMap API 还是比较好用的，慢慢看 GoogleMap API 的帮助都可以做出来，我这里主要介绍的是怎么将地标存放起来，再读出来。不然只是一个地图在哪儿没有什么意义。</p>
 
-<p>我这里是用XML来存放的，存下来的数据还是比较简单，你可以根据自已的需要做一些修改就可以了，也可以换成数据库来存放。</p>
+<p>我这里是用 XML 来存放的，存下来的数据还是比较简单，你可以根据自已的需要做一些修改就可以了，也可以换成数据库来存放。</p>
 
 <h3>Jquery.GoogleMap.js 源代码内容</h3>
 
@@ -177,15 +177,15 @@
 <span class='line-number'>85</span>
 <span class='line-number'>86</span>
 </pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="cm">/*</span>
-</span><span class='line'><span class="cm">– GoogleMap操作类</span>
-</span><span class='line'><span class="cm">– 作者:李华顺</span>
+</span><span class='line'><span class="cm">– GoogleMap 操作类</span>
+</span><span class='line'><span class="cm">– 作者：李华顺</span>
 </span><span class='line'><span class="cm">– 官方网站：http://www.wathon.com</span>
 </span><span class='line'><span class="cm">– 我的博客：http://huacn.cnblogs.com</span>
 </span><span class='line'><span class="cm">– 演示地址：http://www.wathon.com/opensource/js/GoogleMap/Default.aspx</span>
 </span><span class='line'><span class="cm">– 使用请保存署名</span>
 </span><span class='line'><span class="cm">*/</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">//创建GoogleMap</span>
+</span><span class='line'><span class="c1">//创建 GoogleMap</span>
 </span><span class='line'><span class="c1">//panelMap - 显示地图的对象区域</span>
 </span><span class='line'><span class="c1">//showScale - 是否显示改变大小的控件 true false</span>
 </span><span class='line'><span class="c1">//showLargeControl - 是否显示切换控件  true false</span>
@@ -240,7 +240,7 @@
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
 </span><span class='line'>
-</span><span class='line'><span class="c1">//在指定坐标上显示tip提示</span>
+</span><span class='line'><span class="c1">//在指定坐标上显示 tip 提示</span>
 </span><span class='line'><span class="kd">var</span> <span class="nx">GoogleMapShowTip</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">myMap</span><span class="p">,</span><span class="nx">point</span><span class="p">,</span><span class="nx">text</span><span class="p">){</span>
 </span><span class='line'>    <span class="nx">myMap</span><span class="p">.</span><span class="nx">openInfoWindow</span><span class="p">(</span><span class="nx">point</span><span class="p">,</span><span class="nb">document</span><span class="p">.</span><span class="nx">createTextNode</span><span class="p">(</span><span class="nx">text</span><span class="p">));</span>
 </span><span class='line'><span class="p">};</span>
@@ -253,12 +253,12 @@
 </span><span class='line'>    <span class="k">return</span> <span class="nx">marker</span><span class="p">;</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">//根据坐标点取得X坐标</span>
+</span><span class='line'><span class="c1">//根据坐标点取得 X 坐标</span>
 </span><span class='line'><span class="kd">var</span> <span class="nx">GoogleMapPointX</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">point</span><span class="p">){</span>
 </span><span class='line'>    <span class="k">return</span> <span class="nx">point</span><span class="p">.</span><span class="nx">lat</span><span class="p">();</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">//根据坐标点取得Y坐标</span>
+</span><span class='line'><span class="c1">//根据坐标点取得 Y 坐标</span>
 </span><span class='line'><span class="kd">var</span> <span class="nx">GoogleMapPointY</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">point</span><span class="p">){</span>
 </span><span class='line'>    <span class="k">return</span> <span class="nx">point</span><span class="p">.</span><span class="nx">lng</span><span class="p">();</span>
 </span><span class='line'><span class="p">};</span>
@@ -410,8 +410,8 @@
 <span class='line-number'>141</span>
 <span class='line-number'>142</span>
 </pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="cm">/*</span>
-</span><span class='line'><span class="cm">– GoogleMap操作类</span>
-</span><span class='line'><span class="cm">– 作者:李华顺</span>
+</span><span class='line'><span class="cm">– GoogleMap 操作类</span>
+</span><span class='line'><span class="cm">– 作者：李华顺</span>
 </span><span class='line'><span class="cm">– 官方网站：http://www.wathon.com</span>
 </span><span class='line'><span class="cm">– 我的博客：http://huacn.cnblogs.com</span>
 </span><span class='line'><span class="cm">– 演示地址：http://www.wathon.com/opensource/js/GoogleMap/Default.aspx</span>
@@ -533,7 +533,7 @@
 </span><span class='line'>        <span class="c1">///</span>
 </span><span class='line'>        <span class="c1">/// 取得旧的列表</span>
 </span><span class='line'>        <span class="c1">/// name,area</span>
-</span><span class='line'>        <span class="c1">/// 地标名,坐标</span>
+</span><span class='line'>        <span class="c1">/// 地标名，坐标</span>
 </span><span class='line'>        <span class="c1">///</span>
 </span><span class='line'>        <span class="c1">///</span>
 </span><span class='line'>        <span class="k">public</span> <span class="n">System</span><span class="p">.</span><span class="n">Xml</span><span class="p">.</span><span class="n">XmlNodeList</span> <span class="n">GetAreaList</span><span class="p">()</span>
@@ -554,7 +554,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>HTML部分的源代码内容</h3>
+<h3>HTML 部分的源代码内容</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -625,7 +625,7 @@
 <span class='line-number'>67</span>
 </pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;html</span> <span class="na">xmlns=</span><span class="s">&quot;http://www.w3.org/1999/xhtml&quot;</span> <span class="nt">&gt;</span>
 </span><span class='line'><span class="nt">&lt;head</span> <span class="na">runat=</span><span class="s">&quot;server&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;title&gt;</span>GoogleMap例子<span class="nt">&lt;/title&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;title&gt;</span>GoogleMap 例子<span class="nt">&lt;/title&gt;</span>
 </span><span class='line'>  <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src=</span><span class="s">&quot;scripts/jquery.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
 </span><span class='line'>  <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src=</span><span class="s">&quot;scripts/jquery.interface.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
 </span><span class='line'>  <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src=</span><span class="s">&quot;scripts/jquery.xml.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
@@ -653,7 +653,7 @@
 </span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
 </span><span class='line'>    <span class="nx">myMap</span> <span class="o">=</span> <span class="nx">GoogleMapCreate</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">&quot;panelMap&quot;</span><span class="p">),</span><span class="kc">true</span><span class="p">,</span><span class="kc">true</span><span class="p">,</span><span class="kc">true</span><span class="p">,</span><span class="kc">true</span><span class="p">,</span><span class="nx">zoomSize</span><span class="p">);</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="c1">//给“添加&quot;按钮的click放入事件</span>
+</span><span class='line'>    <span class="c1">//给“添加&quot;按钮的 click 放入事件</span>
 </span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="err">’#</span><span class="nx">lblAddArea</span><span class="err">’</span><span class="p">).</span><span class="nx">click</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
 </span><span class='line'>      <span class="c1">//$(’div#info’).show(’slow’);</span>
 </span><span class='line'>      <span class="nx">GoogleMapAddEvent</span><span class="p">(</span><span class="nx">myMap</span><span class="p">,</span> <span class="s2">&quot;click&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">marker</span><span class="p">,</span> <span class="nx">point</span><span class="p">)</span> <span class="p">{</span>

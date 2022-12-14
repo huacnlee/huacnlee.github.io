@@ -79,7 +79,7 @@
 <article class="entry" role="article">
 
   <header>
-    <h1 class="entry_title">Linux 定时自动备份MySQL与网站并发送邮件</h1>
+    <h1 class="entry_title">Linux 定时自动备份 MySQL 与网站并发送邮件</h1>
     
   </header>
 
@@ -106,13 +106,13 @@
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># -uroot(root是用户名 -u与root之间没空格) -p123123 (123123是密码 -p与123123之间没空格)</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># -uroot(root 是用户名 -u 与 root 之间没空格) -p123123 (123123 是密码 -p 与 123123 之间没空格)</span>
 </span><span class='line'><span class="nv">$ </span>mysqldump -uroot -p123123 --databases pasite &gt; <span class="nv">$BACKUP_PATH</span>/pasite.sql
 </span></code></pre></td></tr></table></div></figure>
 
 
 <ul>
-<li>打包压缩网站和数据库的SQL文件：</li>
+<li>打包压缩网站和数据库的 SQL 文件：</li>
 </ul>
 
 
@@ -122,7 +122,7 @@
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># 1.将刚才到处的MySQL文件压缩，以节省邮箱空间</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># 1.将刚才到处的 MySQL 文件压缩，以节省邮箱空间</span>
 </span><span class='line'>tar zcf <span class="nv">$BACKUP_PATH</span>/pasite_db_<span class="nv">$DATE_NAME</span>.tar.gz <span class="nv">$backup_path</span>/pasite.sql
 </span><span class='line'>tar zcf <span class="nv">$BACKUP_PATH</span>/personlab_db_<span class="nv">$DATE_NAME</span>.tar.gz <span class="nv">$backup_path</span>/personlab.sql
 </span><span class='line'><span class="c"># 2.打包压缩网站</span>
@@ -149,7 +149,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>完整的Shell脚本：</h3>
+<h3>完整的 Shell 脚本：</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -180,7 +180,7 @@
 <span class='line-number'>27</span>
 <span class='line-number'>28</span>
 </pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/bin/sh</span>
-</span><span class='line'><span class="c"># Linux 自动备份 MySQL与网站并发邮件到自已邮箱</span>
+</span><span class='line'><span class="c"># Linux 自动备份 MySQL 与网站并发邮件到自已邮箱</span>
 </span><span class='line'><span class="c"># 定义临时目录</span>
 </span><span class='line'><span class="nv">BACKUP_PATH</span><span class="o">=</span>/tmp/autobackups
 </span><span class='line'><span class="c"># 定义日期字符串</span>
@@ -189,10 +189,10 @@
 </span><span class='line'>mkdir <span class="nv">$BACKUP_PATH</span>
 </span><span class='line'>
 </span><span class='line'><span class="c"># 打包文件</span>
-</span><span class='line'><span class="c"># 1.完整备份 MySQL -uroot(root是用户名 -u与root之间没空格) -p123123 (123123是密码 -p与123123之间没空格)</span>
+</span><span class='line'><span class="c"># 1.完整备份 MySQL -uroot(root 是用户名 -u 与 root 之间没空格) -p123123 (123123 是密码 -p 与 123123 之间没空格)</span>
 </span><span class='line'>mysqldump -uroot -p123123 --databases pasite &gt; <span class="nv">$BACKUP_PATH</span>/pasite.sql
 </span><span class='line'>mysqldump -uroot -p123123 --databases personlab_production &gt; <span class="nv">$BACKUP_PATH</span>/personlab.sql
-</span><span class='line'><span class="c"># 2.将刚才到处的MySQL文件压缩，以节省邮箱空间</span>
+</span><span class='line'><span class="c"># 2.将刚才到处的 MySQL 文件压缩，以节省邮箱空间</span>
 </span><span class='line'>tar zcf <span class="nv">$BACKUP_PATH</span>/pasite_db_<span class="nv">$DATE_NAME</span>.tar.gz <span class="nv">$backup_path</span>/pasite.sql
 </span><span class='line'>tar zcf <span class="nv">$BACKUP_PATH</span>/personlab_db_<span class="nv">$DATE_NAME</span>.tar.gz <span class="nv">$backup_path</span>/personlab.sql
 </span><span class='line'><span class="c"># 3.打包压缩网站</span>
@@ -211,14 +211,14 @@
 
 
 <p>接下来创建 Linux Cron 任务，让系统定时执行上面这个 shell 脚本：
-使用命令 <code>sudo crontab -e</code> 并加入下面的代码:</p>
+使用命令 <code>sudo crontab -e</code> 并加入下面的代码：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='bash'><span class='line'>32 3 * * * <span class="nb">cd</span> /home/huacnlee/wwwroot/ &amp;amp;&amp;amp; sh auto_backup.sh
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>关于 crontab 的介绍请移步看《<a href="http://huacnlee.com/blog/create-rails-task-scheduler-by-rake-and-cronjob" target="_blank">Rails 使用Rake + cronjob 创建计划任务 </a>》里面的介绍，我这里设置的是每天凌成3点32分开始执行，当然上面的shell脚本是保存在 <code>/home/huacnlee/wwwroot/auto_backup.sh</code> 这儿的。</p>
+<p>关于 crontab 的介绍请移步看《<a href="http://huacnlee.com/blog/create-rails-task-scheduler-by-rake-and-cronjob" target="_blank">Rails 使用 Rake + cronjob 创建计划任务 </a>》里面的介绍，我这里设置的是每天凌成 3 点 32 分开始执行，当然上面的 shell 脚本是保存在 <code>/home/huacnlee/wwwroot/auto_backup.sh</code> 这儿的。</p>
 </div>
 
   <footer>

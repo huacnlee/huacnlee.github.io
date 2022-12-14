@@ -86,13 +86,13 @@
 
 <p>在淘宝系里面有个苦恼的事情，全公司的前端都主要使用 <a href="https://github.com/kissyteam/kissy">Kissy</a> 这个前端框架。我一直觉得这个东西使用起来过于复杂，不喜欢用。</p>
 
-<h3>据我了解:</h3>
+<h3>据我了解：</h3>
 
 <blockquote><p>Kissy 实际上是从 jQuery (API or 源代码？我不确定) 衍生过来的，很多功能都非常相似，而 Kissy 在 jQuery 这种功能的基础上实现了很多正对淘宝项目情况的功能扩充。</p></blockquote>
 
 <p>但是我觉得 Kissy 没有把 jQuery 精简好用的优点保留下来，反而整出了非常奇怪的 API 命名和调用方式</p>
 
-<h3>比如下面这些方法:</h3>
+<h3>比如下面这些方法：</h3>
 
 <ul>
 <li>KISSY - 全大写的类名;</li>
@@ -120,7 +120,7 @@
 
 <p>这个过程还好有使用 Kissy 很久的 <a href="http://github.com/cricy">同事</a> 帮忙解释 Kissy 的使用问题…(说到这里我又不得不吐槽 Kissy 文档太差，就是看不懂…)</p>
 
-<p>总归，到最后， kissy-rails 还是实现了，用起来和 jquery-rails 差不多，也就是把之前 jquery 的地方换成 kissy:</p>
+<p>总归，到最后，kissy-rails 还是实现了，用起来和 jquery-rails 差不多，也就是把之前 jquery 的地方换成 kissy:</p>
 
 <p>Gemfile</p>
 
@@ -138,7 +138,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>然后 Rails Helper 里面提供的 Ajax 支持就能用 Kissy 的 API 来实现了，比如:</p>
+<p>然后 Rails Helper 里面提供的 Ajax 支持就能用 Kissy 的 API 来实现了，比如：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>

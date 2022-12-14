@@ -78,23 +78,23 @@
 <article class="entry" role="article">
 
   <header>
-    <h1 class="entry_title">缓存方式扩展，缓存Tag(命名空间)的实现</h1>
+    <h1 class="entry_title">缓存方式扩展，缓存 Tag(命名空间) 的实现</h1>
     
   </header>
 
-  <div class="entry_content"><p>用过 <a href="http://www.rubyonrails.org" target="_blank">Ruby on Rails</a> 以后，从里面学到了很多很不错的应用，如《<a href="http://huacn.blogbus.com/logs/38925062.html" target="_blank">在Asp.net中实现类似Rails的 Flash[:notice] 的功能</a>》，这里我实现<strong>缓存标签</strong>（也可以叫<strong>缓存命名空间</strong>）。</p>
+  <div class="entry_content"><p>用过 <a href="http://www.rubyonrails.org" target="_blank">Ruby on Rails</a> 以后，从里面学到了很多很不错的应用，如《<a href="http://huacn.blogbus.com/logs/38925062.html" target="_blank">在 Asp.net 中实现类似 Rails 的 Flash[:notice] 的功能</a>》，这里我实现<strong>缓存标签</strong>（也可以叫<strong>缓存命名空间</strong>）。</p>
 
 
 <p>我们经常会遇到需要<span style="color: #ff6600;">批量删除某一类</span>的缓存，如 <span style="color: #008080;"><span style="font-size: 12px;">posts/p/1,posts/p/2,posts/p/3</span></span> 这几个 CacheKey 都是属于文章列表的，我们想通过 posts 来删除所有页的缓存，这个就是简单的 Get Set Delete 这类的功能操作的了。</p>
 
 
-<p>在 <a href="http://www.rubyonrails.org" target="_blank">Ruby on Rails</a> 里面，缓存可以用 <span style="color: #008080;"><span style="font-size: 12px;">posts/p/*</span></span> (正则的方式) 来删除一系列的缓存，我这里没有做那么复杂，只是简单的实现给Caches加标签，分类，在按照分类来删除一些列缓存。</p>
+<p>在 <a href="http://www.rubyonrails.org" target="_blank">Ruby on Rails</a> 里面，缓存可以用 <span style="color: #008080;"><span style="font-size: 12px;">posts/p/*</span></span> (正则的方式) 来删除一系列的缓存，我这里没有做那么复杂，只是简单的实现给 Caches 加标签，分类，在按照分类来删除一些列缓存。</p>
 
 
-<p>我这里是模仿的 <a href="http://www.djangoproject.com" target="_blank">Django</a> 的一个实现，看这个地址 《<a href="http://stepsandnumbers.com/archive/2009/04/11/setting-and-delete-cache-in-django-with-tags/" target="_blank">Setting and deleting cache in Django with tags</a>》，这个的实现方式我整理了一下，做到了 <a href="http://code.google.com/p/pulog" target="_blank">Pulog</a> 里面，代码在<a href="http://code.google.com/p/pulog/source/browse/trunk/imtx/utils/caches.py?spec=svn234&amp;r=233" target="_blank">这里</a>。</p>
+<p>我这里是模仿的 <a href="http://www.djangoproject.com" target="_blank">Django</a> 的一个实现，看这个地址《<a href="http://stepsandnumbers.com/archive/2009/04/11/setting-and-delete-cache-in-django-with-tags/" target="_blank">Setting and deleting cache in Django with tags</a>》，这个的实现方式我整理了一下，做到了 <a href="http://code.google.com/p/pulog" target="_blank">Pulog</a> 里面，代码在<a href="http://code.google.com/p/pulog/source/browse/trunk/imtx/utils/caches.py?spec=svn234&amp;r=233" target="_blank">这里</a>。</p>
 
 
-<p>看看我在.NET里面的实现</p>
+<p>看看我在.NET 里面的实现</p>
 
 
 <h3>Caches 类源代码</h3>
@@ -229,10 +229,10 @@
 <span class='line-number'>128</span>
 <span class='line-number'>129</span>
 </pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="cm">/*</span>
-</span><span class='line'><span class="cm"> * Cache 接口，实现tag功能，key前缀</span>
+</span><span class='line'><span class="cm"> * Cache 接口，实现 tag 功能，key 前缀</span>
 </span><span class='line'><span class="cm"> * Logs,Memcached 在这里没有公开，只是一些具体的实现，你可以根据已经情况实现一下</span>
-</span><span class='line'><span class="cm"> * Logs.Debug 表示写debug日志</span>
-</span><span class='line'><span class="cm"> * Memcached 里面的Get,Set,Remove也需要自已实现</span>
+</span><span class='line'><span class="cm"> * Logs.Debug 表示写 debug 日志</span>
+</span><span class='line'><span class="cm"> * Memcached 里面的 Get,Set,Remove 也需要自已实现</span>
 </span><span class='line'><span class="cm"> */</span>
 </span><span class='line'><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
 </span><span class='line'><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
@@ -282,7 +282,7 @@
 </span><span class='line'>    <span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="c1">///</span>
-</span><span class='line'>    <span class="c1">/// 存缓存，带Tag，用于做类似命名空间的管理</span>
+</span><span class='line'>    <span class="c1">/// 存缓存，带 Tag，用于做类似命名空间的管理</span>
 </span><span class='line'>    <span class="c1">///</span>
 </span><span class='line'>    <span class="c1">///</span>
 </span><span class='line'>    <span class="c1">///</span>
@@ -374,20 +374,20 @@
 <span class='line-number'>10</span>
 <span class='line-number'>11</span>
 </pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="c1">//写缓存</span>
-</span><span class='line'><span class="n">Caches</span><span class="p">.</span><span class="n">Set</span><span class="p">(</span><span class="s">&quot;posts/p/1&quot;</span><span class="p">,</span><span class="n">posts</span><span class="p">,</span><span class="k">new</span> <span class="kt">string</span><span class="p">[]{</span> <span class="s">&quot;posts&quot;</span> <span class="p">});</span>  <span class="c1">//第1页 写缓存</span>
-</span><span class='line'><span class="n">Caches</span><span class="p">.</span><span class="n">Set</span><span class="p">(</span><span class="s">&quot;posts/p/2&quot;</span><span class="p">,</span><span class="n">posts</span><span class="p">,</span><span class="k">new</span> <span class="kt">string</span><span class="p">[]{</span> <span class="s">&quot;posts&quot;</span> <span class="p">});</span>  <span class="c1">//第2页 写缓存</span>
-</span><span class='line'><span class="n">Caches</span><span class="p">.</span><span class="n">Set</span><span class="p">(</span><span class="s">&quot;posts/p/3&quot;</span><span class="p">,</span><span class="n">posts</span><span class="p">,</span><span class="k">new</span> <span class="kt">string</span><span class="p">[]{</span> <span class="s">&quot;posts&quot;</span> <span class="p">});</span>  <span class="c1">//第3页 写缓存</span>
+</span><span class='line'><span class="n">Caches</span><span class="p">.</span><span class="n">Set</span><span class="p">(</span><span class="s">&quot;posts/p/1&quot;</span><span class="p">,</span><span class="n">posts</span><span class="p">,</span><span class="k">new</span> <span class="kt">string</span><span class="p">[]{</span> <span class="s">&quot;posts&quot;</span> <span class="p">});</span>  <span class="c1">//第 1 页 写缓存</span>
+</span><span class='line'><span class="n">Caches</span><span class="p">.</span><span class="n">Set</span><span class="p">(</span><span class="s">&quot;posts/p/2&quot;</span><span class="p">,</span><span class="n">posts</span><span class="p">,</span><span class="k">new</span> <span class="kt">string</span><span class="p">[]{</span> <span class="s">&quot;posts&quot;</span> <span class="p">});</span>  <span class="c1">//第 2 页 写缓存</span>
+</span><span class='line'><span class="n">Caches</span><span class="p">.</span><span class="n">Set</span><span class="p">(</span><span class="s">&quot;posts/p/3&quot;</span><span class="p">,</span><span class="n">posts</span><span class="p">,</span><span class="k">new</span> <span class="kt">string</span><span class="p">[]{</span> <span class="s">&quot;posts&quot;</span> <span class="p">});</span>  <span class="c1">//第 3 页 写缓存</span>
 </span><span class='line'>
 </span><span class='line'>
 </span><span class='line'><span class="c1">//取</span>
-</span><span class='line'><span class="n">Caches</span><span class="p">.</span><span class="n">Get</span><span class="p">(</span><span class="s">&quot;posts/p/1&quot;</span><span class="p">);</span> <span class="c1">//取 第1页</span>
+</span><span class='line'><span class="n">Caches</span><span class="p">.</span><span class="n">Get</span><span class="p">(</span><span class="s">&quot;posts/p/1&quot;</span><span class="p">);</span> <span class="c1">//取 第 1 页</span>
 </span><span class='line'>
 </span><span class='line'><span class="c1">//删除所有页</span>
 </span><span class='line'><span class="n">Caches</span><span class="p">.</span><span class="n">RemoveByTags</span><span class="p">(</span><span class="k">new</span> <span class="kt">string</span><span class="p">[]{</span><span class="s">&quot;posts&quot;</span><span class="p">});</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>这个Tag也就类似博客系统的Tag功能，给Cache设定1个或多个Tag，删除的时候就可以根据Tag删除Tag下面所有 CacheKey的缓存。</p>
+<p>这个 Tag 也就类似博客系统的 Tag 功能，给 Cache 设定 1 个或多个 Tag，删除的时候就可以根据 Tag 删除 Tag 下面所有 CacheKey 的缓存。</p>
 </div>
 
   <footer>

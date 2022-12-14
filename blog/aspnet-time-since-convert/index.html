@@ -89,9 +89,9 @@
     
   </header>
 
-  <div class="entry_content"><p>目前 Web 2.0 的网站上很流行以：2秒前、3天前、1月前 这样的方式来显示一条消息的时间，这种做法想 <a href="http://twitter.com" target="_blank">Twitter</a>、<a href="http://fanfou.com" target="_blank">饭否</a>&#8230;等网站都在使用，用在即时性高的文章或消息上面。</p>
+  <div class="entry_content"><p>目前 Web 2.0 的网站上很流行以：2 秒前、3 天前、1 月前 这样的方式来显示一条消息的时间，这种做法想 <a href="http://twitter.com" target="_blank">Twitter</a>、<a href="http://fanfou.com" target="_blank">饭否</a>&#8230;等网站都在使用，用在即时性高的文章或消息上面。</p>
 
-<p>我这里写了一个 C# 的实现方式:</p>
+<p>我这里写了一个 C# 的实现方式：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -211,17 +211,17 @@
 </span><span class='line'>
 </span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalSeconds</span> <span class="p">&lt;=</span> <span class="m">30</span><span class="p">)</span>
 </span><span class='line'>        <span class="p">{</span>
-</span><span class='line'>            <span class="c1">//30秒以前</span>
+</span><span class='line'>            <span class="c1">//30 秒以前</span>
 </span><span class='line'>            <span class="n">strResult</span> <span class="p">=</span> <span class="s">&quot;刚刚&quot;</span><span class="p">;</span>
 </span><span class='line'>        <span class="p">}</span>
 </span><span class='line'>        <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalSeconds</span> <span class="p">&lt;=</span> <span class="m">59</span><span class="p">)</span>
 </span><span class='line'>        <span class="p">{</span>
-</span><span class='line'>            <span class="c1">//小于1分钟</span>
-</span><span class='line'>            <span class="n">strResult</span> <span class="p">=</span> <span class="s">&quot;1分钟前&quot;</span><span class="p">;</span>
+</span><span class='line'>            <span class="c1">//小于 1 分钟</span>
+</span><span class='line'>            <span class="n">strResult</span> <span class="p">=</span> <span class="s">&quot;1 分钟前&quot;</span><span class="p">;</span>
 </span><span class='line'>        <span class="p">}</span>
 </span><span class='line'>        <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalMinutes</span> <span class="p">&lt;=</span> <span class="m">60</span> <span class="p">&amp;&amp;</span> <span class="n">ts</span><span class="p">.</span><span class="n">TotalMinutes</span> <span class="p">!=</span> <span class="m">30</span><span class="p">)</span>
 </span><span class='line'>        <span class="p">{</span>
-</span><span class='line'>            <span class="c1">//分钟，没有处理30分的时候</span>
+</span><span class='line'>            <span class="c1">//分钟，没有处理 30 分的时候</span>
 </span><span class='line'>            <span class="n">strNumber</span> <span class="p">=</span> <span class="n">Convert</span><span class="p">.</span><span class="n">ToInt32</span><span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalMinutes</span><span class="p">).</span><span class="n">ToString</span><span class="p">();</span>
 </span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">TotalMinutes</span> <span class="p">==</span> <span class="m">2</span><span class="p">)</span>
 </span><span class='line'>            <span class="p">{</span>
@@ -290,13 +290,13 @@
 </span><span class='line'>        <span class="p">}</span>
 </span><span class='line'>        <span class="k">else</span>
 </span><span class='line'>        <span class="p">{</span>
-</span><span class='line'>            <span class="n">strResult</span> <span class="p">=</span> <span class="n">last</span><span class="p">.</span><span class="n">ToString</span><span class="p">(</span><span class="s">&quot;yy年M月d日&quot;</span><span class="p">);</span>
+</span><span class='line'>            <span class="n">strResult</span> <span class="p">=</span> <span class="n">last</span><span class="p">.</span><span class="n">ToString</span><span class="p">(</span><span class="s">&quot;yy 年 M 月 d 日&quot;</span><span class="p">);</span>
 </span><span class='line'>        <span class="p">}</span>
 </span><span class='line'>    <span class="p">}</span>
 </span><span class='line'>    <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">ex</span><span class="p">)</span>
 </span><span class='line'>    <span class="p">{</span>
 </span><span class='line'>        <span class="n">YtRuntime</span><span class="p">.</span><span class="n">WriteLog</span><span class="p">(</span><span class="n">ex</span><span class="p">.</span><span class="n">ToString</span><span class="p">());</span>
-</span><span class='line'>        <span class="n">strResult</span> <span class="p">=</span> <span class="n">last</span><span class="p">.</span><span class="n">ToString</span><span class="p">(</span><span class="s">&quot;yy年M月d日&quot;</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">strResult</span> <span class="p">=</span> <span class="n">last</span><span class="p">.</span><span class="n">ToString</span><span class="p">(</span><span class="s">&quot;yy 年 M 月 d 日&quot;</span><span class="p">);</span>
 </span><span class='line'>    <span class="p">}</span>
 </span><span class='line'>    <span class="k">return</span> <span class="n">strResult</span><span class="p">;</span>
 </span><span class='line'><span class="p">}</span>

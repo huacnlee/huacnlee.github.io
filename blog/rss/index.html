@@ -18,7 +18,7 @@
     <link href="http://huacnlee.github.com/blog/cache-design-in-ruby-china"/>
     <updated>2014-05-21T11:11:00+08:00</updated>
     <id>http://huacnlee.github.com/blog/cache-design-in-ruby-china</id>
-    <content type="html"><![CDATA[<p>看最近 @quakewang 分享的 《<a href="http://ruby-china.org/topics/19389">总结 web 应用中常用的各种 cache</a>》，我也搭车分享一下在 Ruby China 里面，我们是如何做 Cache 的。</p>
+    <content type="html"><![CDATA[<p>看最近 @quakewang 分享的《<a href="http://ruby-china.org/topics/19389">总结 web 应用中常用的各种 cache</a>》，我也搭车分享一下在 Ruby China 里面，我们是如何做 Cache 的。</p>
 
 <h2>首先给大家看一下 NewRelic 的报表</h2>
 
@@ -40,7 +40,7 @@
 
 <p><img src="http://l.ruby-china.org/photo/2014/771c1d75b08c01b268eb0e5223739d3e.png" alt="" /></p>
 
-<p>PS: 在发布这篇文章之前我有稍加修改了一下，GitHub 请求放到后台队列处理，新的结果是这样:</p>
+<p>PS: 在发布这篇文章之前我有稍加修改了一下，GitHub 请求放到后台队列处理，新的结果是这样：</p>
 
 <p><img src="http://l.ruby-china.org/photo/2014/f05fab2bc39506da10c5a5ebb7172d79.png" alt="" /></p>
 
@@ -61,7 +61,7 @@
 <li>Fragment Cache</li>
 <li>数据缓存</li>
 <li>ETag</li>
-<li>静态资源缓存 (JS,CSS,图片)</li>
+<li>静态资源缓存 (JS,CSS，图片)</li>
 </ul>
 
 
@@ -498,7 +498,7 @@
     <id>http://huacnlee.github.com/blog/jquery-qeditor-introduction</id>
     <content type="html"><![CDATA[<p>一直以来，我都被所见即所得 (<a href="http://en.wikipedia.org/wiki/WYSIWYG">WYSIWYG</a>) 编辑器困扰着，项目中总是会用到，但是他们又总是没那么好&#8230;</p>
 
-<p>实际上，目前市面上已经有太多这类开源的工具：(KindEditor, TinyMce, KissyEditor, NicEdit， CKEditor &#8230;)</p>
+<p>实际上，目前市面上已经有太多这类开源的工具：(KindEditor, TinyMce, KissyEditor, NicEdit，CKEditor &#8230;)</p>
 
 <h3>下面是我在使用中发现他们普遍存在的问题：</h3>
 
@@ -541,8 +541,8 @@
 <h3>相关地址</h3>
 
 <ul>
-<li>项目: <a href="https://github.com/huacnlee/jquery.qeditor">https://github.com/huacnlee/jquery.qeditor</a></li>
-<li>演示: <a href="http://huacnlee.com/jquery.qeditor">http://huacnlee.com/jquery.qeditor</a></li>
+<li>项目：<a href="https://github.com/huacnlee/jquery.qeditor">https://github.com/huacnlee/jquery.qeditor</a></li>
+<li>演示：<a href="http://huacnlee.com/jquery.qeditor">http://huacnlee.com/jquery.qeditor</a></li>
 </ul>
 
 ]]></content>
@@ -568,7 +568,7 @@
 <ol>
 <li>用户访问 /topics/11 页面，<code>TopicsController#show</code> 加载 <code>@topic</code>，并通过 View 生成内容返回</li>
 <li>用户来回访问 10 次 /topics/11，可此页面内容无任何变化</li>
-<li>过了1天以后，<code>@topic</code> 有了新的回复，用户再次访问的时候，内容变了</li>
+<li>过了 1 天以后，<code>@topic</code> 有了新的回复，用户再次访问的时候，内容变了</li>
 </ol>
 
 
@@ -578,7 +578,7 @@
 
 <ol>
 <li>用户访问 /topics/11 页面，<code>TopicsController#show</code> 加载 <code>@topic</code>，并通过 View 生成内容返回，并给出目前内容的 <code>ETag: 89vbsn28716</code></li>
-<li>用户带着 <code>ETag: 89vbsn28716</code> 再次访问 /topics/11 ，服务器检查 ETag 与执行结果，发现无变化，返回 304，浏览器直接使用 Cache 的内容渲染页面</li>
+<li>用户带着 <code>ETag: 89vbsn28716</code> 再次访问 /topics/11，服务器检查 ETag 与执行结果，发现无变化，返回 304，浏览器直接使用 Cache 的内容渲染页面</li>
 <li>过了一天以后，<code>@topic</code> 有了新回复，用户再次带着 <code>ETag: 89vbsn28716</code> /topics/11，服务器检查 ETag 发现不对了，生成新内容，并返回 200</li>
 </ol>
 
@@ -630,7 +630,7 @@
 
 <p>以上这些东西都是需要影响页面更新的。</p>
 
-<p>实际上我们只需要将 <code>fresh_when</code> 方法在 <code>ApplicationController</code> 里面覆盖一下，把页面上需要调用而影响结果的东西加入到 <code>fresh_when</code> 的 <code>:etag</code> 参数里面就好了:</p>
+<p>实际上我们只需要将 <code>fresh_when</code> 方法在 <code>ApplicationController</code> 里面覆盖一下，把页面上需要调用而影响结果的东西加入到 <code>fresh_when</code> 的 <code>:etag</code> 参数里面就好了：</p>
 
 <p>application_controller.rb:</p>
 
@@ -718,7 +718,7 @@
 <blockquote><p>Paperclip 暂时还没有人给它实现又拍云集成 <br />
 CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另外还有我实现的<a href="https://github.com/huacnlee/carrierwave-aliyun">阿里云存储的插件</a>。</p></blockquote>
 
-<p>如果你想在 CarrierWave 里面使用又拍云作为存储介质，那么你需要用:</p>
+<p>如果你想在 CarrierWave 里面使用又拍云作为存储介质，那么你需要用：</p>
 
 <ul>
 <li><a href="https://github.com/nowa/carrierwave-upyun">https://github.com/nowa/carrierwave-upyun</a></li>
@@ -736,7 +736,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>只需要简单的配置就能很好的将他们结合起来:</p>
+<p>只需要简单的配置就能很好的将他们结合起来：</p>
 
 <p>config/initializes/carrierwave.rb</p>
 
@@ -764,11 +764,11 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 
 <p>在以往我们使用 CarrierWave 或 Paperclip 的时候，我们习惯于在 Rails 里面直接使用 ImageMagick 将图片处理成不同的缩略图版本（尺寸，格式，水印，锐化，模糊&#8230;）以适应我们的业务需求。</p>
 
-<blockquote><p> 这个也是 Ruby 社区的一大优点!<br />CarrierWave 或 Paperclip 可以很容易的将图片自动化的处理掉，使得我们的代码干净利落！</p></blockquote>
+<blockquote><p> 这个也是 Ruby 社区的一大优点！<br />CarrierWave 或 Paperclip 可以很容易的将图片自动化的处理掉，使得我们的代码干净利落！</p></blockquote>
 
-<p>不过如果你用了又拍云以后，CarrierWave 提供的 <a href="https://github.com/jnicklas/carrierwave#adding-versions">缩略图生成</a> 功能或许你就不该使用了，由于远程网络访问以及服务器带宽会带来上传速度的问题，我们需要尽可能的减少服务器到又拍云服务器的网络使用，具体看我在 Ruby China 上面发帖描述的情况: 《<a href="http://ruby-china.org/topics/5059">盛大云和又拍云配合起来使用的问题</a>》</p>
+<p>不过如果你用了又拍云以后，CarrierWave 提供的 <a href="https://github.com/jnicklas/carrierwave#adding-versions">缩略图生成</a> 功能或许你就不该使用了，由于远程网络访问以及服务器带宽会带来上传速度的问题，我们需要尽可能的减少服务器到又拍云服务器的网络使用，具体看我在 Ruby China 上面发帖描述的情况：《<a href="http://ruby-china.org/topics/5059">盛大云和又拍云配合起来使用的问题</a>》</p>
 
-<p>你有两个选择:</p>
+<p>你有两个选择：</p>
 
 <ol>
 <li>使用又拍云的 Form API 来上传图片，你可以看看这个 <a href="https://gist.github.com/3414491">Gist</a> ,这个里面的代码只是将上传调通了，后面还有许多事情需要手工处理；</li>
@@ -778,7 +778,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 
 <p>如果你选择用图片空间，那你还可以继续使用 CarrierWave 和 carrierwave-upyun 来实现图片处理，以前那套思路都还可以继续使用，只是需要对 CarrierWave 进行一些 Hack 就可以和“图片空间”很好的搭配起来了。</p>
 
-<h3>以前我们的 CarrierWave 自定义 Uploader 可能是这样的:</h3>
+<h3>以前我们的 CarrierWave 自定义 Uploader 可能是这样的：</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -883,7 +883,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>在 Views 里面你是这样:</p>
+<p>在 Views 里面你是这样：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">image_tag</span><span class="p">(</span><span class="vi">@user</span><span class="o">.</span><span class="n">avatar</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="ss">:small</span><span class="p">))</span> <span class="cp">%&gt;</span><span class="x"></span>
@@ -894,9 +894,9 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 
 <p>先在又拍云的图片空间里面配置好你需要的“自定义缩略图尺寸”.</p>
 
-<blockquote><p>定义缩略图一定要提前想好!<br />因为版本一定义好，名称就不能修改了，也不能删除，并且最多有 30 种的限制。</p></blockquote>
+<blockquote><p>定义缩略图一定要提前想好！<br />因为版本一定义好，名称就不能修改了，也不能删除，并且最多有 30 种的限制。</p></blockquote>
 
-<p>接下来改造你的代码，将 AvatarUploader, PhotoUploader, CoverUploader 扔掉，改用一个 ImageUploader 代替:</p>
+<p>接下来改造你的代码，将 AvatarUploader, PhotoUploader, CoverUploader 扔掉，改用一个 ImageUploader 代替：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -1016,7 +1016,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>当然我不建议你直接这么写，你应该写个 <code>user_avatar_tag</code> 的 Helper 来做上面这段的事情:</p>
+<p>当然我不建议你直接这么写，你应该写个 <code>user_avatar_tag</code> 的 Helper 来做上面这段的事情：</p>
 
 <p>users_helper.rb</p>
 
@@ -1066,7 +1066,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 </ul>
 
 
-<p>里面包含 4 个文件的改动:</p>
+<p>里面包含 4 个文件的改动：</p>
 
 <ul>
 <li><code>lib/ftp_sync.rb</code> - FTP 同步功能，此文件无需修改</li>
@@ -1123,20 +1123,20 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 
 <h2>通过远程开发环境联调支付功能</h2>
 
-<p>解决方案就是:</p>
+<p>解决方案就是：</p>
 
 <p>在远程服务器上面跑开发环境调试</p>
 
 <ol>
 <li>找个速度快一些的 VPS，并把开发环境安装好</li>
-<li>VPS 上面配置 Nginx 方向代理到 http://127.0.0.1:3000, 并绑定一个真实的域名，(如: dev.huacnlee.com)</li>
+<li>VPS 上面配置 Nginx 方向代理到 http://127.0.0.1:3000, 并绑定一个真实的域名，(如：dev.huacnlee.com)</li>
 <li>通过 SSH 连到 VPS 上面，并启动项目开发环境</li>
 <li>通过 SFTP/FTP 的方式远程编辑文件，通过一些工具自动同步（你可以把你的 ssh pub key 存放服务器上面，这样连接 SFTP 的时候就不需要繁琐的输入密码)</li>
 <li>访问 dev.huacnlee.com 来调试</li>
 </ol>
 
 
-<h3>你需要下面几个软件:</h3>
+<h3>你需要下面几个软件：</h3>
 
 <p>我这里只搞过 Mac 平台的，其他平台可以寻找类似的替代方案</p>
 
@@ -1147,7 +1147,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 
 
 <p>用起来也很简单，先安装 <a href="https://github.com/osxfuse/osxfuse/downloads">FUSE for OS X</a>，下载以后有安装包的，这个装好了无需配置。
-然后下载 <a href="http://macfusionapp.org">Macfusion</a>，这个无需安装直接运行，界面上就几个按钮而已，如图:</p>
+然后下载 <a href="http://macfusionapp.org">Macfusion</a>，这个无需安装直接运行，界面上就几个按钮而已，如图：</p>
 
 <p><img src="http://macfusionapp.org/screenshots/mf2_main.png" alt="" /> <img src="http://macfusionapp.org/screenshots/mf2_editing.png" alt="" /></p>
 
@@ -1168,13 +1168,13 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 
 <p>在淘宝系里面有个苦恼的事情，全公司的前端都主要使用 <a href="https://github.com/kissyteam/kissy">Kissy</a> 这个前端框架。我一直觉得这个东西使用起来过于复杂，不喜欢用。</p>
 
-<h3>据我了解:</h3>
+<h3>据我了解：</h3>
 
 <blockquote><p>Kissy 实际上是从 jQuery (API or 源代码？我不确定) 衍生过来的，很多功能都非常相似，而 Kissy 在 jQuery 这种功能的基础上实现了很多正对淘宝项目情况的功能扩充。</p></blockquote>
 
 <p>但是我觉得 Kissy 没有把 jQuery 精简好用的优点保留下来，反而整出了非常奇怪的 API 命名和调用方式</p>
 
-<h3>比如下面这些方法:</h3>
+<h3>比如下面这些方法：</h3>
 
 <ul>
 <li>KISSY - 全大写的类名;</li>
@@ -1202,7 +1202,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 
 <p>这个过程还好有使用 Kissy 很久的 <a href="http://github.com/cricy">同事</a> 帮忙解释 Kissy 的使用问题…(说到这里我又不得不吐槽 Kissy 文档太差，就是看不懂…)</p>
 
-<p>总归，到最后， kissy-rails 还是实现了，用起来和 jquery-rails 差不多，也就是把之前 jquery 的地方换成 kissy:</p>
+<p>总归，到最后，kissy-rails 还是实现了，用起来和 jquery-rails 差不多，也就是把之前 jquery 的地方换成 kissy:</p>
 
 <p>Gemfile</p>
 
@@ -1220,7 +1220,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>然后 Rails Helper 里面提供的 Ajax 支持就能用 Kissy 的 API 来实现了，比如:</p>
+<p>然后 Rails Helper 里面提供的 Ajax 支持就能用 Kissy 的 API 来实现了，比如：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -1275,7 +1275,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 
 <p>我最近发现一个规律可以很好解决上面的难题&#8230;</p>
 
-<p>Rails 用 form_for (不管你是用 <a href="https://github.com/justinfrench/formtastic">Formtastic</a> 还是 <a href="https://github.com/plataformatec/simple_form">simple_form</a> 还是 Rails <a href="http://guides.rubyonrails.org/form_helpers.html">默认的</a> 生成表单以后每个表单会有一个固定的 class ，每个文本框会有固定的 id</p>
+<p>Rails 用 form_for (不管你是用 <a href="https://github.com/justinfrench/formtastic">Formtastic</a> 还是 <a href="https://github.com/plataformatec/simple_form">simple_form</a> 还是 Rails <a href="http://guides.rubyonrails.org/form_helpers.html">默认的</a> 生成表单以后每个表单会有一个固定的 class，每个文本框会有固定的 id</p>
 
 <ul>
 <li>form 的 class 是根据 Model 名称转换而来的</li>
@@ -1369,7 +1369,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 
 <p>由于 Github 上面没有中文的项目名称，所以中文搜索这里就没法演示出来，稍后我再补充一下。</p>
 
-<p>这里面演示了如何用别名索引，附加字段到 Redis，如何用排序(rand 那个属性)</p>
+<p>这里面演示了如何用别名索引，附加字段到 Redis，如何用排序 (rand 那个属性)</p>
 ]]></content>
   </entry>
   
@@ -1381,7 +1381,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
     <content type="html"><![CDATA[<p>这个是基于 <a href="http://mongoid.org">Mongoid</a> 实现的 Tag 功能的 Ruby gem。</p>
 
 <p>老早就搞出来了。目前这个东西已经稳定的在 <a href="http://720p.so">720p.so</a> 上面跑了很长一段时间，今天公布一下。
-其实这类功能在我之前已经有几个，但是经过尝试以后发现他们的太复杂了，不满足我的需求，于是自己实现了一个，基于 Array 字段实现的 Tag 。</p>
+其实这类功能在我之前已经有几个，但是经过尝试以后发现他们的太复杂了，不满足我的需求，于是自己实现了一个，基于 Array 字段实现的 Tag。</p>
 
 <h2>特点</h2>
 
@@ -1451,17 +1451,17 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
 </pre></td><td class='code'><pre><code class='bash'><span class='line'>irb&gt; <span class="nv">m</span> <span class="o">=</span> Movie.new
-</span><span class='line'>irb&gt; m.actor_list <span class="o">=</span> <span class="s2">&quot;甄子丹,古天乐,徐静蕾&quot;</span>
+</span><span class='line'>irb&gt; m.actor_list <span class="o">=</span> <span class="s2">&quot;甄子丹，古天乐，徐静蕾&quot;</span>
 </span><span class='line'>irb&gt; m.actors
 </span><span class='line'><span class="o">[</span><span class="s2">&quot;甄子丹&quot;</span>, <span class="s2">&quot;古天乐&quot;</span>, <span class="s2">&quot;徐静蕾&quot;</span><span class="o">]</span>
-</span><span class='line'>irb&gt; m.country_list <span class="o">=</span> <span class="s2">&quot;美国|法国|俄罗斯&quot;</span>
+</span><span class='line'>irb&gt; m.country_list <span class="o">=</span> <span class="s2">&quot;美国 | 法国 | 俄罗斯&quot;</span>
 </span><span class='line'>irb&gt; m.countries
 </span><span class='line'><span class="o">[</span><span class="s2">&quot;美国&quot;</span>,<span class="s2">&quot;法国&quot;</span>,<span class="s2">&quot;俄罗斯&quot;</span><span class="o">]</span>
-</span><span class='line'>irb&gt; m.country_list <span class="o">=</span> <span class="s2">&quot;美国|法国|俄罗斯|中国&quot;</span>
+</span><span class='line'>irb&gt; m.country_list <span class="o">=</span> <span class="s2">&quot;美国 | 法国 | 俄罗斯 | 中国&quot;</span>
 </span><span class='line'>irb&gt; m.country_list_changed?
 </span><span class='line'><span class="nb">true</span>
 </span><span class='line'>irb&gt; m.country_list_was
-</span><span class='line'><span class="s2">&quot;美国|法国|俄罗斯&quot;</span>
+</span><span class='line'><span class="s2">&quot;美国 | 法国 | 俄罗斯&quot;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -1470,9 +1470,9 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>irb&gt; Movie.tagged_with_on<span class="o">(</span>:actors, <span class="s2">&quot;成龙, 李连杰&quot;</span><span class="o">)</span> <span class="c"># 查找同时带有 “成龙” 和 “李连杰” 的电影</span>
-</span><span class='line'>irb&gt; Movie.tagged_with_on<span class="o">(</span>:actors, <span class="s2">&quot;古天乐, 杨紫琼&quot;</span>, :match <span class="o">=</span>&gt; :any<span class="o">)</span> <span class="c"># 查找 “古天乐” 或 “杨紫琼” 的电影</span>
-</span><span class='line'>irb&gt; Movie.tagged_with_on<span class="o">(</span>:actors, <span class="s2">&quot;周杰伦&quot;</span>, :match <span class="o">=</span>&gt; :not<span class="o">)</span> <span class="c"># 查找不是 “周杰伦” 的电影</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>irb&gt; Movie.tagged_with_on<span class="o">(</span>:actors, <span class="s2">&quot;成龙，李连杰&quot;</span><span class="o">)</span> <span class="c"># 查找同时带有“成龙”和“李连杰”的电影</span>
+</span><span class='line'>irb&gt; Movie.tagged_with_on<span class="o">(</span>:actors, <span class="s2">&quot;古天乐，杨紫琼&quot;</span>, :match <span class="o">=</span>&gt; :any<span class="o">)</span> <span class="c"># 查找“古天乐”或“杨紫琼”的电影</span>
+</span><span class='line'>irb&gt; Movie.tagged_with_on<span class="o">(</span>:actors, <span class="s2">&quot;周杰伦&quot;</span>, :match <span class="o">=</span>&gt; :not<span class="o">)</span> <span class="c"># 查找不是“周杰伦”的电影</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -1504,7 +1504,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
     <id>http://huacnlee.github.com/blog/active-model-callback-call-with-methods</id>
     <content type="html"><![CDATA[<p>今天才关注到这个文档，以前只是有个大概的印象&#8230;</p>
 
-<p>Rails Model 有许多 callback 事件 (<code>before_save</code>, <code>after_save</code>, <code>before_create</code>, <code>after_create</code> &#8230;)，可以让我们在数据更新的前后定义一些动作.
+<p>Rails Model 有许多 callback 事件 (<code>before_save</code>, <code>after_save</code>, <code>before_create</code>, <code>after_create</code> &#8230;)，可以让我们在数据更新的前后定义一些动作。
 比如我们偶尔会这样：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -1609,7 +1609,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 </span><span class='line'>Resolving deltas: 100% <span class="o">(</span>211/211<span class="o">)</span>, completed with 72 <span class="nb">local </span>objects.
 </span><span class='line'>From git://github.com/huacnlee/ruby-china
 </span><span class='line'> * <span class="o">[</span>new branch<span class="o">]</span>      master -&gt; huacnlee/master
-</span><span class='line'><span class="c"># 将 huacnlee 的 master 分支的改动合并过来,目前是处与 master 分支</span>
+</span><span class='line'><span class="c"># 将 huacnlee 的 master 分支的改动合并过来，目前是处与 master 分支</span>
 </span><span class='line'>~/work/ruby-china &lt;master&gt; <span class="nv">$ </span>git merge huacnlee/master
 </span></code></pre></td></tr></table></div></figure>
 
@@ -1625,7 +1625,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 
 <h2>对比两个不同版本的差距</h2>
 
-<p>我昨晚特意下载了他们重构成 MySQL 版本的 <a href="http://github.com/rubytaiwan/ruby-taiwan">ruby-taiwan</a> 的代码与目前 <a href="http://github.com/huacnlee/ruby-china">ruby-china</a> 的代码在开发环境下面模拟数据做了一下对比.</p>
+<p>我昨晚特意下载了他们重构成 MySQL 版本的 <a href="http://github.com/rubytaiwan/ruby-taiwan">ruby-taiwan</a> 的代码与目前 <a href="http://github.com/huacnlee/ruby-china">ruby-china</a> 的代码在开发环境下面模拟数据做了一下对比。</p>
 
 <h3>数据场景</h3>
 
@@ -1636,10 +1636,10 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 </ul>
 
 
-<h3>对比结果:</h3>
+<h3>对比结果：</h3>
 
 <ul>
-<li>话题列表 /topics (15个话题)</li>
+<li>话题列表 /topics (15 个话题)</li>
 </ul>
 
 
@@ -1677,7 +1677,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 
 
 <ul>
-<li>话题查看页面 /topics/:id <em>27条回复的场景</em></li>
+<li>话题查看页面 /topics/:id <em>27 条回复的场景</em></li>
 </ul>
 
 
@@ -1731,7 +1731,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 <span class='line-number'>9</span>
 <span class='line-number'>10</span>
 <span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Started GET <span class="s2">&quot;/topics/777&quot;</span> <span class="o">(</span>58条回复<span class="o">)</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>Started GET <span class="s2">&quot;/topics/777&quot;</span> <span class="o">(</span>58 条回复<span class="o">)</span>
 </span><span class='line'>Completed 200 OK in 107ms <span class="o">(</span>Views: 82.9ms | Mongo: 23.3ms | Solr: 0.0ms<span class="o">)</span>
 </span><span class='line'>Completed 200 OK in 121ms <span class="o">(</span>Views: 33.7ms | Mongo: 27.5ms | Solr: 0.0ms<span class="o">)</span>
 </span><span class='line'>Completed 200 OK in 135ms <span class="o">(</span>Views: 48.4ms | Mongo: 26.8ms | Solr: 0.0ms<span class="o">)</span>
@@ -1750,7 +1750,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 <p>之前 ruby-china 某个时期在开发环境下面确实非常慢，但那个原因是下面几个</p>
 
 <ol>
-<li><a href="https://github.com/mislav/will_paginate">will_paginate</a> 由于不支持 MongoDb 的分页方式，所以每次分页都是 <code>Model.all</code> 以后，以 Array 来分页的，所以这个是之前性能的罪魁祸首,<a href="https://github.com/lucasas/will_paginate_mongoid">参见</a>；</li>
+<li><a href="https://github.com/mislav/will_paginate">will_paginate</a> 由于不支持 MongoDb 的分页方式，所以每次分页都是 <code>Model.all</code> 以后，以 Array 来分页的，所以这个是之前性能的罪魁祸首，<a href="https://github.com/lucasas/will_paginate_mongoid">参见</a>；</li>
 <li>Mongoid 的 eager loading 需要手动配置 <code>identity_map_enabled: true</code> 才会有效果；</li>
 <li>之前 Rails 3.1 环境确实比较慢，已进入 Rails 3.2 已经感觉是非常明显的。</li>
 </ol>
@@ -1769,7 +1769,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
     <link href="http://huacnlee.github.com/blog/hello-otcopress"/>
     <updated>2012-02-21T09:53:00+08:00</updated>
     <id>http://huacnlee.github.com/blog/hello-otcopress</id>
-    <content type="html"><![CDATA[<p>一直都听说 <a href="http://octopress.org">Otcopress</a> 非常不错，于是试试将之前泡在 Heroku 上面的博客迁移过来。之前在 Heroku 上面由于GFW的原因，访问速度无比慢了。</p>
+    <content type="html"><![CDATA[<p>一直都听说 <a href="http://octopress.org">Otcopress</a> 非常不错，于是试试将之前泡在 Heroku 上面的博客迁移过来。之前在 Heroku 上面由于 GFW 的原因，访问速度无比慢了。</p>
 
 <p>话说我的博客托管程序历史：</p>
 
@@ -1845,7 +1845,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 </span><span class='line'>  <span class="k">def</span> <span class="nf">filename</span>
 </span><span class='line'>    <span class="k">if</span> <span class="n">original_filename</span>
 </span><span class='line'>      <span class="c1"># current_path 是 Carrierwave 上传过程临时创建的一个文件，有时间标记</span>
-</span><span class='line'>      <span class="c1"># 例如: /Users/jason/work/ruby-china/public/uploads/tmp/20131105-1057-46664-5614/_____2013-11-05___10.37.50.png</span>
+</span><span class='line'>      <span class="c1"># 例如：/Users/jason/work/ruby-china/public/uploads/tmp/20131105-1057-46664-5614/_____2013-11-05___10.37.50.png</span>
 </span><span class='line'>      <span class="vi">@name</span> <span class="o">||=</span> <span class="no">Digest</span><span class="o">::</span><span class="no">MD5</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="n">current_path</span><span class="p">)</span>
 </span><span class='line'>      <span class="s2">&quot;</span><span class="si">#{</span><span class="vi">@name</span><span class="si">}</span><span class="s2">.</span><span class="si">#{</span><span class="n">file</span><span class="o">.</span><span class="n">extension</span><span class="si">}</span><span class="s2">&quot;</span>
 </span><span class='line'>    <span class="k">end</span>
@@ -1854,7 +1854,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>这么做的原因:</h2>
+<h2>这么做的原因：</h2>
 
 <ul>
 <li>carrent_path 的算法 <code>Time.now.utc.to_i.to_s + '-' + Process.pid.to_s + '-' + ("%04d" % rand(9999)) + 原始文件名</code>，所以理论上重复的概率非常低，外加上一般上传并不会有那种瞬间并发出现的场景，<a href="https://github.com/carrierwaveuploader/carrierwave/blob/0d6864a84dbed16ef0ed149f332fa3b9f9bd35eb/lib/carrierwave/uploader/cache.rb#L18">来源</a></li>
@@ -1886,7 +1886,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
     <link href="http://huacnlee.github.com/blog/rubygems-mirrors"/>
     <updated>2011-12-23T17:34:00+08:00</updated>
     <id>http://huacnlee.github.com/blog/rubygems-mirrors</id>
-    <content type="html"><![CDATA[<p>今年下半年开始， rubygems.org 就开始因为 GFW 的原因倒是时常无法安装，再到后面根本就无法安装，之前我还有写过一篇《<a href="http://huacnlee.com/blog/using-nginx-proxy-to-mirror-rubygem-org" target="_blank" title="搭建 nginx 反向代理，提高 gem 的安装速度">搭建 nginx 反向代理，提高 gem 的安装速度</a>》，但是这样的作法无法保持长久，那些反向代理服务器都是个人VPS搭建，而且由于依然会访问 rubygems.org ，gem 的安装过程依然会很慢&#8230;</p>
+    <content type="html"><![CDATA[<p>今年下半年开始，rubygems.org 就开始因为 GFW 的原因倒是时常无法安装，再到后面根本就无法安装，之前我还有写过一篇《<a href="http://huacnlee.com/blog/using-nginx-proxy-to-mirror-rubygem-org" target="_blank" title="搭建 nginx 反向代理，提高 gem 的安装速度">搭建 nginx 反向代理，提高 gem 的安装速度</a>》，但是这样的作法无法保持长久，那些反向代理服务器都是个人 VPS 搭建，而且由于依然会访问 rubygems.org，gem 的安装过程依然会很慢&#8230;</p>
 
 
 <p>半个月前就在 Ruby China 里面<a href="http://ruby-china.org/search?q=Gem+镜像" target="_blank">讨论</a>说要搞些国内的镜像服务器，结果因为中途遇到种种困难，一直到现在在解决，过程曲折啊，15W+ 的 gem 包还是 @<a href="http://twitter.com/zhuangbiaowei" target="_blank">zhuangbiaowei</a>&nbsp;帮忙下载，然后同步过来的。</p>
@@ -1898,7 +1898,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 <!-- more -->
 
 
-<p>地址: <a href="http://ruby.taobao.org" target="_blank">http://ruby.taobao.org</a></p>
+<p>地址：<a href="http://ruby.taobao.org" target="_blank">http://ruby.taobao.org</a></p>
 
 
 <p>以后这个服务将会一直有淘宝的人来维护下去（至少我还在的时候它一定能保持稳定）</p>
@@ -1914,7 +1914,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
     <link href="http://huacnlee.github.com/blog/rails-attr-accessor-technique"/>
     <updated>2011-12-08T21:49:00+08:00</updated>
     <id>http://huacnlee.github.com/blog/rails-attr-accessor-technique</id>
-    <content type="html"><![CDATA[<p>这个是这<a href="http://ruby-china.org/topics/376" target="_blank">周二杭州 Ruby Tuesday</a> 扯出来的&nbsp;<br />比如这样的场景，你又个 Post ，它有 tags 的熟悉，里面用 Array 存放多个 tag，但是页面上编辑的时候我们可能会要用户输入以逗号隔开的方式提交多个 tag （比如： ruby, rails, python ）然后保存的是将这个数据分割为数组保存。&nbsp;<br />代码就像这样，只是我以前的写法。</p>
+    <content type="html"><![CDATA[<p>这个是这<a href="http://ruby-china.org/topics/376" target="_blank">周二杭州 Ruby Tuesday</a> 扯出来的&nbsp;<br />比如这样的场景，你又个 Post，它有 tags 的熟悉，里面用 Array 存放多个 tag，但是页面上编辑的时候我们可能会要用户输入以逗号隔开的方式提交多个 tag（比如：ruby, rails, python）然后保存的是将这个数据分割为数组保存。&nbsp;<br />代码就像这样，只是我以前的写法。</p>
 
 
 
@@ -2017,7 +2017,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>这样一来， Controller 里面就不用写了，直接调用 tag_list，它的改变将会和 tags 息息相关</p>
+<p>这样一来，Controller 里面就不用写了，直接调用 tag_list，它的改变将会和 tags 息息相关</p>
 ]]></content>
   </entry>
   
@@ -2030,7 +2030,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 
 
 <ol>
-<li>创建一个 Mailer ；</li>
+<li>创建一个 Mailer；</li>
 <li>编辑邮件 HTML 模板；</li>
 <li>在功能上面点击模拟发送邮件的过程，或是从 Rails console 直接调用 Mailer 发送测试邮件；</li>
 <li>打开信箱查看邮件内容，格式，样式，文字是否有误；</li>
@@ -2118,7 +2118,7 @@ CarrierWave 就有 <a href="http://nowa.me">@nowazhu</a> 实现了一个，另�
 <p>同时 <a href="http://github.com/huacnlee/personlab" target="_blank">Personlab</a> 的代码也跟着更新了，新版本将会去掉之前的评论，验证码，等相关的功能，同时 Comments 表的数据也会同时删除掉。一下子干净了很多。</p>
 
 
-<p>也顺便将独立页面编辑的格式化换成了 Markdown， Textile 写起来有点别扭，还是 Markdown 的好记些。</p>
+<p>也顺便将独立页面编辑的格式化换成了 Markdown，Textile 写起来有点别扭，还是 Markdown 的好记些。</p>
 
 
 <p>&nbsp;</p>

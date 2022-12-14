@@ -78,11 +78,11 @@
 <article class="entry" role="article">
 
   <header>
-    <h1 class="entry_title">谈谈Cookie存取和IE页面缓存的问题</h1>
+    <h1 class="entry_title">谈谈 Cookie 存取和 IE 页面缓存的问题</h1>
     
   </header>
 
-  <div class="entry_content"><p>最近老是发现在IE里会有Cookie的问题，如IE下面无法登出，或无法登录，或者登录后信息却无法取到，而Firefox下面一直是通过的，都试过好多次了，今天终于找回的主要的原因；<br /> <br /> <strong><span style="font-size: 24pt"><span style="font-family: 微软雅黑"> Cookie的问题：</span></span></strong><br /> <br /> 首先看一下我的Cookie存取代码 (这个Cookie操作支持二级域名访问)</p>
+  <div class="entry_content"><p>最近老是发现在 IE 里会有 Cookie 的问题，如 IE 下面无法登出，或无法登录，或者登录后信息却无法取到，而 Firefox 下面一直是通过的，都试过好多次了，今天终于找回的主要的原因；<br /> <br /> <strong><span style="font-size: 24pt"><span style="font-family: 微软雅黑"> Cookie 的问题：</span></span></strong><br /> <br /> 首先看一下我的 Cookie 存取代码 (这个 Cookie 操作支持二级域名访问)</p>
 
 
 
@@ -175,9 +175,9 @@
 <span class='line-number'>86</span>
 <span class='line-number'>87</span>
 <span class='line-number'>88</span>
-</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="cp">#region 存取Cookie</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="cp">#region 存取 Cookie</span>
 </span><span class='line'><span class="c1">///</span>
-</span><span class='line'><span class="c1">/// 存Cookie</span>
+</span><span class='line'><span class="c1">/// 存 Cookie</span>
 </span><span class='line'><span class="c1">/// Json Lee 2007-09-24</span>
 </span><span class='line'><span class="c1">///</span>
 </span><span class='line'><span class="c1">/// 名称</span>
@@ -188,21 +188,21 @@
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>    <span class="n">cookieName</span> <span class="p">=</span> <span class="n">cookieName</span><span class="p">.</span><span class="n">ToLower</span><span class="p">();</span>
 </span><span class='line'>    <span class="n">HttpCookie</span> <span class="n">cookie</span> <span class="p">=</span> <span class="k">new</span> <span class="n">HttpCookie</span><span class="p">(</span><span class="n">cookieName</span><span class="p">,</span><span class="n">cookieValue</span><span class="p">);</span>
-</span><span class='line'>    <span class="n">cookie</span><span class="p">.</span><span class="n">Expires</span> <span class="p">=</span> <span class="n">DateTime</span><span class="p">.</span><span class="n">Now</span><span class="p">.</span><span class="n">AddMinutes</span><span class="p">(</span><span class="n">cookieExpiryMinute</span><span class="p">);</span>  <span class="c1">//设置Cookie过期时间</span>
+</span><span class='line'>    <span class="n">cookie</span><span class="p">.</span><span class="n">Expires</span> <span class="p">=</span> <span class="n">DateTime</span><span class="p">.</span><span class="n">Now</span><span class="p">.</span><span class="n">AddMinutes</span><span class="p">(</span><span class="n">cookieExpiryMinute</span><span class="p">);</span>  <span class="c1">//设置 Cookie 过期时间</span>
 </span><span class='line'>    <span class="n">cookie</span><span class="p">.</span><span class="n">Path</span> <span class="p">=</span> <span class="s">&quot;/&quot;</span><span class="p">;</span>
-</span><span class='line'>    <span class="c1">//设置可访问Cookie的路径 为项目下的cookie文件夹及其子文件夹下所有页面</span>
-</span><span class='line'>    <span class="c1">//如果需要整个应用程序可访问 则设置为cookie.Path = &quot;/&quot;;即可</span>
+</span><span class='line'>    <span class="c1">//设置可访问 Cookie 的路径 为项目下的 cookie 文件夹及其子文件夹下所有页面</span>
+</span><span class='line'>    <span class="c1">//如果需要整个应用程序可访问 则设置为 cookie.Path = &quot;/&quot;;即可</span>
 </span><span class='line'>    <span class="n">cookie</span><span class="p">.</span><span class="n">Domain</span> <span class="p">=</span> <span class="err">“</span><span class="p">.</span><span class="m">163.</span><span class="n">com</span><span class="s">&quot;;</span>
-</span><span class='line'>    <span class="c1">//以www.163.com为例，若要在 news.163.com等不同主机访问可以如上设置</span>
+</span><span class='line'>    <span class="c1">//以 www.163.com 为例，若要在 news.163.com 等不同主机访问可以如上设置</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="c1">//删除旧的同名Cookie</span>
+</span><span class='line'>    <span class="c1">//删除旧的同名 Cookie</span>
 </span><span class='line'>    <span class="n">HttpContext</span><span class="p">.</span><span class="n">Current</span><span class="p">.</span><span class="n">Response</span><span class="p">.</span><span class="n">Cookies</span><span class="p">.</span><span class="n">Remove</span><span class="p">(</span><span class="n">cookieName</span><span class="p">);</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="n">HttpContext</span><span class="p">.</span><span class="n">Current</span><span class="p">.</span><span class="n">Response</span><span class="p">.</span><span class="n">Cookies</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">cookie</span><span class="p">);</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="c1">///</span>
-</span><span class='line'><span class="c1">/// 存Cookie</span>
+</span><span class='line'><span class="c1">/// 存 Cookie</span>
 </span><span class='line'><span class="c1">/// Json Lee 2007-09-24</span>
 </span><span class='line'><span class="c1">///</span>
 </span><span class='line'><span class="c1">/// 名称</span>
@@ -214,7 +214,7 @@
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="c1">///</span>
-</span><span class='line'><span class="c1">/// 清除Cookie</span>
+</span><span class='line'><span class="c1">/// 清除 Cookie</span>
 </span><span class='line'><span class="c1">///</span>
 </span><span class='line'><span class="c1">/// 名称</span>
 </span><span class='line'><span class="c1">///</span>
@@ -224,7 +224,7 @@
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="c1">///</span>
-</span><span class='line'><span class="c1">/// 取Cookie</span>
+</span><span class='line'><span class="c1">/// 取 Cookie</span>
 </span><span class='line'><span class="c1">/// Json Lee 2007-09-24</span>
 </span><span class='line'><span class="c1">///</span>
 </span><span class='line'><span class="c1">/// 名称</span>
@@ -253,7 +253,7 @@
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="c1">///</span>
-</span><span class='line'><span class="c1">/// 取Cookie</span>
+</span><span class='line'><span class="c1">/// 取 Cookie</span>
 </span><span class='line'><span class="c1">/// Json Lee 2007-09-24</span>
 </span><span class='line'><span class="c1">///</span>
 </span><span class='line'><span class="c1">/// 名称</span>
@@ -268,21 +268,21 @@
 
 
 
-<p><br /> Cookie存取看起来的确很简单，而在.NET里面好像更简单。<br /> 但是&#8230;&#8230;&#8230;&#8230;&#8230;&#8230;&#8230;.<br /> 往往简单的东西经常出现一些问题，让人找不到原因。<br /> 我之前这里出现的问题就是，在写Cookie的时候，没有处理旧的同名Cookie，例如：第一次登录的时候写入 Cookie username=jsonlee 和 password=123456<br /> 有时候有可能会在未退出的情况下重新登录一下，这样就会再次写入同样的Cookie，但这样的情况，好像没有把原来的覆盖(我用 IECookies 这个工具看到的)，而是新加入一个同名的。这样一来明显问题就存在了。<br /> 所以我在SetCookie的方法里面加入了</p>
+<p><br /> Cookie 存取看起来的确很简单，而在.NET 里面好像更简单。<br /> 但是&#8230;&#8230;&#8230;&#8230;&#8230;&#8230;&#8230;.<br /> 往往简单的东西经常出现一些问题，让人找不到原因。<br /> 我之前这里出现的问题就是，在写 Cookie 的时候，没有处理旧的同名 Cookie，例如：第一次登录的时候写入 Cookie username=jsonlee 和 password=123456<br /> 有时候有可能会在未退出的情况下重新登录一下，这样就会再次写入同样的 Cookie，但这样的情况，好像没有把原来的覆盖 (我用 IECookies 这个工具看到的)，而是新加入一个同名的。这样一来明显问题就存在了。<br /> 所以我在 SetCookie 的方法里面加入了</p>
 
 
 
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="c1">//删除旧的同名Cookie</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="c1">//删除旧的同名 Cookie</span>
 </span><span class='line'><span class="n">HttpContext</span><span class="p">.</span><span class="n">Current</span><span class="p">.</span><span class="n">Response</span><span class="p">.</span><span class="n">Cookies</span><span class="p">.</span><span class="n">Remove</span><span class="p">(</span><span class="n">cookieName</span><span class="p">);</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 
 
-<p>这样一来问题就解决了。<br /> <br /> <br /> <strong><span style="font-family: 微软雅黑"><span style="font-size: 24pt">IE页面缓存的问题：<br /> <br /> </span></span></strong>我现在的用户登录状态是通过 Ajax调用一个 GetUserBar.aspx 来取得用户状态栏信息的<br /> 以下是 GetUserbar.aspx 的代码</p>
+<p>这样一来问题就解决了。<br /> <br /> <br /> <strong><span style="font-family: 微软雅黑"><span style="font-size: 24pt">IE 页面缓存的问题：<br /> <br /> </span></span></strong>我现在的用户登录状态是通过 Ajax 调用一个 GetUserBar.aspx 来取得用户状态栏信息的<br /> 以下是 GetUserbar.aspx 的代码</p>
 
 
 
@@ -300,17 +300,17 @@
 </span><span class='line'><span class="err">&lt;</span>%if(CheckIsLogin()){%&gt;
 </span><span class='line'>您好：<span class="err">&lt;</span>%=this.GetNickname()%&gt;
 </span><span class='line'><span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;&lt;%=UrlRewriteLink.GetUserHomeUrl()%&gt;&quot;</span><span class="nt">&gt;</span>您的主页<span class="nt">&lt;/a&gt;</span> |
-</span><span class='line'><span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&#39;/user/user_setup.aspx&#39;</span><span class="nt">&gt;</span>个人设置a&gt; |
+</span><span class='line'><span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&#39;/user/user_setup.aspx&#39;</span><span class="nt">&gt;</span>个人设置 a&gt; |
 </span><span class='line'><span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&#39;/logout.aspx&#39;</span><span class="nt">&gt;</span>退出<span class="nt">&lt;/a&gt;</span>
 </span><span class='line'><span class="err">&lt;</span>%}else{%&gt;
-</span><span class='line'><span class="nt">&lt;span</span> <span class="na">style=</span><span class="s">&quot;margin-right:10px;&quot;</span><span class="nt">&gt;</span>您已经登录了！span&gt;<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/reg.aspx&quot;</span><span class="nt">&gt;</span>注册a&gt; | <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/login.aspx&quot;</span><span class="nt">&gt;</span>登录<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'><span class="nt">&lt;span</span> <span class="na">style=</span><span class="s">&quot;margin-right:10px;&quot;</span><span class="nt">&gt;</span>您已经登录了！span&gt;<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/reg.aspx&quot;</span><span class="nt">&gt;</span>注册 a&gt; | <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/login.aspx&quot;</span><span class="nt">&gt;</span>登录<span class="nt">&lt;/a&gt;</span>
 </span><span class='line'><span class="err">&lt;</span>%}%&gt;
 </span></code></pre></td></tr></table></div></figure>
 
 
 
 
-<p><br /> 如上面这段代码，如果通过Ajax调用它，哪就可以在静态页面上取得用户的登录信息<br /> 可是&#8230;&#8230;.<br /> 这个问题就出来了，而且还不容易发现，哪就是<strong><span style="font-size: 18pt"><span style="color: red"><span style="font-family: 微软雅黑">IE的页面缓存</span></span></span></strong>，IE好像有个机制会把访问过的页面缓存到 <span style="color: #5ca414"><strong><span style="font-size: 12pt"><span style="font-family: Verdana">C:\Documents and Settings\用户名\Local Settings\Temporary Internet Files</span></span></strong> </span>这个文件夹里面。所以每个Ajax调用的GetUserBar.aspx时候IE取到的都是缓存信息，而不是GetUserBar.aspx运行的结果。所以才出现了，一直无法登出或无法登录的状态（其实是已经登录登出了的，只是表面上看不出来）。<br /> <br /> 解决办法就是在 GetUserBar.aspx 的Page_Load方法里面加入设定&#8221;<span style="color: #0817ff">Response.Expires</span>&#8220;的时间的处理，如：</p>
+<p><br /> 如上面这段代码，如果通过 Ajax 调用它，哪就可以在静态页面上取得用户的登录信息<br /> 可是&#8230;&#8230;.<br /> 这个问题就出来了，而且还不容易发现，哪就是<strong><span style="font-size: 18pt"><span style="color: red"><span style="font-family: 微软雅黑">IE 的页面缓存</span></span></span></strong>，IE 好像有个机制会把访问过的页面缓存到 <span style="color: #5ca414"><strong><span style="font-size: 12pt"><span style="font-family: Verdana">C:\Documents and Settings\用户名\Local Settings\Temporary Internet Files</span></span></strong> </span>这个文件夹里面。所以每个 Ajax 调用的 GetUserBar.aspx 时候 IE 取到的都是缓存信息，而不是 GetUserBar.aspx 运行的结果。所以才出现了，一直无法登出或无法登录的状态（其实是已经登录登出了的，只是表面上看不出来）。<br /> <br /> 解决办法就是在 GetUserBar.aspx 的 Page_Load 方法里面加入设定&#8221;<span style="color: #0817ff">Response.Expires</span>&#8220;的时间的处理，如：</p>
 
 
 
@@ -330,7 +330,7 @@
 
 
 
-<p><br /> <br /> 这样问题就解决了。<br /> <br /> 网上存在很多的Cookie操作的文章，可是这些东西都是抄来抄去的，哪个站长跟本就没有对这些代码做过测试，我以前试着看过好多个，很多是存在有问题的。<br /> 希望这篇文章会给需要的人带来帮助。</p>
+<p><br /> <br /> 这样问题就解决了。<br /> <br /> 网上存在很多的 Cookie 操作的文章，可是这些东西都是抄来抄去的，哪个站长跟本就没有对这些代码做过测试，我以前试着看过好多个，很多是存在有问题的。<br /> 希望这篇文章会给需要的人带来帮助。</p>
 
 </div>
 

@@ -78,7 +78,7 @@
 <article class="entry" role="article">
 
   <header>
-    <h1 class="entry_title">Rails项目，从文件系统转移到 Mongodb GridFS</h1>
+    <h1 class="entry_title">Rails 项目，从文件系统转移到 Mongodb GridFS</h1>
     
   </header>
 
@@ -136,7 +136,7 @@
 <div>先是把 Paperclip 换成&nbsp;<a href="https://github.com/jnicklas/carrierwave" target="_blank">Carrierwave</a>&nbsp;(这里时因为截止到目前 Paperclip 还没有支持 GridFS)</div>
 
 
-<h3><strong>我以一个Model为例子来介绍转换过程</strong></h3>
+<h3><strong>我以一个 Model 为例子来介绍转换过程</strong></h3>
 
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -171,7 +171,7 @@
 
 <div>
 <ul>
-<li>Gemfile 里面增加, Paperclip 插件依然保留：</li>
+<li>Gemfile 里面增加，Paperclip 插件依然保留：</li>
 </ul>
 </div>
 
@@ -195,7 +195,7 @@
 <li>新增 app/uploaders/base_uploader.rb, 内容参考&nbsp;<a href="https://github.com/huacnlee/homeland/blob/7100ce4c506cc2c4387f25e50c533e5bbcac6cc2/app/uploaders/base_uploader.rb" target="_blank">base_uploader.rb</a></li>
 <li>新增 app/uploaders/photo_uploader.rb, 并继承 BaseUploader, 内容参考&nbsp;<a href="https://github.com/huacnlee/homeland/blob/7100ce4c506cc2c4387f25e50c533e5bbcac6cc2/app/uploaders/photo_uploader.rb" target="_blank">photo_uploader.rb</a></li>
 <li>去掉 Photo model 里面的&nbsp;has_attached_file 定义，改用&nbsp;mount_uploader :image, PhotoUploader</li>
-<li>生成个 migration,把数据库里面&nbsp;<em>image_file_name</em>&nbsp;字段重命名为&nbsp;<em>image</em></li>
+<li>生成个 migration，把数据库里面&nbsp;<em>image_file_name</em>&nbsp;字段重命名为&nbsp;<em>image</em></li>
 <li>Views 里面把所有以前 Paperclip 的图片调用方式改为 Carrierwave 的调用方式 (哎，为嘛不做成一样的呢)</li>
 <li>上传图片流程不用修改</li>
 <li>routes</li>
@@ -291,10 +291,10 @@
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># coding: UTF-8</span>
 </span><span class='line'><span class="c1"># </span>
 </span><span class='line'><span class="c1"># 以下为 Rake 任务，功能是将普通文件系统里面的东西转移到 MongoDB GridFS 里面</span>
-</span><span class='line'><span class="c1"># 此代码片段来自于 Homeland 项目： https://github.com/huacnlee/homeland/tree/mysql</span>
+</span><span class='line'><span class="c1"># 此代码片段来自于 Homeland 项目：https://github.com/huacnlee/homeland/tree/mysql</span>
 </span><span class='line'><span class="c1"># 场景：</span>
 </span><span class='line'><span class="c1"># 老架构 Linux File Store, Paperclip, hash 目录:&quot;https://github.com/huacnlee/homeland/blob/ca0bdd8ab26da7b780e2dae7eba12b79f41e6d65/config/initializers/paperclip_hashpath.rb&quot;</span>
-</span><span class='line'><span class="c1"># 新架构 Mongodb GridFS, Garrierwave, 继续沿用 Paperclip 目录兼容: https://github.com/huacnlee/homeland/tree/7100ce4c506cc2c4387f25e50c533e5bbcac6cc2/app/uploaders</span>
+</span><span class='line'><span class="c1"># 新架构 Mongodb GridFS, Garrierwave, 继续沿用 Paperclip 目录兼容：https://github.com/huacnlee/homeland/tree/7100ce4c506cc2c4387f25e50c533e5bbcac6cc2/app/uploaders</span>
 </span><span class='line'><span class="c1"># 整个过程不会修改任何原始数据库和上传文件</span>
 </span><span class='line'><span class="c1">#</span>
 </span><span class='line'><span class="nb">require</span> <span class="s1">&#39;mongo&#39;</span>
@@ -308,7 +308,7 @@
 </span><span class='line'>    <span class="c1"># 处理 Photo 表的</span>
 </span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="mi">120</span>
 </span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;Import Photos&quot;</span>
-</span><span class='line'>    <span class="c1"># 定义原来的几种图片个规格,分别载入</span>
+</span><span class='line'>    <span class="c1"># 定义原来的几种图片个规格，分别载入</span>
 </span><span class='line'>    <span class="n">photos_styles</span> <span class="o">=</span> <span class="sx">%w(small normal original)</span>
 </span><span class='line'>    <span class="no">Photo</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="ss">:conditions</span> <span class="o">=&gt;</span> <span class="s1">&#39;image is not null&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">photo</span><span class="o">|</span>
 </span><span class='line'>      <span class="n">photos_styles</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">style</span><span class="o">|</span>

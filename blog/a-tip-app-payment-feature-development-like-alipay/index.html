@@ -102,20 +102,20 @@
 
 <h2>通过远程开发环境联调支付功能</h2>
 
-<p>解决方案就是:</p>
+<p>解决方案就是：</p>
 
 <p>在远程服务器上面跑开发环境调试</p>
 
 <ol>
 <li>找个速度快一些的 VPS，并把开发环境安装好</li>
-<li>VPS 上面配置 Nginx 方向代理到 http://127.0.0.1:3000, 并绑定一个真实的域名，(如: dev.huacnlee.com)</li>
+<li>VPS 上面配置 Nginx 方向代理到 http://127.0.0.1:3000, 并绑定一个真实的域名，(如：dev.huacnlee.com)</li>
 <li>通过 SSH 连到 VPS 上面，并启动项目开发环境</li>
 <li>通过 SFTP/FTP 的方式远程编辑文件，通过一些工具自动同步（你可以把你的 ssh pub key 存放服务器上面，这样连接 SFTP 的时候就不需要繁琐的输入密码)</li>
 <li>访问 dev.huacnlee.com 来调试</li>
 </ol>
 
 
-<h3>你需要下面几个软件:</h3>
+<h3>你需要下面几个软件：</h3>
 
 <p>我这里只搞过 Mac 平台的，其他平台可以寻找类似的替代方案</p>
 
@@ -126,7 +126,7 @@
 
 
 <p>用起来也很简单，先安装 <a href="https://github.com/osxfuse/osxfuse/downloads">FUSE for OS X</a>，下载以后有安装包的，这个装好了无需配置。
-然后下载 <a href="http://macfusionapp.org">Macfusion</a>，这个无需安装直接运行，界面上就几个按钮而已，如图:</p>
+然后下载 <a href="http://macfusionapp.org">Macfusion</a>，这个无需安装直接运行，界面上就几个按钮而已，如图：</p>
 
 <p><img src="http://macfusionapp.org/screenshots/mf2_main.png" alt="" /> <img src="http://macfusionapp.org/screenshots/mf2_editing.png" alt="" /></p>
 
