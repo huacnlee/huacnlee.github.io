@@ -59,6 +59,13 @@ Zed 官方以 **Community Champion Spotlight: Jason Lee** 为题，专文介绍�
 * [GORM](https://github.com/go-gorm/gorm) <span class="repo-stars" aria-hidden="true" title="39,950 GitHub stars · 2026-09-09">☆ 40k</span> — 引入[事务块 API `db.Transaction`](https://github.com/go-gorm/gorm/pull/2767) 和用于检查生成 SQL 的 [`ToSQL`](https://github.com/go-gorm/gorm/pull/4787)，并开发了 GORM 分表插件 [gorm-sharding](https://github.com/go-gorm/sharding)。
 * [Pest](https://github.com/pest-parser/pest) <span class="repo-stars" aria-hidden="true" title="5,395 GitHub stars · 2026-09-09">☆ 5.4k</span> — 增加 [Unicode Script 规则](https://github.com/pest-parser/pest/pull/751)、[多语法文件支持](https://github.com/pest-parser/pest/pull/758)，并[优化行列定位性能](https://github.com/pest-parser/pest/pull/785)。
 
+## Omarchy
+
+* [Omamail](https://github.com/huacnlee/omamail) — Omarchy 邮件插件，支持 Gmail、HEY 与 IMAP，将邮件阅读和管理融入桌面。
+* [Omasend](https://github.com/huacnlee/omasend) — 为 Omarchy 打造的原生 LocalSend 客户端，通过局域网发送文件、文件夹和文字。基于 GPUI Kit，支持 Linux、macOS 和 Windows。
+* [omarchy-mihoro](https://github.com/huacnlee/omarchy-mihoro) — Mihoro 的 Omarchy 状态栏面板，用于查看代理状态、切换 Rule / Global / Direct 模式和管理订阅。
+* [omarchy-which-key](https://github.com/huacnlee/omarchy-which-key) — 将 Which Key 体验带到桌面：按住 Super 显示快捷键提示，直接读取当前 Omarchy 与 Hyprland 的实际绑定。
+
 ## 更多开源作品
 
 * [AutoCorrect](https://github.com/huacnlee/autocorrect) <span class="repo-stars" aria-hidden="true" title="1,627 GitHub stars · 2026-09-09">☆ 1.6k</span> — 基于 Rust 的文案检查与格式化工具，处理 CJK 与英文混排中的空格、词语和标点。
@@ -81,12 +88,5 @@ Zed 官方以 **Community Champion Spotlight: Jason Lee** 为题，专文介绍�
 * [RuCaptcha](https://github.com/huacnlee/rucaptcha) <span class="repo-stars" aria-hidden="true" title="702 GitHub stars · 2026-09-09">☆ 0.7k</span> — Rails 图形验证码工具。
 * [activestorage-aliyun](https://github.com/huacnlee/activestorage-aliyun) — Active Storage 的阿里云 OSS 支持。
 * [social-share-button](https://github.com/huacnlee/social-share-button) <span class="repo-stars" aria-hidden="true" title="580 GitHub stars · 2026-09-09">☆ 0.6k</span> — Rails 社交分享插件。
-
-## Omarchy
-
-* [Omamail](https://github.com/huacnlee/omamail) — Omarchy 邮件插件，支持 Gmail、HEY 与 IMAP，将邮件阅读和管理融入桌面。
-* [Omasend](https://github.com/huacnlee/omasend) — 为 Omarchy 打造的原生 LocalSend 客户端，通过局域网发送文件、文件夹和文字。基于 GPUI Kit，支持 Linux、macOS 和 Windows。
-* [omarchy-mihoro](https://github.com/huacnlee/omarchy-mihoro) — Mihoro 的 Omarchy 状态栏面板，用于查看代理状态、切换 Rule / Global / Direct 模式和管理订阅。
-* [omarchy-which-key](https://github.com/huacnlee/omarchy-which-key) — 将 Which Key 体验带到桌面：按住 Super 显示快捷键提示，直接读取当前 Omarchy 与 Hyprland 的实际绑定。
 
 [在 GitHub 查看更多项目 →](https://github.com/huacnlee?tab=repositories)

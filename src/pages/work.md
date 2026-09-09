@@ -59,6 +59,13 @@ Zed featured my work in **Community Champion Spotlight: Jason Lee**, recognizing
 * [GORM](https://github.com/go-gorm/gorm) <span class="repo-stars" aria-hidden="true" title="39,950 GitHub stars · 2026-09-09">☆ 40k</span> — Introduced the [`db.Transaction` API](https://github.com/go-gorm/gorm/pull/2767) and [`ToSQL`](https://github.com/go-gorm/gorm/pull/4787) for transaction blocks and SQL inspection, and created [gorm-sharding](https://github.com/go-gorm/sharding), a table-sharding plugin for GORM.
 * [Pest](https://github.com/pest-parser/pest) <span class="repo-stars" aria-hidden="true" title="5,395 GitHub stars · 2026-09-09">☆ 5.4k</span> — Added [Unicode Script rules](https://github.com/pest-parser/pest/pull/751), [multiple grammar files](https://github.com/pest-parser/pest/pull/758), and [line-index performance improvements](https://github.com/pest-parser/pest/pull/785).
 
+## Omarchy
+
+* [Omamail](https://github.com/huacnlee/omamail) — A mail plugin for Omarchy with Gmail, HEY, and IMAP support. Read and manage email right from the desktop.
+* [Omasend](https://github.com/huacnlee/omasend) — A native LocalSend client for Omarchy. Share files, folders, and text over your local network. Built with GPUI Kit for Linux, macOS, and Windows.
+* [omarchy-mihoro](https://github.com/huacnlee/omarchy-mihoro) — An Omarchy bar panel for Mihoro. Monitor your proxy, switch between Rule, Global, and Direct modes, and manage subscriptions.
+* [omarchy-which-key](https://github.com/huacnlee/omarchy-which-key) — Which Key for the desktop. Hold Super to see a shortcut guide drawn from your active Omarchy and Hyprland keybindings.
+
 ## More Open Source
 
 * [AutoCorrect](https://github.com/huacnlee/autocorrect) <span class="repo-stars" aria-hidden="true" title="1,627 GitHub stars · 2026-09-09">☆ 1.6k</span> — A Rust linter and formatter for spacing, words, and punctuation in mixed CJK and English text.
@@ -81,12 +88,5 @@ Zed featured my work in **Community Champion Spotlight: Jason Lee**, recognizing
 * [RuCaptcha](https://github.com/huacnlee/rucaptcha) <span class="repo-stars" aria-hidden="true" title="702 GitHub stars · 2026-09-09">☆ 0.7k</span> — Image captchas for Rails.
 * [activestorage-aliyun](https://github.com/huacnlee/activestorage-aliyun) — Aliyun OSS support for Active Storage.
 * [social-share-button](https://github.com/huacnlee/social-share-button) <span class="repo-stars" aria-hidden="true" title="580 GitHub stars · 2026-09-09">☆ 0.6k</span> — Social sharing buttons for Rails.
-
-## Omarchy
-
-* [Omamail](https://github.com/huacnlee/omamail) — A mail plugin for Omarchy with Gmail, HEY, and IMAP support. Read and manage email right from the desktop.
-* [Omasend](https://github.com/huacnlee/omasend) — A native LocalSend client for Omarchy. Share files, folders, and text over your local network. Built with GPUI Kit for Linux, macOS, and Windows.
-* [omarchy-mihoro](https://github.com/huacnlee/omarchy-mihoro) — An Omarchy bar panel for Mihoro. Monitor your proxy, switch between Rule, Global, and Direct modes, and manage subscriptions.
-* [omarchy-which-key](https://github.com/huacnlee/omarchy-which-key) — Which Key for the desktop. Hold Super to see a shortcut guide drawn from your active Omarchy and Hyprland keybindings.
 
 [More projects on GitHub →](https://github.com/huacnlee?tab=repositories)
