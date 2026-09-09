@@ -8,5 +8,5 @@
     }
   </style>
   <path class="block" d="M0 0h40v40H0z"/>
-  <path class="letters" d="M17.5 3h5v23H40v5H0v-5h17.5z"/>
+  <path class="letters" d="M17.5-1h5v36H41v6H-1v-6h18.5z"/>
 </svg>
