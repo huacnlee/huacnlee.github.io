@@ -1,6 +1,6 @@
 ---
 layout: ../layouts/Page.astro
-title: "About"
+title: "Profile · GPUI Kit & Ruby China"
 description: "Jason Lee (huacnlee), Technical VP at Longbridge, creator of GPUI Kit (formerly GPUI Component), and co-founder of Ruby China."
 ---
 

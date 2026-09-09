@@ -5,5 +5,3 @@ dist/
 .env
 .env.*
 !.env.example
-playwright-report/
-test-results/

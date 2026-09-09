@@ -1,6 +1,6 @@
 ---
 layout: ../../layouts/Page.astro
-title: "关于我"
+title: "Profile · GPUI Kit 与 Ruby China"
 description: "李华顺（Jason Lee / huacnlee），Technical VP at Longbridge，GPUI Kit（原 GPUI Component）作者与维护者，Ruby China 联合创始人。"
 ---
 

@@ -1,7 +1,7 @@
 ---
 layout: ../../layouts/Page.astro
 title: "开源"
-description: "李华顺的开源作品：GPUI Kit、Omamail、Omasend、Omarchy 插件、AutoCorrect、GoBackup 与 Ruby China。"
+description: "李华顺的开源工作：创建 GPUI Kit，深度参与 GPUI 与 Zed 核心开发，以及 Ruby China、AutoCorrect、GoBackup 和 Rust、Rails 开发工具。"
 ---
 
 <div class="intro compact">

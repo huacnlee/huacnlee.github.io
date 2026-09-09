@@ -1,7 +1,7 @@
 ---
 layout: ../layouts/Page.astro
 title: "Opensource"
-description: "Open-source work by Jason Lee: GPUI Kit, Omamail, Omasend, Omarchy plugins, AutoCorrect, GoBackup, and Ruby China."
+description: "Jason Lee’s open-source work: creator of GPUI Kit, core contributions to GPUI and Zed, Ruby China, AutoCorrect, GoBackup, Rust and Rails tools."
 ---
 
 <div class="intro compact">

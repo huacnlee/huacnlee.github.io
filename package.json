@@ -7,8 +7,7 @@
     "dev": "bun --bun astro dev --host 0.0.0.0",
     "build": "bun --bun astro build",
     "preview": "bun --bun astro preview --host 0.0.0.0",
-    "check": "bun --bun astro check",
-    "test": "bun --bun playwright test"
+    "check": "bun --bun astro check"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.5",
@@ -28,7 +27,6 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
-    "@playwright/test": "^1.63.0",
     "@types/bun": "^1.4.2",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",

@@ -3,8 +3,8 @@ import '@fontsource-variable/geist';
 import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
 import { buttonVariants } from '../components/ui/button';
-interface Props { title: string; description: string; }
-const { title, description } = Astro.props;
+interface Props { title: string; description: string; noindex?: boolean; }
+const { title, description, noindex = false } = Astro.props;
 const path = Astro.url.pathname;
 const isZh = path === '/zh/' || path.startsWith('/zh/');
 const home = isZh ? '/zh/' : '/';
@@ -14,28 +14,71 @@ const chinesePath = `/zh${englishPath}`;
 const hasTranslation = ['/', '/work/'].includes(englishPath);
 const canonical = new URL(path, Astro.site);
 const name = isZh ? '李华顺 · Jason Lee' : 'Jason Lee';
+const pageTitle = `${title} — ${name}`;
+const siteUrl = new URL('/', Astro.site).href;
+const personId = `${siteUrl}#person`;
+const markdownPath = path.endsWith('/work/') ? `${path.slice(0, -1)}.md` : `${path}index.md`;
+const socialImage = new URL('/favicon.png', Astro.site);
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Person', '@id': personId,
+      name: 'Jason Lee', alternateName: ['李华顺', 'huacnlee'], url: siteUrl,
+      jobTitle: 'Technical VP',
+      worksFor: { '@type': 'Organization', name: 'Longbridge', url: 'https://longbridge.com/' },
+      sameAs: ['https://github.com/huacnlee', 'https://x.com/huacnlee', 'https://ruby-china.org/huacnlee'],
+    },
+    {
+      '@type': 'WebSite', '@id': `${siteUrl}#website`, url: siteUrl,
+      name: 'Jason Lee', inLanguage: ['en', 'zh-CN'], author: { '@id': personId },
+    },
+    {
+      '@type': englishPath === '/' ? 'ProfilePage' : 'CollectionPage',
+      '@id': `${canonical.href}#webpage`, url: canonical.href,
+      name: pageTitle, description, inLanguage: isZh ? 'zh-CN' : 'en',
+      isPartOf: { '@id': `${siteUrl}#website` }, author: { '@id': personId },
+      ...(englishPath === '/' ? { mainEntity: { '@id': personId } } : { about: { '@id': personId } }),
+    },
+  ],
+};
 ---
 <!doctype html>
 <html lang={isZh ? "zh-CN" : "en"}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title} — {name}</title>
+    <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <meta name="author" content="Jason Lee" />
-    <link rel="canonical" href={canonical} />
+    <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large'} />
+    {!noindex && <link rel="canonical" href={canonical} />}
+    {hasTranslation && <link rel="alternate" type="text/markdown" href={new URL(markdownPath, Astro.site)} />}
     {hasTranslation && <>
       <link rel="alternate" hreflang="en" href={new URL(englishPath, Astro.site)} />
       <link rel="alternate" hreflang="zh-CN" href={new URL(chinesePath, Astro.site)} />
       <link rel="alternate" hreflang="x-default" href={new URL(englishPath, Astro.site)} />
     </>}
     <meta property="og:locale" content={isZh ? 'zh_CN' : 'en_US'} />
+    {hasTranslation && <meta property="og:locale:alternate" content={isZh ? 'en_US' : 'zh_CN'} />}
     <link rel="icon" href="/favicon.ico?v=5" sizes="16x16 32x32 48x48" />
     <link rel="icon" href="/favicon.svg?v=5" type="image/svg+xml" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content={`${title} — ${name}`} />
+    <meta property="og:site_name" content="Jason Lee" />
+    <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:width" content="1024" />
+    <meta property="og:image:height" content="1024" />
+    <meta property="og:image:alt" content="Jason Lee — JL monogram" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:creator" content="@huacnlee" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
+    <meta name="twitter:image:alt" content="Jason Lee — JL monogram" />
+    {!noindex && <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData).replace(/</g, '\\u003c')} />}
   </head>
   <body class="min-h-screen bg-background font-mono text-foreground antialiased">
     <a class="skip-link" href="#content">{isZh ? '跳至正文' : 'Skip to content'}</a>
