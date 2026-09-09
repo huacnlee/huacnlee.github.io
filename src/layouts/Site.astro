@@ -1,0 +1,62 @@
+---
+import '@fontsource-variable/geist';
+import '@fontsource-variable/jetbrains-mono';
+import '../styles/global.css';
+import { buttonVariants } from '../components/ui/button';
+interface Props { title: string; description: string; }
+const { title, description } = Astro.props;
+const path = Astro.url.pathname;
+const isZh = path === '/zh/' || path.startsWith('/zh/');
+const home = isZh ? '/zh/' : '/';
+const works = isZh ? '/zh/work/' : '/work/';
+const englishPath = isZh ? path.replace(/^\/zh/, '') : path;
+const chinesePath = `/zh${englishPath}`;
+const hasTranslation = ['/', '/work/'].includes(englishPath);
+const canonical = new URL(path, Astro.site);
+const name = isZh ? '李华顺 · Jason Lee' : 'Jason Lee';
+---
+<!doctype html>
+<html lang={isZh ? "zh-CN" : "en"}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} — {name}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content="Jason Lee" />
+    <link rel="canonical" href={canonical} />
+    {hasTranslation && <>
+      <link rel="alternate" hreflang="en" href={new URL(englishPath, Astro.site)} />
+      <link rel="alternate" hreflang="zh-CN" href={new URL(chinesePath, Astro.site)} />
+      <link rel="alternate" hreflang="x-default" href={new URL(englishPath, Astro.site)} />
+    </>}
+    <meta property="og:locale" content={isZh ? 'zh_CN' : 'en_US'} />
+    <link rel="icon" href="/favicon.ico?v=5" sizes="16x16 32x32 48x48" />
+    <link rel="icon" href="/favicon.svg?v=5" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={`${title} — ${name}`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+  </head>
+  <body class="min-h-screen bg-background font-mono text-foreground antialiased">
+    <a class="skip-link" href="#content">{isZh ? '跳至正文' : 'Skip to content'}</a>
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <header class="site-header">
+        <nav class="site-nav" aria-label={isZh ? "主导航" : "Main navigation"}>
+          <div class="nav-pages">
+            <a class="nav-link" href={home} aria-current={path === home ? 'page' : undefined}>Profile</a>
+            <a class="nav-link" href={works} aria-current={path === works ? 'page' : undefined}>Opensource</a>
+          </div>
+          <div class="nav-external">
+            <a class="nav-link" href="https://github.com/huacnlee">GitHub</a>
+            <a class="nav-link" href="https://x.com/huacnlee">Twitter</a>
+            {hasTranslation && <a class={buttonVariants({ variant: "ghost", size: "xs" })} href={isZh ? englishPath : chinesePath} lang={isZh ? 'en' : 'zh-CN'} aria-label={isZh ? 'Switch to English' : '切换到中文'}>{isZh ? 'English' : '中文'}</a>}
+          </div>
+        </nav>
+      </header>
+      <main id="content" tabindex="-1" class="mx-auto max-w-5xl pb-16">
+        <slot />
+      </main>
+    </div>
+    <script>import "../scripts/motion";</script>
+  </body>
+</html>

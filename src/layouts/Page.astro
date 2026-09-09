@@ -1,0 +1,9 @@
+---
+import Site from './Site.astro';
+const { frontmatter } = Astro.props;
+---
+<Site title={frontmatter.title} description={frontmatter.description}>
+  <div id="page" class="page-shell">
+    <slot />
+  </div>
+</Site>
