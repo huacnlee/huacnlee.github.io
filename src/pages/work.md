@@ -83,9 +83,9 @@ Zed featured my work in **Community Champion Spotlight: Jason Lee**, recognizing
 
 * [rails-settings-cached](https://github.com/huacnlee/rails-settings-cached) <span class="repo-stars" aria-hidden="true" title="1,122 GitHub stars · 2026-09-09">☆ 1.1k</span> — Global settings for Rails applications.
 * [action-store](https://github.com/rails-engine/action-store) — Store likes, follows, bookmarks, and blocks through polymorphic associations.
-* [Notifications](https://github.com/rails-engine/notifications) — An in-app notification engine for Rails.
-* [AuditLog](https://github.com/rails-engine/audit-log) — User activity logs with a query interface.
-* [RuCaptcha](https://github.com/huacnlee/rucaptcha) <span class="repo-stars" aria-hidden="true" title="702 GitHub stars · 2026-09-09">☆ 0.7k</span> — Image captchas for Rails.
+* [notifications](https://github.com/rails-engine/notifications) — An in-app notification engine for Rails.
+* [audit-log](https://github.com/rails-engine/audit-log) — User activity logs with a query interface.
+* [rucaptcha](https://github.com/huacnlee/rucaptcha) <span class="repo-stars" aria-hidden="true" title="702 GitHub stars · 2026-09-09">☆ 0.7k</span> — Image captchas for Rails.
 * [activestorage-aliyun](https://github.com/huacnlee/activestorage-aliyun) — Aliyun OSS support for Active Storage.
 * [social-share-button](https://github.com/huacnlee/social-share-button) <span class="repo-stars" aria-hidden="true" title="580 GitHub stars · 2026-09-09">☆ 0.6k</span> — Social sharing buttons for Rails.
 

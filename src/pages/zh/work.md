@@ -83,9 +83,9 @@ Zed 官方以 **Community Champion Spotlight: Jason Lee** 为题，专文介绍�
 
 * [rails-settings-cached](https://github.com/huacnlee/rails-settings-cached) <span class="repo-stars" aria-hidden="true" title="1,122 GitHub stars · 2026-09-09">☆ 1.1k</span> — Rails 应用全局设置。
 * [action-store](https://github.com/rails-engine/action-store) — 用多态关联统一存储赞、关注、收藏与屏蔽等行为。
-* [Notifications](https://github.com/rails-engine/notifications) — Rails 应用站内通知引擎。
-* [AuditLog](https://github.com/rails-engine/audit-log) — 用户操作审计日志与查询界面。
-* [RuCaptcha](https://github.com/huacnlee/rucaptcha) <span class="repo-stars" aria-hidden="true" title="702 GitHub stars · 2026-09-09">☆ 0.7k</span> — Rails 图形验证码工具。
+* [notifications](https://github.com/rails-engine/notifications) — Rails 应用站内通知引擎。
+* [audit-log](https://github.com/rails-engine/audit-log) — 用户操作审计日志与查询界面。
+* [rucaptcha](https://github.com/huacnlee/rucaptcha) <span class="repo-stars" aria-hidden="true" title="702 GitHub stars · 2026-09-09">☆ 0.7k</span> — Rails 图形验证码工具。
 * [activestorage-aliyun](https://github.com/huacnlee/activestorage-aliyun) — Active Storage 的阿里云 OSS 支持。
 * [social-share-button](https://github.com/huacnlee/social-share-button) <span class="repo-stars" aria-hidden="true" title="580 GitHub stars · 2026-09-09">☆ 0.6k</span> — Rails 社交分享插件。
 
