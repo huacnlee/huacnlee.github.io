@@ -1,0 +1,150 @@
+{
+  "asOf": "2026-09-09",
+  "repositories": {
+    "gitlabhq/gitlabhq": {
+      "nameWithOwner": "gitlabhq/gitlabhq",
+      "stargazerCount": 24546,
+      "url": "https://github.com/gitlabhq/gitlabhq"
+    },
+    "go-gorm/gorm": {
+      "nameWithOwner": "go-gorm/gorm",
+      "stargazerCount": 39950,
+      "url": "https://github.com/go-gorm/gorm"
+    },
+    "go-gorm/sharding": {
+      "nameWithOwner": "go-gorm/sharding",
+      "stargazerCount": 333,
+      "url": "https://github.com/go-gorm/sharding"
+    },
+    "gobackup/gobackup": {
+      "nameWithOwner": "gobackup/gobackup",
+      "stargazerCount": 2949,
+      "url": "https://github.com/gobackup/gobackup"
+    },
+    "huacnlee/activestorage-aliyun": {
+      "nameWithOwner": "huacnlee/activestorage-aliyun",
+      "stargazerCount": 137,
+      "url": "https://github.com/huacnlee/activestorage-aliyun"
+    },
+    "huacnlee/autocorrect": {
+      "nameWithOwner": "huacnlee/autocorrect",
+      "stargazerCount": 1627,
+      "url": "https://github.com/huacnlee/autocorrect"
+    },
+    "huacnlee/bluedoc": {
+      "nameWithOwner": "huacnlee/bluedoc",
+      "stargazerCount": 633,
+      "url": "https://github.com/huacnlee/bluedoc"
+    },
+    "huacnlee/omamail": {
+      "nameWithOwner": "huacnlee/omamail",
+      "stargazerCount": 187,
+      "url": "https://github.com/huacnlee/omamail"
+    },
+    "huacnlee/omarchy-mihoro": {
+      "nameWithOwner": "huacnlee/omarchy-mihoro",
+      "stargazerCount": 118,
+      "url": "https://github.com/huacnlee/omarchy-mihoro"
+    },
+    "huacnlee/omarchy-which-key": {
+      "nameWithOwner": "huacnlee/omarchy-which-key",
+      "stargazerCount": 23,
+      "url": "https://github.com/huacnlee/omarchy-which-key"
+    },
+    "huacnlee/omasend": {
+      "nameWithOwner": "huacnlee/omasend",
+      "stargazerCount": 23,
+      "url": "https://github.com/huacnlee/omasend"
+    },
+    "huacnlee/rails-settings-cached": {
+      "nameWithOwner": "huacnlee/rails-settings-cached",
+      "stargazerCount": 1122,
+      "url": "https://github.com/huacnlee/rails-settings-cached"
+    },
+    "huacnlee/rucaptcha": {
+      "nameWithOwner": "huacnlee/rucaptcha",
+      "stargazerCount": 702,
+      "url": "https://github.com/huacnlee/rucaptcha"
+    },
+    "huacnlee/social-share-button": {
+      "nameWithOwner": "huacnlee/social-share-button",
+      "stargazerCount": 580,
+      "url": "https://github.com/huacnlee/social-share-button"
+    },
+    "longbridge/gpui-kit": {
+      "nameWithOwner": "longbridge/gpui-kit",
+      "stargazerCount": 14185,
+      "url": "https://github.com/longbridge/gpui-kit"
+    },
+    "longbridge/rust-i18n": {
+      "nameWithOwner": "longbridge/rust-i18n",
+      "stargazerCount": 665,
+      "url": "https://github.com/longbridge/rust-i18n"
+    },
+    "pest-parser/pest": {
+      "nameWithOwner": "pest-parser/pest",
+      "stargazerCount": 5395,
+      "url": "https://github.com/pest-parser/pest"
+    },
+    "rails-engine/action-store": {
+      "nameWithOwner": "rails-engine/action-store",
+      "stargazerCount": 407,
+      "url": "https://github.com/rails-engine/action-store"
+    },
+    "rails-engine/audit-log": {
+      "nameWithOwner": "rails-engine/audit-log",
+      "stargazerCount": 177,
+      "url": "https://github.com/rails-engine/audit-log"
+    },
+    "rails-engine/notifications": {
+      "nameWithOwner": "rails-engine/notifications",
+      "stargazerCount": 382,
+      "url": "https://github.com/rails-engine/notifications"
+    },
+    "rails/rails": {
+      "nameWithOwner": "rails/rails",
+      "stargazerCount": 58750,
+      "url": "https://github.com/rails/rails"
+    },
+    "ruby-china/homeland": {
+      "nameWithOwner": "ruby-china/homeland",
+      "stargazerCount": 3859,
+      "url": "https://github.com/ruby-china/homeland"
+    },
+    "zed-industries/zed": {
+      "nameWithOwner": "zed-industries/zed",
+      "stargazerCount": 89985,
+      "url": "https://github.com/zed-industries/zed"
+    },
+    "tauri-apps/wry": {
+      "nameWithOwner": "tauri-apps/wry",
+      "stargazerCount": 4953,
+      "url": "https://github.com/tauri-apps/wry"
+    },
+    "eggjs/egg-sequelize": {
+      "nameWithOwner": "eggjs/egg-sequelize",
+      "stargazerCount": 613,
+      "url": "https://github.com/eggjs/egg-sequelize"
+    },
+    "mdn/translated-content": {
+      "nameWithOwner": "mdn/translated-content",
+      "stargazerCount": 2029,
+      "url": "https://github.com/mdn/translated-content"
+    },
+    "tree-sitter/tree-sitter-rust": {
+      "nameWithOwner": "tree-sitter/tree-sitter-rust",
+      "stargazerCount": 530,
+      "url": "https://github.com/tree-sitter/tree-sitter-rust"
+    },
+    "kvark/blade": {
+      "nameWithOwner": "kvark/blade",
+      "stargazerCount": 806,
+      "url": "https://github.com/kvark/blade"
+    },
+    "ruby-china/ruby-china": {
+      "nameWithOwner": "ruby-china/homeland",
+      "stargazerCount": 3859,
+      "url": "https://github.com/ruby-china/homeland"
+    }
+  }
+}
