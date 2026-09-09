@@ -27,6 +27,8 @@ GitHub 公开搜索返回 116 个由 huacnlee 发起、已合并到 `zed-industr
 | 路径抗锯齿 | [#22812](https://github.com/zed-industries/zed/pull/22812) | 2025-01-29 | 在 Metal 与 Blade 路径绘制中引入 MSAA；后续有相关调整，不宣称当前实现仍完全相同。 |
 | 路径渲染重构与全局 MSAA | [#29718](https://github.com/zed-industries/zed/pull/29718) | 2025-07-02 | 移除每条路径单独创建纹理，直接绘制到渲染目标并引入全局多重采样抗锯齿，降低显存开销、改善性能。PR 中的 5 GB 是作者应用中的具体场景，不作为通用节省量。 |
 | macOS 系统字体裁切 | [#47001](https://github.com/zed-industries/zed/pull/47001) | 2026-03-19 | 继续修复 `.SystemUIFont` 渲染时字形被裁切的问题；PR 展示了系统字体及 ZedMono、ZedSans、Monaco、Menlo 的验证效果。 |
+| SVG 图像颜色 | [#15488](https://github.com/zed-industries/zed/pull/15488) | 2024-09-17 | 修正 RGBA 到 BGRA 的通道转换，让 img 元素正确显示 SVG 颜色。 |
+| 文本截断与省略 | [#14850](https://github.com/zed-industries/zed/pull/14850) | 2024-08-23 | 为 TextStyle 增加 truncate 与 text_ellipsis，提供文本截断和省略能力。 |
 | 多行文本截断 | [#23058](https://github.com/zed-industries/zed/pull/23058) | 2025-01-29 | 新增 line_clamp，按指定行数截断文本，并调整 truncate 与文本布局的配合。 |
 | 文本装饰对齐 | [#24721](https://github.com/zed-industries/zed/pull/24721) | 2025-03-15 | 修复居中、右对齐文本的下划线和删除线位置。 |
 | 文字交互样式 | [#24723](https://github.com/zed-industries/zed/pull/24723) | 2025-04-10 | 修复文字 hover / active 样式，支持正确显示链接悬停颜色。 |
