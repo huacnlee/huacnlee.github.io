@@ -19,7 +19,7 @@ description: "李华顺的开源工作：创建 GPUI Kit，深度参与 GPUI 与
     </div>
     <div class="featured-body">
       <p class="featured-lead">自 2024 年起，我创建并维护 GPUI Kit，一个基于 GPUI 的桌面应用框架，前身是 GPUI Component。</p>
-      <p>它涵盖 UI 组件、布局、编辑器和应用开发工具，支持 macOS、Windows 和 Linux。我深度参与 GPUI 核心开发，为框架引入线性渐变、Tab 焦点导航与矢量路径构建，同时在 GPUI Kit 中持续完善应用层能力。</p>
+      <p>它涵盖 UI 组件、布局、编辑器和应用开发工具，支持 macOS、Windows 和 Linux。我深度参与 GPUI 核心开发，为框架引入 MSAA 路径抗锯齿、线性渐变、Tab 焦点导航与矢量路径构建，同时在 GPUI Kit 中持续完善应用层能力。</p>
       <dl class="featured-capabilities">
         <div><dt>界面构建</dt><dd>从 UI 组件、数据表格到 Dock 布局与图表，支持桌面界面的开发。</dd></div>
         <div><dt>应用开发</dt><dd>提供代码编辑器与应用开发工具，用于构建 Longbridge Pro 等原生应用。</dd></div>
@@ -38,9 +38,9 @@ description: "李华顺的开源工作：创建 GPUI Kit，深度参与 GPUI 与
 
 自 2024 年 2 月起，我向 Zed 和 GPUI 提交了超过 100 个已合并 PR，工作横跨编辑器、底层渲染框架与原生平台集成。许多改进连接着 Zed 自身的需求，以及我在 Longbridge Pro 和 GPUI Kit 中的开发实践。
 
-* **图形与渲染。** 引入[线性渐变](https://github.com/zed-industries/zed/pull/20812)、[矢量路径构建](https://github.com/zed-industries/zed/pull/22808)与[元素透明度](https://github.com/zed-industries/zed/pull/17132)，改进路径抗锯齿和圆角裁剪。
-* **文字与排版。** 修复 [Zed 编辑器](https://github.com/zed-industries/zed/pull/11296)及 [GPUI 文字渲染](https://github.com/zed-industries/zed/pull/17737)的中日韩文字换行，增加[多行截断](https://github.com/zed-industries/zed/pull/23058)，修复 macOS 字体裁切问题。
-* **交互与性能。** 增加 [Tab 焦点导航](https://github.com/zed-industries/zed/pull/33008)和键盘激活，修复[嵌套浮层与延迟绘制](https://github.com/zed-industries/zed/pull/47770)，[减少滚动和鼠标交互中的无效刷新](https://github.com/zed-industries/zed/pull/25009)。
+* **图形与渲染。** 为 Metal 与 Blade 的路径渲染引入 [MSAA 多重采样抗锯齿](https://github.com/zed-industries/zed/pull/22812)，改善矢量图形的边缘质量。增加[线性渐变](https://github.com/zed-industries/zed/pull/20812)、[矢量路径构建](https://github.com/zed-industries/zed/pull/22808)与[元素透明度](https://github.com/zed-industries/zed/pull/17132)，并改进圆角裁剪。
+* **文字与排版。** 增加 [`line_clamp` 多行文本截断](https://github.com/zed-industries/zed/pull/23058)，修复[居中和右对齐文字的下划线、删除线位置](https://github.com/zed-industries/zed/pull/24721)，以及[文字 hover 与 active 样式](https://github.com/zed-industries/zed/pull/24723)，让链接悬停颜色正确生效。同时修复 [Zed 编辑器](https://github.com/zed-industries/zed/pull/11296)及 [GPUI](https://github.com/zed-industries/zed/pull/17737) 的中日韩文字换行和 macOS 字体裁切问题。
+* **交互与性能。** [减少整窗刷新，提高缓存视图的命中率](https://github.com/zed-industries/zed/pull/25009)，避免滚动与鼠标交互中不必要的渲染调用。增加 [Tab 焦点导航](https://github.com/zed-industries/zed/pull/33008)和键盘激活，并修复[嵌套浮层与延迟绘制](https://github.com/zed-industries/zed/pull/47770)。
 * **原生平台支持。** 完善 Windows 窗口行为、[运行时与语言服务安装](https://github.com/zed-industries/zed/pull/11156)、[文件路径匹配](https://github.com/zed-industries/zed/pull/12357)，并让 macOS 的[原生窗口外观跟随编辑器主题](https://github.com/zed-industries/zed/pull/58902)。
 * **编辑器使用体验。** 改进 Rust 语法高亮、[扩展安装后的主题选择](https://github.com/zed-industries/zed/pull/9529)、[状态栏行列跳转](https://github.com/zed-industries/zed/pull/9002)和[终端任务重跑](https://github.com/zed-industries/zed/pull/12379)，以及 Markdown 预览和菜单细节。
 

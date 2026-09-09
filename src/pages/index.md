@@ -21,7 +21,7 @@ description: "Jason Lee (huacnlee), Technical VP at Longbridge, creator of GPUI 
 
 Since 2024, I’ve been building and maintaining [GPUI Kit](https://gpui-kit.com/), a Rust desktop application framework built on GPUI, formerly known as GPUI Component. It covers UI components, layouts, editors, and application development tools, with support for macOS, Windows, and Linux.
 
-My contributions to GPUI’s core include linear gradients, Tab focus navigation, and vector path construction, alongside improvements to text rendering, Windows support, and rendering performance. [Zed’s official spotlight](https://zed.dev/blog/community-champion-jason-lee) recognizes my work on GPUI and its ecosystem.
+My contributions to GPUI’s core include MSAA path anti-aliasing, linear gradients, Tab focus navigation, and vector path construction, alongside improvements to text rendering, Windows support, and rendering performance. [Zed’s official spotlight](https://zed.dev/blog/community-champion-jason-lee) recognizes my work on GPUI and its ecosystem.
 
 In GPUI Kit, I continue to develop the application layer so more developers can build fast, polished native apps in Rust. Through GPUI Shell, these apps can also support plugins and extensions written in JavaScript.
 

@@ -21,7 +21,7 @@ description: "李华顺（Jason Lee / huacnlee），Technical VP at Longbridge�
 
 自 2024 年起，我创建并维护 [GPUI Kit](https://gpui-kit.com/)，一个基于 GPUI 的 Rust 桌面应用框架，前身是 GPUI Component。它涵盖 UI 组件、布局、编辑器和应用开发工具，支持 macOS、Windows 和 Linux。
 
-我深度参与 GPUI 核心开发，为框架引入线性渐变、Tab 焦点导航和矢量路径构建，并持续改进文字渲染、Windows 支持与渲染性能。[Zed 官方专文](https://zed.dev/blog/community-champion-jason-lee)介绍了我对 GPUI 及其生态的贡献。
+我深度参与 GPUI 核心开发，为框架引入 MSAA 路径抗锯齿、线性渐变、Tab 焦点导航和矢量路径构建，并持续改进文字渲染、Windows 支持与渲染性能。[Zed 官方专文](https://zed.dev/blog/community-champion-jason-lee)介绍了我对 GPUI 及其生态的贡献。
 
 在 GPUI Kit 中，我持续完善应用层能力，让更多开发者能够用 Rust 构建快速、精致的原生应用。通过 GPUI Shell，这些应用还可以用 JavaScript 编写插件和扩展。
 
