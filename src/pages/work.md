@@ -1,12 +1,12 @@
 ---
 layout: ../layouts/Page.astro
-title: "Opensource"
-description: "Open-source work by Jason Lee: GPUI Kit, Omamail, Omasend, Omarchy plugins, AutoCorrect, GoBackup, and Ruby China."
+title: "OPEN SOURCE"
+description: "Jason Lee’s open-source work: creator of GPUI Kit, core contributions to GPUI and Zed, Ruby China, AutoCorrect, GoBackup, Rust and Rails tools."
 ---
 
 <div class="intro compact">
   <p class="eyebrow">CURRENTLY BUILDING</p>
-  <h1>Opensource</h1>
+  <h1>OPEN SOURCE</h1>
   <p class="lead">The projects I’m actively building and improving.</p>
 </div>
 
@@ -19,7 +19,7 @@ description: "Open-source work by Jason Lee: GPUI Kit, Omamail, Omasend, Omarchy
     </div>
     <div class="featured-body">
       <p class="featured-lead">Since 2024, I’ve been building and maintaining GPUI Kit, a desktop application framework built on GPUI, formerly known as GPUI Component.</p>
-      <p>It brings UI components, layouts, editors, and application development tools together for macOS, Windows, and Linux. My work on GPUI’s core includes linear gradients, Tab focus navigation, and vector path construction, alongside the application layer I continue to build in GPUI Kit.</p>
+      <p>It brings UI components, layouts, editors, and application development tools together for macOS, Windows, and Linux. My work on GPUI’s core includes MSAA path anti-aliasing, linear gradients, Tab focus navigation, and vector path construction, alongside the application layer I continue to build in GPUI Kit.</p>
       <dl class="featured-capabilities">
         <div><dt>Interfaces</dt><dd>Components, data tables, docking, and charts for building desktop interfaces.</dd></div>
         <div><dt>Applications</dt><dd>A code editor and application tools, used in native apps such as Longbridge Pro.</dd></div>
@@ -38,11 +38,10 @@ I contribute improvements from real projects back to the tools and frameworks I 
 
 Since February 2024, I’ve contributed more than 100 merged PRs to Zed and GPUI, spanning the editor, its rendering framework, and native platform integration. Much of this work connects the needs of Zed with what I learn building Longbridge Pro and GPUI Kit.
 
-* **Graphics and rendering.** Introduced [linear gradients](https://github.com/zed-industries/zed/pull/20812), [vector path construction](https://github.com/zed-industries/zed/pull/22808), and [element opacity](https://github.com/zed-industries/zed/pull/17132), alongside path anti-aliasing and rounded clipping improvements.
-* **Text and typography.** Fixed CJK wrapping in both [Zed’s editor](https://github.com/zed-industries/zed/pull/11296) and [GPUI text rendering](https://github.com/zed-industries/zed/pull/17737); added [multi-line truncation](https://github.com/zed-industries/zed/pull/23058) and corrected font clipping on macOS.
-* **Interaction and performance.** Added [Tab focus navigation](https://github.com/zed-industries/zed/pull/33008) and keyboard activation, fixed [nested popovers and deferred rendering](https://github.com/zed-industries/zed/pull/47770), and [reduced unnecessary refreshes](https://github.com/zed-industries/zed/pull/25009) during scrolling and mouse interaction.
-* **Native platform support.** Improved Windows window behavior, [runtime and language-server installation](https://github.com/zed-industries/zed/pull/11156), and [file-path matching](https://github.com/zed-industries/zed/pull/12357). On macOS, I made [native window appearance follow the selected theme](https://github.com/zed-industries/zed/pull/58902).
-* **Everyday editor workflows.** Improved Rust syntax highlighting, [theme selection after installing extensions](https://github.com/zed-industries/zed/pull/9529), [status-bar line navigation](https://github.com/zed-industries/zed/pull/9002), and [rerunning tasks from the terminal](https://github.com/zed-industries/zed/pull/12379), alongside Markdown preview and menu refinements.
+* **Graphics and rendering.** Helped lay the foundation for arbitrary path drawing in GPUI through [vector path construction](https://github.com/zed-industries/zed/pull/22808), [MSAA anti-aliasing](https://github.com/zed-industries/zed/pull/22812), and [a reworked path renderer](https://github.com/zed-industries/zed/pull/29718). Together, these provide the groundwork for custom vector graphics and chart rendering, with smoother edges and lower GPU memory overhead.
+* **Text and typography.** Improved CJK wrapping, [multi-line truncation](https://github.com/zed-industries/zed/pull/23058), font rendering, and interactive text styles—making text more reliable across layouts and states.
+* **Interaction and performance.** Added [keyboard focus navigation](https://github.com/zed-industries/zed/pull/33008) and activation, and [improved view caching](https://github.com/zed-industries/zed/pull/25009) to reduce unnecessary rendering during scrolling and mouse interaction.
+* **Native platforms and editor experience.** Improved Windows integration and macOS rendering, alongside everyday Zed workflows such as theme switching, file navigation, and terminal tasks.
 
 I’m also developing proposals for [native window composition](https://github.com/zed-industries/zed/pull/62379), [GPUI overlays above native child views](https://github.com/zed-industries/zed/pull/61945), and [glass-surface rendering](https://github.com/zed-industries/zed/pull/58833). These are ongoing upstream proposals, extending how GPUI works with embedded native content.
 
@@ -58,6 +57,13 @@ Zed featured my work in **Community Champion Spotlight: Jason Lee**, recognizing
 * [GitLab](https://github.com/gitlabhq/gitlabhq) <span class="repo-stars" aria-hidden="true" title="24,546 GitHub stars · 2026-09-09">☆ 24.5k</span> — Improved [settings caching](https://github.com/gitlabhq/gitlabhq/pull/9825), [permission-check performance](https://github.com/gitlabhq/gitlabhq/pull/9915), and view rendering alongside maintaining Alibaba’s GitLab.
 * [GORM](https://github.com/go-gorm/gorm) <span class="repo-stars" aria-hidden="true" title="39,950 GitHub stars · 2026-09-09">☆ 40k</span> — Introduced the [`db.Transaction` API](https://github.com/go-gorm/gorm/pull/2767) and [`ToSQL`](https://github.com/go-gorm/gorm/pull/4787) for transaction blocks and SQL inspection, and created [gorm-sharding](https://github.com/go-gorm/sharding), a table-sharding plugin for GORM.
 * [Pest](https://github.com/pest-parser/pest) <span class="repo-stars" aria-hidden="true" title="5,395 GitHub stars · 2026-09-09">☆ 5.4k</span> — Added [Unicode Script rules](https://github.com/pest-parser/pest/pull/751), [multiple grammar files](https://github.com/pest-parser/pest/pull/758), and [line-index performance improvements](https://github.com/pest-parser/pest/pull/785).
+
+## Omarchy
+
+* [Omamail](https://github.com/huacnlee/omamail) — A mail plugin for Omarchy with Gmail, HEY, and IMAP support. Read and manage email right from the desktop.
+* [Omasend](https://github.com/huacnlee/omasend) — A native LocalSend client for Omarchy. Share files, folders, and text over your local network. Built with GPUI Kit for Linux, macOS, and Windows.
+* [Omarchy Mihoro](https://github.com/huacnlee/omarchy-mihoro) — An Omarchy bar panel for Mihoro. Monitor your proxy, switch between Rule, Global, and Direct modes, and manage subscriptions.
+* [Omarchy WhichKey](https://github.com/huacnlee/omarchy-which-key) — Which Key for the desktop. Hold Super to see a shortcut guide drawn from your active Omarchy and Hyprland keybindings.
 
 ## More Open Source
 
@@ -75,18 +81,11 @@ Zed featured my work in **Community Champion Spotlight: Jason Lee**, recognizing
 ## Rails Tools
 
 * [rails-settings-cached](https://github.com/huacnlee/rails-settings-cached) <span class="repo-stars" aria-hidden="true" title="1,122 GitHub stars · 2026-09-09">☆ 1.1k</span> — Global settings for Rails applications.
-* [ActionStore](https://github.com/rails-engine/action-store) — Store likes, follows, bookmarks, and blocks through polymorphic associations.
-* [Notifications](https://github.com/rails-engine/notifications) — An in-app notification engine for Rails.
-* [AuditLog](https://github.com/rails-engine/audit-log) — User activity logs with a query interface.
-* [RuCaptcha](https://github.com/huacnlee/rucaptcha) <span class="repo-stars" aria-hidden="true" title="702 GitHub stars · 2026-09-09">☆ 0.7k</span> — Image captchas for Rails.
+* [action-store](https://github.com/rails-engine/action-store) — Store likes, follows, bookmarks, and blocks through polymorphic associations.
+* [notifications](https://github.com/rails-engine/notifications) — An in-app notification engine for Rails.
+* [audit-log](https://github.com/rails-engine/audit-log) — User activity logs with a query interface.
+* [rucaptcha](https://github.com/huacnlee/rucaptcha) <span class="repo-stars" aria-hidden="true" title="702 GitHub stars · 2026-09-09">☆ 0.7k</span> — Image captchas for Rails.
 * [activestorage-aliyun](https://github.com/huacnlee/activestorage-aliyun) — Aliyun OSS support for Active Storage.
 * [social-share-button](https://github.com/huacnlee/social-share-button) <span class="repo-stars" aria-hidden="true" title="580 GitHub stars · 2026-09-09">☆ 0.6k</span> — Social sharing buttons for Rails.
-
-## Omarchy
-
-* [Omamail](https://github.com/huacnlee/omamail) — A mail plugin for Omarchy with Gmail, HEY, and IMAP support. Read and manage email right from the desktop.
-* [Omasend](https://github.com/huacnlee/omasend) — A native LocalSend client for Omarchy. Share files, folders, and text over your local network. Built with GPUI Kit for Linux, macOS, and Windows.
-* [omarchy-mihoro](https://github.com/huacnlee/omarchy-mihoro) — An Omarchy bar panel for Mihoro. Monitor your proxy, switch between Rule, Global, and Direct modes, and manage subscriptions.
-* [omarchy-which-key](https://github.com/huacnlee/omarchy-which-key) — Which Key for the desktop. Hold Super to see a shortcut guide drawn from your active Omarchy and Hyprland keybindings.
 
 [More projects on GitHub →](https://github.com/huacnlee?tab=repositories)

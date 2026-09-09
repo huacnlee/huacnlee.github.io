@@ -1,7 +1,7 @@
 ---
 layout: ../../layouts/Page.astro
 title: "开源"
-description: "李华顺的开源作品：GPUI Kit、Omamail、Omasend、Omarchy 插件、AutoCorrect、GoBackup 与 Ruby China。"
+description: "李华顺的开源工作：创建 GPUI Kit，深度参与 GPUI 与 Zed 核心开发，以及 Ruby China、AutoCorrect、GoBackup 和 Rust、Rails 开发工具。"
 ---
 
 <div class="intro compact">
@@ -19,7 +19,7 @@ description: "李华顺的开源作品：GPUI Kit、Omamail、Omasend、Omarchy 
     </div>
     <div class="featured-body">
       <p class="featured-lead">自 2024 年起，我创建并维护 GPUI Kit，一个基于 GPUI 的桌面应用框架，前身是 GPUI Component。</p>
-      <p>它涵盖 UI 组件、布局、编辑器和应用开发工具，支持 macOS、Windows 和 Linux。我深度参与 GPUI 核心开发，为框架引入线性渐变、Tab 焦点导航与矢量路径构建，同时在 GPUI Kit 中持续完善应用层能力。</p>
+      <p>它涵盖 UI 组件、布局、编辑器和应用开发工具，支持 macOS、Windows 和 Linux。我深度参与 GPUI 核心开发，为框架引入 MSAA 路径抗锯齿、线性渐变、Tab 焦点导航与矢量路径构建，同时在 GPUI Kit 中持续完善应用层能力。</p>
       <dl class="featured-capabilities">
         <div><dt>界面构建</dt><dd>从 UI 组件、数据表格到 Dock 布局与图表，支持桌面界面的开发。</dd></div>
         <div><dt>应用开发</dt><dd>提供代码编辑器与应用开发工具，用于构建 Longbridge Pro 等原生应用。</dd></div>
@@ -38,11 +38,10 @@ description: "李华顺的开源作品：GPUI Kit、Omamail、Omasend、Omarchy 
 
 自 2024 年 2 月起，我向 Zed 和 GPUI 提交了超过 100 个已合并 PR，工作横跨编辑器、底层渲染框架与原生平台集成。许多改进连接着 Zed 自身的需求，以及我在 Longbridge Pro 和 GPUI Kit 中的开发实践。
 
-* **图形与渲染。** 引入[线性渐变](https://github.com/zed-industries/zed/pull/20812)、[矢量路径构建](https://github.com/zed-industries/zed/pull/22808)与[元素透明度](https://github.com/zed-industries/zed/pull/17132)，改进路径抗锯齿和圆角裁剪。
-* **文字与排版。** 修复 [Zed 编辑器](https://github.com/zed-industries/zed/pull/11296)及 [GPUI 文字渲染](https://github.com/zed-industries/zed/pull/17737)的中日韩文字换行，增加[多行截断](https://github.com/zed-industries/zed/pull/23058)，修复 macOS 字体裁切问题。
-* **交互与性能。** 增加 [Tab 焦点导航](https://github.com/zed-industries/zed/pull/33008)和键盘激活，修复[嵌套浮层与延迟绘制](https://github.com/zed-industries/zed/pull/47770)，[减少滚动和鼠标交互中的无效刷新](https://github.com/zed-industries/zed/pull/25009)。
-* **原生平台支持。** 完善 Windows 窗口行为、[运行时与语言服务安装](https://github.com/zed-industries/zed/pull/11156)、[文件路径匹配](https://github.com/zed-industries/zed/pull/12357)，并让 macOS 的[原生窗口外观跟随编辑器主题](https://github.com/zed-industries/zed/pull/58902)。
-* **编辑器使用体验。** 改进 Rust 语法高亮、[扩展安装后的主题选择](https://github.com/zed-industries/zed/pull/9529)、[状态栏行列跳转](https://github.com/zed-industries/zed/pull/9002)和[终端任务重跑](https://github.com/zed-industries/zed/pull/12379)，以及 Markdown 预览和菜单细节。
+* **图形与渲染。** 通过[矢量路径构建](https://github.com/zed-industries/zed/pull/22808)、[MSAA 抗锯齿](https://github.com/zed-industries/zed/pull/22812)与[路径渲染重构](https://github.com/zed-industries/zed/pull/29718)，为 GPUI 的任意路径绘制奠定基础，支撑自定义矢量图形与各类图表的绘制，同时改善边缘质量、降低显存开销。
+* **文字与排版。** 完善中日韩文字换行、[多行截断](https://github.com/zed-industries/zed/pull/23058)、字体渲染与交互样式，让文字在不同布局和状态下稳定呈现。
+* **交互与性能。** 增加[键盘焦点导航](https://github.com/zed-industries/zed/pull/33008)与激活能力，并[改善视图缓存](https://github.com/zed-industries/zed/pull/25009)，减少滚动和鼠标交互中的不必要渲染。
+* **原生平台与编辑器体验。** 完善 Windows 集成与 macOS 渲染，同时改进 Zed 的主题切换、文件导航和终端任务等日常使用体验。
 
 近期，我还在推进[原生窗口合成](https://github.com/zed-industries/zed/pull/62379)、[原生子视图之上的 GPUI 浮层](https://github.com/zed-industries/zed/pull/61945)与[玻璃表面渲染](https://github.com/zed-industries/zed/pull/58833)等上游提案，扩展 GPUI 与嵌入式原生内容协同工作的能力。
 
@@ -58,6 +57,13 @@ Zed 官方以 **Community Champion Spotlight: Jason Lee** 为题，专文介绍�
 * [GitLab](https://github.com/gitlabhq/gitlabhq) <span class="repo-stars" aria-hidden="true" title="24,546 GitHub stars · 2026-09-09">☆ 24.5k</span> — 在维护阿里集团 GitLab 的同时，贡献[配置缓存](https://github.com/gitlabhq/gitlabhq/pull/9825)、[权限判断性能](https://github.com/gitlabhq/gitlabhq/pull/9915)与视图渲染优化。
 * [GORM](https://github.com/go-gorm/gorm) <span class="repo-stars" aria-hidden="true" title="39,950 GitHub stars · 2026-09-09">☆ 40k</span> — 引入[事务块 API `db.Transaction`](https://github.com/go-gorm/gorm/pull/2767) 和用于检查生成 SQL 的 [`ToSQL`](https://github.com/go-gorm/gorm/pull/4787)，并开发了 GORM 分表插件 [gorm-sharding](https://github.com/go-gorm/sharding)。
 * [Pest](https://github.com/pest-parser/pest) <span class="repo-stars" aria-hidden="true" title="5,395 GitHub stars · 2026-09-09">☆ 5.4k</span> — 增加 [Unicode Script 规则](https://github.com/pest-parser/pest/pull/751)、[多语法文件支持](https://github.com/pest-parser/pest/pull/758)，并[优化行列定位性能](https://github.com/pest-parser/pest/pull/785)。
+
+## Omarchy
+
+* [Omamail](https://github.com/huacnlee/omamail) — Omarchy 邮件插件，支持 Gmail、HEY 与 IMAP，将邮件阅读和管理融入桌面。
+* [Omasend](https://github.com/huacnlee/omasend) — 为 Omarchy 打造的原生 LocalSend 客户端，通过局域网发送文件、文件夹和文字。基于 GPUI Kit，支持 Linux、macOS 和 Windows。
+* [Omarchy Mihoro](https://github.com/huacnlee/omarchy-mihoro) — Mihoro 的 Omarchy 状态栏面板，用于查看代理状态、切换 Rule / Global / Direct 模式和管理订阅。
+* [Omarchy WhichKey](https://github.com/huacnlee/omarchy-which-key) — 将 Which Key 体验带到桌面：按住 Super 显示快捷键提示，直接读取当前 Omarchy 与 Hyprland 的实际绑定。
 
 ## 更多开源作品
 
@@ -75,18 +81,11 @@ Zed 官方以 **Community Champion Spotlight: Jason Lee** 为题，专文介绍�
 ## Rails 工具
 
 * [rails-settings-cached](https://github.com/huacnlee/rails-settings-cached) <span class="repo-stars" aria-hidden="true" title="1,122 GitHub stars · 2026-09-09">☆ 1.1k</span> — Rails 应用全局设置。
-* [ActionStore](https://github.com/rails-engine/action-store) — 用多态关联统一存储赞、关注、收藏与屏蔽等行为。
-* [Notifications](https://github.com/rails-engine/notifications) — Rails 应用站内通知引擎。
-* [AuditLog](https://github.com/rails-engine/audit-log) — 用户操作审计日志与查询界面。
-* [RuCaptcha](https://github.com/huacnlee/rucaptcha) <span class="repo-stars" aria-hidden="true" title="702 GitHub stars · 2026-09-09">☆ 0.7k</span> — Rails 图形验证码工具。
+* [action-store](https://github.com/rails-engine/action-store) — 用多态关联统一存储赞、关注、收藏与屏蔽等行为。
+* [notifications](https://github.com/rails-engine/notifications) — Rails 应用站内通知引擎。
+* [audit-log](https://github.com/rails-engine/audit-log) — 用户操作审计日志与查询界面。
+* [rucaptcha](https://github.com/huacnlee/rucaptcha) <span class="repo-stars" aria-hidden="true" title="702 GitHub stars · 2026-09-09">☆ 0.7k</span> — Rails 图形验证码工具。
 * [activestorage-aliyun](https://github.com/huacnlee/activestorage-aliyun) — Active Storage 的阿里云 OSS 支持。
 * [social-share-button](https://github.com/huacnlee/social-share-button) <span class="repo-stars" aria-hidden="true" title="580 GitHub stars · 2026-09-09">☆ 0.6k</span> — Rails 社交分享插件。
-
-## Omarchy
-
-* [Omamail](https://github.com/huacnlee/omamail) — Omarchy 邮件插件，支持 Gmail、HEY 与 IMAP，将邮件阅读和管理融入桌面。
-* [Omasend](https://github.com/huacnlee/omasend) — 为 Omarchy 打造的原生 LocalSend 客户端，通过局域网发送文件、文件夹和文字。基于 GPUI Kit，支持 Linux、macOS 和 Windows。
-* [omarchy-mihoro](https://github.com/huacnlee/omarchy-mihoro) — Mihoro 的 Omarchy 状态栏面板，用于查看代理状态、切换 Rule / Global / Direct 模式和管理订阅。
-* [omarchy-which-key](https://github.com/huacnlee/omarchy-which-key) — 将 Which Key 体验带到桌面：按住 Super 显示快捷键提示，直接读取当前 Omarchy 与 Hyprland 的实际绑定。
 
 [在 GitHub 查看更多项目 →](https://github.com/huacnlee?tab=repositories)
