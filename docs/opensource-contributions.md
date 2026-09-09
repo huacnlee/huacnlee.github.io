@@ -25,6 +25,7 @@ GitHub 公开搜索返回 116 个由 huacnlee 发起、已合并到 `zed-industr
 | 键盘激活聚焦元素 | [#35075](https://github.com/zed-industries/zed/pull/35075) | 2025-08-05 | 让 Enter、Space 可触发聚焦元素的点击行为。 |
 | 矢量路径构建 | [#22808](https://github.com/zed-industries/zed/pull/22808) | 2025-01-29 | 引入基于 lyon 的 PathBuilder，支持更复杂的矢量路径。 |
 | 路径抗锯齿 | [#22812](https://github.com/zed-industries/zed/pull/22812) | 2025-01-29 | 在 Metal 与 Blade 路径绘制中引入 MSAA；后续有相关调整，不宣称当前实现仍完全相同。 |
+| 路径渲染重构与全局 MSAA | [#29718](https://github.com/zed-industries/zed/pull/29718) | 2025-07-02 | 移除每条路径单独创建纹理，直接绘制到渲染目标并引入全局多重采样抗锯齿，降低显存开销、改善性能。PR 中的 5 GB 是作者应用中的具体场景，不作为通用节省量。 |
 | 多行文本截断 | [#23058](https://github.com/zed-industries/zed/pull/23058) | 2025-01-29 | 新增 line_clamp，按指定行数截断文本，并调整 truncate 与文本布局的配合。 |
 | 文本装饰对齐 | [#24721](https://github.com/zed-industries/zed/pull/24721) | 2025-03-15 | 修复居中、右对齐文本的下划线和删除线位置。 |
 | 文字交互样式 | [#24723](https://github.com/zed-industries/zed/pull/24723) | 2025-04-10 | 修复文字 hover / active 样式，支持正确显示链接悬停颜色。 |
