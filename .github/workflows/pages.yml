@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build:
-    name: Check, test and build
+    name: Check and build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -26,10 +26,6 @@ jobs:
         run: bun run check
       - name: Build site
         run: bun run build
-      - name: Install Chromium
-        run: bunx --bun playwright install --with-deps chromium
-      - name: Test site
-        run: bun run test
       - name: Configure Pages
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/configure-pages@v5

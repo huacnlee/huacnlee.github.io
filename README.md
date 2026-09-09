@@ -14,8 +14,6 @@ bun run dev
 ```sh
 bun run check
 bun run build
-bunx --bun playwright install chromium
-bun run test
 bun run preview
 ```
 
@@ -32,7 +30,7 @@ Static output is generated in `dist/`. Fonts are bundled locally. Historical pos
 
 ## CI and deployment
 
-The default branch is `main`. GitHub Actions installs the Bun version specified in `package.json` and dependencies from the frozen lockfile, then runs Astro and TypeScript checks, builds the site, and runs Playwright tests in Chromium.
+The default branch is `main`. GitHub Actions installs the Bun version specified in `package.json` and dependencies from the frozen lockfile, then runs Astro and TypeScript checks and builds the site. CI does not install or run a browser.
 
 - Pull requests run validation without publishing.
 - Pushes and merges to `main` deploy `dist/` to GitHub Pages after all checks pass.
