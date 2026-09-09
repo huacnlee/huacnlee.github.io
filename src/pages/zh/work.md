@@ -38,7 +38,7 @@ description: "李华顺的开源工作：创建 GPUI Kit，深度参与 GPUI 与
 
 自 2024 年 2 月起，我向 Zed 和 GPUI 提交了超过 100 个已合并 PR，工作横跨编辑器、底层渲染框架与原生平台集成。许多改进连接着 Zed 自身的需求，以及我在 Longbridge Pro 和 GPUI Kit 中的开发实践。
 
-* **图形与渲染。** 从引入 [MSAA 抗锯齿](https://github.com/zed-industries/zed/pull/22812)到[重构路径渲染](https://github.com/zed-industries/zed/pull/29718)，改善矢量图形质量、降低显存开销，并完善渐变与矢量路径构建能力。
+* **图形与渲染。** 通过[矢量路径构建](https://github.com/zed-industries/zed/pull/22808)、[MSAA 抗锯齿](https://github.com/zed-industries/zed/pull/22812)与[路径渲染重构](https://github.com/zed-industries/zed/pull/29718)，为 GPUI 的任意路径绘制奠定基础，支撑自定义矢量图形与各类图表的绘制，同时改善边缘质量、降低显存开销。
 * **文字与排版。** 完善中日韩文字换行、[多行截断](https://github.com/zed-industries/zed/pull/23058)、字体渲染与交互样式，让文字在不同布局和状态下稳定呈现。
 * **交互与性能。** 增加[键盘焦点导航](https://github.com/zed-industries/zed/pull/33008)与激活能力，并[改善视图缓存](https://github.com/zed-industries/zed/pull/25009)，减少滚动和鼠标交互中的不必要渲染。
 * **原生平台与编辑器体验。** 完善 Windows 集成与 macOS 渲染，同时改进 Zed 的主题切换、文件导航和终端任务等日常使用体验。
