@@ -1,12 +1,12 @@
 ---
 layout: ../layouts/Page.astro
-title: "Opensource"
+title: "OPEN SOURCE"
 description: "Jason Lee’s open-source work: creator of GPUI Kit, core contributions to GPUI and Zed, Ruby China, AutoCorrect, GoBackup, Rust and Rails tools."
 ---
 
 <div class="intro compact">
   <p class="eyebrow">CURRENTLY BUILDING</p>
-  <h1>Opensource</h1>
+  <h1>OPEN SOURCE</h1>
   <p class="lead">The projects I’m actively building and improving.</p>
 </div>
 
