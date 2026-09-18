@@ -1,7 +1,7 @@
 ---
 layout: ../layouts/Page.astro
 title: "Profile · GPUI Kit & Ruby China"
-description: "Jason Lee (huacnlee), Technical VP at Longbridge, creator of GPUI Kit (formerly GPUI Component), and co-founder of Ruby China."
+description: "Jason Lee (huacnlee), Technical VP at Longbridge, creator of GPUI Kit (formerly GPUI Component) and Mado, and co-founder of Ruby China."
 ---
 
 <div class="intro">
@@ -24,6 +24,10 @@ Since 2024, I’ve been building and maintaining [GPUI Kit](https://gpui-kit.com
 My contributions to GPUI’s core include MSAA path anti-aliasing, linear gradients, Tab focus navigation, and vector path construction, alongside improvements to text rendering, Windows support, and rendering performance. [Zed’s official spotlight](https://zed.dev/blog/community-champion-jason-lee) recognizes my work on GPUI and its ecosystem.
 
 In GPUI Kit, I continue to develop the application layer so more developers can build fast, polished native apps in Rust. Through GPUI Shell, these apps can also support plugins and extensions written in JavaScript.
+
+## Mado
+
+I also build [Mado](https://madomd.com/), a native macOS Markdown app for the AI era. AI writes Markdown; Mado makes it readable—with folder workspaces, outline navigation, Source / Visual / Split modes, lightweight editing, and HTML / PDF export.
 
 ## Ruby China
 

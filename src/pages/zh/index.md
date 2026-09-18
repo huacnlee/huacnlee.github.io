@@ -1,7 +1,7 @@
 ---
 layout: ../../layouts/Page.astro
 title: "Profile · GPUI Kit 与 Ruby China"
-description: "李华顺（Jason Lee / huacnlee），Technical VP at Longbridge，GPUI Kit（原 GPUI Component）作者与维护者，Ruby China 联合创始人。"
+description: "李华顺（Jason Lee / huacnlee），Technical VP at Longbridge，GPUI Kit（原 GPUI Component）与 Mado 作者，Ruby China 联合创始人。"
 ---
 
 <div class="intro">
@@ -24,6 +24,10 @@ description: "李华顺（Jason Lee / huacnlee），Technical VP at Longbridge�
 我深度参与 GPUI 核心开发，为框架引入 MSAA 路径抗锯齿、线性渐变、Tab 焦点导航和矢量路径构建，并持续改进文字渲染、Windows 支持与渲染性能。[Zed 官方专文](https://zed.dev/blog/community-champion-jason-lee)介绍了我对 GPUI 及其生态的贡献。
 
 在 GPUI Kit 中，我持续完善应用层能力，让更多开发者能够用 Rust 构建快速、精致的原生应用。通过 GPUI Shell，这些应用还可以用 JavaScript 编写插件和扩展。
+
+## Mado
+
+我还在开发 [Mado](https://madomd.com/)，一个面向 AI 时代的 macOS 原生 Markdown 应用。AI 写 Markdown，Mado 让它好读：支持文件夹工作区、大纲导航、源码 / 视觉 / 分栏三种模式、轻量编辑，以及 HTML / PDF 导出。
 
 ## Ruby China
 

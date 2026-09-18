@@ -1,7 +1,7 @@
 ---
 layout: ../layouts/Page.astro
 title: "OPEN SOURCE"
-description: "Jason Lee’s open-source work: creator of GPUI Kit, core contributions to GPUI and Zed, Ruby China, AutoCorrect, GoBackup, Rust and Rails tools."
+description: "Jason Lee’s work: creator of GPUI Kit and Mado, core contributions to GPUI and Zed, Ruby China, AutoCorrect, GoBackup, Rust and Rails tools."
 ---
 
 <div class="intro compact">
@@ -27,6 +27,11 @@ description: "Jason Lee’s open-source work: creator of GPUI Kit, core contribu
       </dl>
       <div class="featured-links"><a href="https://gpui-kit.com/">Explore the docs →</a><a href="https://github.com/longbridge/gpui-kit">Source on GitHub ↗</a></div>
     </div>
+  </article>
+  <article class="project">
+    <h3><a href="https://madomd.com/">Mado</a></h3>
+    <p>A native macOS Markdown app for the AI era. AI writes Markdown; Mado makes it readable—with folder workspaces, outline navigation, Source / Visual / Split modes, lightweight editing, and HTML / PDF export. Built in Swift.</p>
+    <p class="project-link"><a href="https://madomd.com/">madomd.com ↗</a></p>
   </article>
 </div>
 

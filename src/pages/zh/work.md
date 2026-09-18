@@ -1,7 +1,7 @@
 ---
 layout: ../../layouts/Page.astro
 title: "开源"
-description: "李华顺的开源工作：创建 GPUI Kit，深度参与 GPUI 与 Zed 核心开发，以及 Ruby China、AutoCorrect、GoBackup 和 Rust、Rails 开发工具。"
+description: "李华顺的作品：创建 GPUI Kit 与 Mado，深度参与 GPUI 与 Zed 核心开发，以及 Ruby China、AutoCorrect、GoBackup 和 Rust、Rails 开发工具。"
 ---
 
 <div class="intro compact">
@@ -27,6 +27,11 @@ description: "李华顺的开源工作：创建 GPUI Kit，深度参与 GPUI 与
       </dl>
       <div class="featured-links"><a href="https://gpui-kit.com/">查看文档与组件 →</a><a href="https://github.com/longbridge/gpui-kit">GitHub 源代码 ↗</a></div>
     </div>
+  </article>
+  <article class="project">
+    <h3><a href="https://madomd.com/">Mado</a></h3>
+    <p>面向 AI 时代的 macOS 原生 Markdown 应用。AI 写 Markdown，Mado 让它好读：支持文件夹工作区、大纲导航、源码 / 视觉 / 分栏三种模式、轻量编辑，以及 HTML / PDF 导出。使用 Swift 开发。</p>
+    <p class="project-link"><a href="https://madomd.com/">madomd.com ↗</a></p>
   </article>
 </div>
 
