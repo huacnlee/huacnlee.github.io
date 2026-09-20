@@ -68,6 +68,7 @@ Zed 官方以 **Community Champion Spotlight: Jason Lee** 为题，专文介绍�
 * [Omamail](https://github.com/huacnlee/omamail) — Omarchy 邮件插件，支持 Gmail、HEY 与 IMAP，将邮件阅读和管理融入桌面。
 * [Omasend](https://github.com/huacnlee/omasend) — 为 Omarchy 打造的原生 LocalSend 客户端，通过局域网发送文件、文件夹和文字。基于 GPUI Kit，支持 Linux、macOS 和 Windows。
 * [Omarchy Mihoro](https://github.com/huacnlee/omarchy-mihoro) — Mihoro 的 Omarchy 状态栏面板，用于查看代理状态、切换 Rule / Global / Direct 模式和管理订阅。
+* [Omarchy ThemeRGB](https://github.com/huacnlee/omarchy-theme-rgb) — 让每一盏灯都跟随主题：把键盘、鼠标、内存、风扇等 OpenRGB 管理的所有设备同步为当前 Omarchy 主题配色，并提供状态栏面板调整配色数量、布局与亮度。
 * [Omarchy WhichKey](https://github.com/huacnlee/omarchy-which-key) — 将 Which Key 体验带到桌面：按住 Super 显示快捷键提示，直接读取当前 Omarchy 与 Hyprland 的实际绑定。
 
 ## 更多开源作品

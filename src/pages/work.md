@@ -68,6 +68,7 @@ Zed featured my work in **Community Champion Spotlight: Jason Lee**, recognizing
 * [Omamail](https://github.com/huacnlee/omamail) — A mail plugin for Omarchy with Gmail, HEY, and IMAP support. Read and manage email right from the desktop.
 * [Omasend](https://github.com/huacnlee/omasend) — A native LocalSend client for Omarchy. Share files, folders, and text over your local network. Built with GPUI Kit for Linux, macOS, and Windows.
 * [Omarchy Mihoro](https://github.com/huacnlee/omarchy-mihoro) — An Omarchy bar panel for Mihoro. Monitor your proxy, switch between Rule, Global, and Direct modes, and manage subscriptions.
+* [Omarchy ThemeRGB](https://github.com/huacnlee/omarchy-theme-rgb) — Your theme, on every light. Syncs keyboard, mouse, RAM, fans, and every device OpenRGB manages with the current Omarchy theme colors, with a bar panel for palette, layout, and brightness.
 * [Omarchy WhichKey](https://github.com/huacnlee/omarchy-which-key) — Which Key for the desktop. Hold Super to see a shortcut guide drawn from your active Omarchy and Hyprland keybindings.
 
 ## More Open Source
