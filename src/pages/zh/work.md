@@ -1,7 +1,7 @@
 ---
 layout: ../../layouts/Page.astro
 title: "开源"
-description: "李华顺的作品：创建 GPUI Kit 与 Mado，深度参与 GPUI 与 Zed 核心开发，以及 Ruby China、AutoCorrect、GoBackup 和 Rust、Rails 开发工具。"
+description: "李华顺的作品：创建 Native Shell（NSH）、GPUI Kit、huacnlee/cargo 与 Mado，深度参与 GPUI 与 Zed 核心开发，以及 Ruby China、AutoCorrect、GoBackup 和 Rust、Rails 开发工具。"
 ---
 
 <div class="intro compact">
@@ -11,6 +11,23 @@ description: "李华顺的作品：创建 GPUI Kit 与 Mado，深度参与 GPUI 
 </div>
 
 <div class="projects">
+  <article class="project featured-project">
+    <div class="featured-heading">
+      <h2><a href="https://nsh.dev/">Native Shell</a></h2>
+      <a class="featured-stars" href="https://github.com/longbridge/nsh" aria-label="Native Shell on GitHub, 975 stars">☆ 975 stars</a>
+      <p>一次构建，处处原生。</p>
+    </div>
+    <div class="featured-body">
+      <p class="featured-lead">我目前的重点项目：Native Shell（NSH），一个用 Rust 构建的原生 UI 框架，支持 iOS、Android、macOS、Windows、Linux 与 Web。</p>
+      <p>组件、状态、逻辑和 API 跨平台共享，各平台使用自己的原生视图、文字、输入与交互进行渲染——UIKit、Android View、AppKit、Win32、GTK 4、HTML 或 GPUI——视觉设计则完全由应用掌控。</p>
+      <dl class="featured-capabilities">
+        <div><dt>Rust 与 TSX</dt><dd>整个应用用 Rust 编写，或用 TSX 与 Tailwind 编写界面，也可以两者结合并共享 Rust 组件。</dd></div>
+        <div><dt>随处交付</dt><dd>打包为独立应用和静态网站，或嵌入现有的 iOS、Android、桌面与 GPUI Kit 应用。</dd></div>
+        <div><dt>运行时模块</dt><dd>加载签名的 TSX 包——插件、功能或 AI 生成的界面——运行在宿主配置的沙箱中。</dd></div>
+      </dl>
+      <div class="featured-links"><a href="https://nsh.dev/">查看文档 →</a><a href="https://github.com/longbridge/nsh">GitHub 源代码 ↗</a></div>
+    </div>
+  </article>
   <article class="project featured-project">
     <div class="featured-heading">
       <h2><a href="https://gpui-kit.com/">GPUI Kit</a></h2>
@@ -27,6 +44,11 @@ description: "李华顺的作品：创建 GPUI Kit 与 Mado，深度参与 GPUI 
       </dl>
       <div class="featured-links"><a href="https://gpui-kit.com/">查看文档与组件 →</a><a href="https://github.com/longbridge/gpui-kit">GitHub 源代码 ↗</a></div>
     </div>
+  </article>
+  <article class="project">
+    <h3><a href="https://huacnlee.github.io/cargo/">huacnlee/cargo</a></h3>
+    <p>可直接替换的 Cargo 分支，专为快速本地构建与可控的磁盘占用优化。同一项目的所有 git worktree 共享一个构建目录，并自动控制在容量上限内——在 525 个 crate 的 NSH 工作区中，5 个 worktree 的构建从 8.5 分钟、33.6 GB 降到 1.6 分钟、5.1 GB。无需任何配置。</p>
+    <p class="project-link"><a href="https://github.com/huacnlee/cargo">GitHub 源代码 ↗</a></p>
   </article>
   <article class="project">
     <h3><a href="https://madomd.com/">Mado</a></h3>

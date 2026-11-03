@@ -1,14 +1,14 @@
 ---
 layout: ../layouts/Page.astro
-title: "Profile · GPUI Kit & Ruby China"
-description: "Jason Lee (huacnlee), Technical VP at Longbridge, creator of GPUI Kit (formerly GPUI Component) and Mado, and co-founder of Ruby China."
+title: "Profile · Native Shell, GPUI Kit & Ruby China"
+description: "Jason Lee (huacnlee), Technical VP at Longbridge, creator of Native Shell (NSH), GPUI Kit (formerly GPUI Component) and huacnlee/cargo, and co-founder of Ruby China."
 ---
 
 <div class="intro">
   <p class="eyebrow">JASON LEE / HUACNLEE</p>
   <h1>Jason Lee</h1>
   <p class="role">Technical VP at <a href="https://longbridge.com">Longbridge</a></p>
-  <p class="lead">Creator of GPUI Kit. Co-founder of Ruby China.<br>Building native desktop apps, developer tools, and open source.</p>
+  <p class="lead">Creator of Native Shell and GPUI Kit. Co-founder of Ruby China.<br>Building native desktop apps, developer tools, and open source.</p>
   <div class="contact-links">
     <a href="mailto:huacnlee@gmail.com">Email</a>
     <a href="https://github.com/huacnlee">GitHub</a>
@@ -16,6 +16,12 @@ description: "Jason Lee (huacnlee), Technical VP at Longbridge, creator of GPUI 
     <a href="https://ruby-china.org/huacnlee">Ruby China</a>
   </div>
 </div>
+
+## Native Shell
+
+My current focus is [Native Shell (NSH)](https://nsh.dev/), a native UI framework for iOS, Android, macOS, Windows, Linux, and the web, built in Rust. **Build once, native everywhere:** components, state, logic, and APIs are shared across platforms, while each platform renders with its own views, text, input, and interaction—and the app keeps full control of its visual design.
+
+Apps can be written entirely in Rust, with screens in TSX, or both. They can ship as standalone apps, be embedded in existing native apps, or load signed TSX modules at run time—plugins, features, or AI-generated UI—inside a sandbox the host configures.
 
 ## GPUI Kit
 
@@ -25,9 +31,9 @@ My contributions to GPUI’s core include MSAA path anti-aliasing, linear gradie
 
 In GPUI Kit, I continue to develop the application layer so more developers can build fast, polished native apps in Rust. Through GPUI Shell, these apps can also support plugins and extensions written in JavaScript.
 
-## Mado
+## huacnlee/cargo
 
-I also build [Mado](https://madomd.com/), a native macOS Markdown app for the AI era. AI writes Markdown; Mado makes it readable—with folder workspaces, outline navigation, Source / Visual / Split modes, lightweight editing, and HTML / PDF export.
+I also maintain [huacnlee/cargo](https://huacnlee.github.io/cargo/), a drop-in Cargo fork tuned for fast local builds and a bounded disk footprint. Every git worktree of a project shares one build directory that stays under a size limit on its own—on the 525-crate NSH workspace, five worktrees build in 1.6 minutes and 5.1 GB instead of 8.5 minutes and 33.6 GB.
 
 ## Ruby China
 

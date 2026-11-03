@@ -1,7 +1,7 @@
 ---
 layout: ../layouts/Page.astro
 title: "OPEN SOURCE"
-description: "Jason Lee’s work: creator of GPUI Kit and Mado, core contributions to GPUI and Zed, Ruby China, AutoCorrect, GoBackup, Rust and Rails tools."
+description: "Jason Lee’s work: creator of Native Shell (NSH), GPUI Kit, huacnlee/cargo and Mado, core contributions to GPUI and Zed, Ruby China, AutoCorrect, GoBackup, Rust and Rails tools."
 ---
 
 <div class="intro compact">
@@ -11,6 +11,23 @@ description: "Jason Lee’s work: creator of GPUI Kit and Mado, core contributio
 </div>
 
 <div class="projects">
+  <article class="project featured-project">
+    <div class="featured-heading">
+      <h2><a href="https://nsh.dev/">Native Shell</a></h2>
+      <a class="featured-stars" href="https://github.com/longbridge/nsh" aria-label="Native Shell on GitHub, 975 stars">☆ 975 stars</a>
+      <p>Build once, native everywhere.</p>
+    </div>
+    <div class="featured-body">
+      <p class="featured-lead">My current focus: Native Shell (NSH), a native UI framework for iOS, Android, macOS, Windows, Linux, and the web, built in Rust.</p>
+      <p>Components, state, logic, and APIs are shared across platforms, while each platform renders with its own views, text, input, and interaction—UIKit, Android views, AppKit, Win32, GTK 4, HTML, or GPUI—and the app owns its visual design.</p>
+      <dl class="featured-capabilities">
+        <div><dt>Rust &amp; TSX</dt><dd>Write the whole app in Rust, its screens in TSX with Tailwind, or combine both with shared Rust components.</dd></div>
+        <div><dt>Ship anywhere</dt><dd>Package standalone apps and static websites, or embed NSH in existing iOS, Android, desktop, and GPUI Kit apps.</dd></div>
+        <div><dt>Run-time modules</dt><dd>Load signed TSX packages—plugins, features, or AI-generated UI—inside a sandbox the host configures.</dd></div>
+      </dl>
+      <div class="featured-links"><a href="https://nsh.dev/">Explore the docs →</a><a href="https://github.com/longbridge/nsh">Source on GitHub ↗</a></div>
+    </div>
+  </article>
   <article class="project featured-project">
     <div class="featured-heading">
       <h2><a href="https://gpui-kit.com/">GPUI Kit</a></h2>
@@ -27,6 +44,11 @@ description: "Jason Lee’s work: creator of GPUI Kit and Mado, core contributio
       </dl>
       <div class="featured-links"><a href="https://gpui-kit.com/">Explore the docs →</a><a href="https://github.com/longbridge/gpui-kit">Source on GitHub ↗</a></div>
     </div>
+  </article>
+  <article class="project">
+    <h3><a href="https://huacnlee.github.io/cargo/">huacnlee/cargo</a></h3>
+    <p>A drop-in Cargo fork tuned for fast local builds and a bounded disk footprint. Every git worktree of a project shares one build directory that stays under a size limit on its own—on the 525-crate NSH workspace, five worktrees build in 1.6 minutes and 5.1 GB instead of 8.5 minutes and 33.6 GB. Nothing to configure.</p>
+    <p class="project-link"><a href="https://github.com/huacnlee/cargo">Source on GitHub ↗</a></p>
   </article>
   <article class="project">
     <h3><a href="https://madomd.com/">Mado</a></h3>
